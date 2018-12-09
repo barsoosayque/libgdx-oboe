@@ -1,0 +1,6 @@
+[submodule "dependencies/oboe"]
+	path = library/dependencies/oboe
+	url = https://github.com/google/oboe.git
+[submodule "dependencies/fmt"]
+	path = library/dependencies/fmt
+	url = https://github.com/fmtlib/fmt.git
