@@ -8,12 +8,18 @@ import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 
-class OboeAudio(private val assetManager: AssetManager): Audio {
+class OboeAudio(private val assetManager: AssetManager) : Audio {
     private var audioEngine: Long = 0
 
     init {
         System.loadLibrary("libgdx-oboe")
         init(assetManager)
+    }
+
+    /** @see <a>https://developer.android.com/guide/topics/media/media-formats</a> */
+    private fun checkFileFormat(file: FileHandle) = when (file.extension().toLowerCase()) {
+        "flac", "mp3", "wav", "aac", "ogg" -> file
+        else -> throw IllegalArgumentException("Unknow file format (\"$file\"). Only FLAC, MP3, WAV, AAC and OGG is allowed here.")
     }
 
     private external fun init(assetManager: AssetManager)
@@ -24,11 +30,15 @@ class OboeAudio(private val assetManager: AssetManager): Audio {
     external fun dispose()
 
     override fun newMusic(file: FileHandle): Music = TODO()
-    override fun newSound(file: FileHandle): Sound = OboeSound(createSoundpool(file.path()))
+    override fun newSound(file: FileHandle): Sound =
+            checkFileFormat(file).path()
+                    .let(::createSoundpool)
+                    .let(::OboeSound)
 
     override fun newAudioDevice(samplingRate: Int, isMono: Boolean): AudioDevice {
         TODO()
     }
+
     override fun newAudioRecorder(samplingRate: Int, isMono: Boolean): AudioRecorder {
         TODO()
     }
