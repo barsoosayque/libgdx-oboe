@@ -1,12 +1,12 @@
 ## Build
 
-### Pre requirements
+### Pre requirements:
 
 - CMake >= 3.7.1
 - C++ compiler which supports C++17 (Preferably, Clang)
 - Android NDK
 
-### Build steps
+### Build steps:
 
 ```bash
 $ ./gradlew :library:build

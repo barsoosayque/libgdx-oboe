@@ -6,7 +6,7 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 
 (Well, you also have to wait for it, because this library is in "work in progress" stage) 
 
-### Table of content
+### Documentation:
 
 - ⚙️ [Usage][usage]
 - 🎹 [Examples][examples]
@@ -14,7 +14,7 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 
 *^ Content of `docs` directory.*
 
-### Progress
+### Progress:
 
 **OboeAudio** class:
 
