@@ -3,6 +3,7 @@ ext {
     jUnitVersion = '1.2.0'
     androidPluginVersion = '3.2.1'
     serializationVersion = '0.9.0'
+    ktxVersion = '1.9.8-b5'
     gdxVersion = '1.9.9'
 }
 
@@ -15,6 +16,9 @@ dependencies {
     implementation project(":library")
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation group: 'io.github.libktx', name: 'ktx-actors', version: "$ktxVersion"
+    implementation group: 'io.github.libktx', name: 'ktx-log', version: "$ktxVersion"
+    implementation group: 'io.github.libktx', name: 'ktx-scene2d', version: "$ktxVersion"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
@@ -94,5 +98,5 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'barsoosayque.sounds/barsoosayque.sounds.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'barsoosayque.libgdxoboe.sounds/barsoosayque.libgdxoboe.sounds.AndroidLauncher'
 }

@@ -1,6 +1,7 @@
-package barsoosayque.sounds
+package barsoosayque.libgdxoboe.sounds
 
 import android.os.Bundle
+import barsoosayque.libgdxoboe.sounds.app.MainApp
 import com.badlogic.gdx.backends.android.AndroidApplication
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
 
@@ -16,7 +17,7 @@ class AndroidLauncher : AndroidApplication() {
         config.useAccelerometer = false
         config.useCompass = false
         config.numSamples = 2
-        initialize(MainGame(), config)
+        initialize(MainApp(), config)
 
 //        addLifecycleListener(object : LifecycleListener {
 //            override fun pause() {
