@@ -6,15 +6,13 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 
 (Well, you also have to wait for it, because this library is in "work in progress" stage) 
 
----
-
-Table of content:
+## Table of content
 
 - ⚙️ [Usage][usage]
 - 🎹 [Examples][examples]
 - 🛠 [Build][build]
 
-*^ Content of `doc` directory.*
+*^ Content of `docs` directory.*
 
 [libgdx]: https://github.com/libgdx/libgdx
 [usage]: /docs/Usage.md
