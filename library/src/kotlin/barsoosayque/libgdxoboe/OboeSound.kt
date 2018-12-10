@@ -1,8 +1,8 @@
-package ru.funnydogs.manatee.manaudio
+package barsoosayque.libgdxoboe
 
 import com.badlogic.gdx.audio.Sound
 
-class ManaudioSound(soundpool: Long) : Sound {
+class OboeSound(soundpool: Long) : Sound {
     private val soundpool = soundpool
 
     external override fun pause()

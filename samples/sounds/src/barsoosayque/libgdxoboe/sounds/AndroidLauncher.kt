@@ -8,11 +8,11 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
 class AndroidLauncher : AndroidApplication() {
 //    private var focusWasChanged: Boolean = true
 //    private var resumeAudio: Boolean = true
-//    lateinit var manaudio: Manaudio
+//    lateinit var oboeAudio: OboeAudio
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        manaudio = Manaudio(assets)
+//        oboeAudio = OboeAudio(assets)
         val config = AndroidApplicationConfiguration()
         config.useAccelerometer = false
         config.useCompass = false
@@ -21,11 +21,11 @@ class AndroidLauncher : AndroidApplication() {
 
 //        addLifecycleListener(object : LifecycleListener {
 //            override fun pause() {
-//                manaudio.stop()
+//                oboeAudio.stop()
 //            }
 //
 //            override fun dispose() {
-//                manaudio.dispose()
+//                oboeAudio.dispose()
 //            }
 //
 //            override fun resume() {}
@@ -37,13 +37,13 @@ class AndroidLauncher : AndroidApplication() {
     // Basically just mimic base class behavior
     // <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-//    override fun getAudio(): Audio = manaudio
+//    override fun getAudio(): Audio = oboeAudio
 //
 //    override fun onWindowFocusChanged(hasFocus: Boolean) {
 //        super.onWindowFocusChanged(hasFocus)
 //        focusWasChanged = hasFocus
 //        if (hasFocus && resumeAudio) {
-//            manaudio.resume()
+//            oboeAudio.resume()
 //            resumeAudio = false
 //        }
 //    }
@@ -51,7 +51,7 @@ class AndroidLauncher : AndroidApplication() {
 //    override fun onResume() {
 //        resumeAudio = true
 //        if (focusWasChanged) {
-//            manaudio.resume()
+//            oboeAudio.resume()
 //            resumeAudio = false
 //        }
 //        super.onResume()

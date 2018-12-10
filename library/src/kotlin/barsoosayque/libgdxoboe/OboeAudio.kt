@@ -1,4 +1,4 @@
-package ru.funnydogs.manatee.manaudio
+package barsoosayque.libgdxoboe
 
 import android.content.res.AssetManager
 import com.badlogic.gdx.Audio
@@ -8,11 +8,11 @@ import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 
-class Manaudio(private val assetManager: AssetManager): Audio {
+class OboeAudio(private val assetManager: AssetManager): Audio {
     private var audioEngine: Long = 0
 
     init {
-        System.loadLibrary("manaudio")
+        System.loadLibrary("libgdx-oboe")
         init(assetManager)
     }
 
@@ -24,7 +24,7 @@ class Manaudio(private val assetManager: AssetManager): Audio {
     external fun dispose()
 
     override fun newMusic(file: FileHandle): Music = TODO()
-    override fun newSound(file: FileHandle): Sound = ManaudioSound(createSoundpool(file.path()))
+    override fun newSound(file: FileHandle): Sound = OboeSound(createSoundpool(file.path()))
 
     override fun newAudioDevice(samplingRate: Int, isMono: Boolean): AudioDevice {
         TODO()
