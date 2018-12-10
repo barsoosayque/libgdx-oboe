@@ -1,5 +1,6 @@
 package barsoosayque.libgdxoboe.sounds.app
 
+import barsoosayque.libgdxoboe.sounds.content.SoundAsset
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.scenes.scene2d.Stage

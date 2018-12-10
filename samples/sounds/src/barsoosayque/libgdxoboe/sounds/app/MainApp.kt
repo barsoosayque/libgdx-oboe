@@ -1,5 +1,7 @@
 package barsoosayque.libgdxoboe.sounds.app
 
+import barsoosayque.libgdxoboe.sounds.content.SkinAsset
+import barsoosayque.libgdxoboe.sounds.content.SoundAsset
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
