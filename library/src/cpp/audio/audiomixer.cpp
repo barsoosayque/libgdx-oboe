@@ -23,10 +23,8 @@ void audio_mixer::render(int16_t* p_audio_data, int32_t p_num_frames) const {
 
     m_tracks.remove_if([&](const std::shared_ptr<const renderable_audio>& track) {
         std::fill(m_buffer.begin(), m_buffer.begin() + m_buffer.capacity(), 0);
-           track->render(m_buffer.data(), p_num_frames);
+        track->render(m_buffer.data(), p_num_frames);
 
-//        track->render(m_buffer.data(), p_num_frames);
-//
         for(int i = 0; i < p_num_frames * m_channels; ++i) {
             p_audio_data[i] += m_buffer[i];
         }

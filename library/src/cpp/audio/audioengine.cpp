@@ -50,13 +50,8 @@ audio_engine::~audio_engine() {
 
 DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_data, int32_t p_num_frames) {
     auto stream = static_cast<int16_t*>(p_audio_data);
-//    for(int32_t i = 0; i < p_num_frames * m_channels; ++i) {
-//        stream[i] = 0;
-//    }
 
-    for (int i = 0; i < p_num_frames; ++i) {
-        m_mixer->render(stream + (m_channels * i), 1);
-    }
+    m_mixer->render(stream, p_num_frames);
 
     return DataCallbackResult::Continue;
 }

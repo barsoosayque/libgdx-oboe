@@ -6,7 +6,7 @@ player_handle::player_handle(SLEngineItf& p_engine, SLDataSource& p_source) {
     // configure audio sink to pcm buffer
     // NOTE: there is also SLDataLocator_AndroidSimpleBufferQueue, but
     // I did not success finding out why such thing exists.
-    SLDataLocator_AndroidSimpleBufferQueue loc_bq = { SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2 };
+    SLDataLocator_AndroidSimpleBufferQueue loc_bq = { SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 1 };
     SLDataFormat_PCM pcm = {
         .formatType = SL_DATAFORMAT_PCM,
         .numChannels = 2,
