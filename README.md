@@ -16,14 +16,14 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 
 ## Progress
 
-*OboeAudio* class:
+**OboeAudio** class:
 
 - [x] `newSound` method;
 - [ ] `newMusic` method;
 - [ ] `newAudioDevice` method;
 - [ ] `newAudioRecorder` method.
 
-*OboeSound* class:
+**OboeSound** class:
 
 - [ ] `play` methods;
 - [ ] `loop` methods;
@@ -35,7 +35,7 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 - [ ] `setVolume` method;
 - [ ] `setPan` method.
 
-*WARN: not marked methods will throw an exception.`
+*WARN: not marked methods will throw an exception.*
 
 [libgdx]: https://github.com/libgdx/libgdx
 [usage]: /docs/Usage.md
