@@ -4,16 +4,21 @@
 
 player_handle::player_handle(SLEngineItf& p_engine, SLDataSource& p_source) {
     // configure audio sink to pcm buffer
-    // NOTE: there is also SLDataLocator_AndroidSimpleBufferQueue, but
-    // I did not success finding out why such thing exists.
     SLDataLocator_AndroidSimpleBufferQueue loc_bq = { SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 1 };
     SLDataFormat_PCM pcm = {
         .formatType = SL_DATAFORMAT_PCM,
+        // TODO dynamic channels
         .numChannels = 2,
+        // OpenSL ES for Android doesn't perform resampling, so
+        // it's advisable by google to use 44.1Hz to match the device,
+        // and it's most likely that 44.1Hz is how files are sampled anyways.
         .samplesPerSec = SL_SAMPLINGRATE_44_1,
+        // Floats only from API 21
         .bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_16,
         .containerSize = SL_PCMSAMPLEFORMAT_FIXED_16,
+        // TODO dynamic channels
         .channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT,
+        // Little Endian only on OpenSL ES for Android
         .endianness = SL_BYTEORDER_LITTLEENDIAN
     };
     SLDataSink sink = { &loc_bq, &pcm };
