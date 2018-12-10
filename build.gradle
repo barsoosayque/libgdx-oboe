@@ -2,7 +2,7 @@ buildscript {
     ext {
         kotlinVersion = '1.3.0'
         androidPluginVersion = '3.2.1'
-        gdxVersion = '1.9.8'
+        gdxVersion = '1.9.9'
     }
     repositories {
         mavenLocal()
