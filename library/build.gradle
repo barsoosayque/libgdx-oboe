@@ -2,17 +2,11 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 configurations { natives }
+sourceCompatibility = 1.6
 
 dependencies {
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-
-    // TODO: delete this
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
-    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
 }
 
 //noinspection GroovyAssignabilityCheck
@@ -22,17 +16,13 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            kotlin.srcDirs = ['src/kotlin']
-            //aidl.srcDirs = ['src/kotlin']
-            // renderscript.srcDirs = ['src/kotlin']
-            // jniLibs.srcDirs = ['libs']
+            java.srcDirs = ['src/kotlin']
+            jni.srcDirs = ['src/cpp']
         }
     }
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
         ndk { abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a' }
         externalNativeBuild {
             cmake {

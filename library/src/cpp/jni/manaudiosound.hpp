@@ -3,7 +3,7 @@
 
 #define MANAUDIO_SOUND_METHOD(result, method) \
     JNIEXPORT result JNICALL \
-    Java_ru_funnydogs_manatee_manaudio_ManaudioSound ## _ ## method
+    Java_barsoosayque_libgdxoboe_ManaudioSound ## _ ## method
 
 extern "C" {
 
