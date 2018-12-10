@@ -15,27 +15,21 @@ class AndroidLauncher : AndroidApplication() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         oboeAudio = OboeAudio(assets)
+        oboeAudioListener()
+
         val config = AndroidApplicationConfiguration()
         initialize(MainApp(), config)
+    }
 
+    private fun oboeAudioListener() {
         addLifecycleListener(object : LifecycleListener {
-            override fun pause() {
-                oboeAudio.stop()
-            }
-
-            override fun dispose() {
-                oboeAudio.dispose()
-            }
-
+            override fun pause() { oboeAudio.stop() }
+            override fun dispose() { oboeAudio.dispose() }
             override fun resume() {}
         })
     }
-
-    // <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    // "Replace default android audio with custom one" the Hack
-    // Basically just mimic base class behavior
-    // <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
     override fun getAudio(): Audio = oboeAudio
 
