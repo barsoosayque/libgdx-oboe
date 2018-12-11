@@ -12,6 +12,7 @@ set (SRC_DIR src/cpp)
 add_library(libgdx-oboe SHARED
             ${SRC_DIR}/opensl/context.cpp
             ${SRC_DIR}/opensl/player.cpp
+            ${SRC_DIR}/opensl/decoder.cpp
             ${SRC_DIR}/core/playerhandle.cpp
             ${SRC_DIR}/audio/audioengine.cpp
             ${SRC_DIR}/audio/audiomixer.cpp
