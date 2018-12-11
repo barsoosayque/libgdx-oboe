@@ -48,18 +48,37 @@ buffer_player::buffer_player(const context& p_context, SLDataSource p_source)
     (*m_queue)->RegisterCallback(m_queue, [](const SLBufferQueueItf p_queue, void* p_self) {
         auto self = reinterpret_cast<buffer_player*>(p_self);
         if(self->m_buffer_callback) {
+            // TODO fix endiannes if CPU is big endian
             self->m_buffer_callback(self->m_queue_buffer);
         }
     }, this);
 }
 
 buffer_player::~buffer_player() {
-    (*m_play)->SetPlayState(m_play, SL_PLAYSTATE_STOPPED);
+    stop();
     (*m_player)->Destroy(m_player);
 }
 
 void buffer_player::on_buffer_update(buffer_callback p_callback) {
     m_buffer_callback = p_callback;
+}
+
+void buffer_player::play() {
+    (*m_play)->SetPlayState(m_play, SL_PLAYSTATE_PLAYING);
+}
+
+void buffer_player::pause() {
+    (*m_play)->SetPlayState(m_play, SL_PLAYSTATE_PAUSED);
+}
+
+void buffer_player::stop() {
+    (*m_play)->SetPlayState(m_play, SL_PLAYSTATE_STOPPED);
+}
+
+bool buffer_player::is_working() {
+    SLBufferQueueState state;
+    (*m_queue)->GetState(m_queue, &state);
+    return state.count > 0;
 }
 
 void buffer_player::enqueue() {

@@ -1,4 +1,5 @@
 #include "audioengine.hpp"
+#include "../opensl/decoder.hpp"
 #include "../utility/ptrptr.hpp"
 #include "../utility/log.hpp"
 #include "../utility/oboeutils.hpp"
@@ -8,6 +9,7 @@ using namespace oboe;
 
 audio_engine::audio_engine(int32_t p_channels, AAssetManager* p_asset_manager)
     : AudioStreamCallback()
+    , m_slcontext(std::make_unique<opensl::context>())
     , m_channels(p_channels)
     , m_asset_manager(p_asset_manager) {
 
@@ -25,7 +27,7 @@ audio_engine::audio_engine(int32_t p_channels, AAssetManager* p_asset_manager)
     debug("Stream sample rate: {}", m_stream->getSampleRate());
     debug("Stream format: {} (given: {})", (int)m_stream->getFormat(), (int)AudioFormat::I16);
 
-    m_max_frames = m_stream->getFramesPerBurst() * 2;
+    int m_max_frames = m_stream->getFramesPerBurst() * 2;
     auto result = m_stream->setBufferSizeInFrames(m_max_frames);
     m_mixer = std::make_unique<audio_mixer>(m_max_frames * p_channels, p_channels);
 
@@ -33,19 +35,11 @@ audio_engine::audio_engine(int32_t p_channels, AAssetManager* p_asset_manager)
         debug("New buffer size is %d frame", result.value());
     }
 
-    std::array<SLEngineOption, 2> options {
-        SL_ENGINEOPTION_THREADSAFE,
-        SL_BOOLEAN_TRUE
-    };
-
-    slCreateEngine(&m_sl, 1, options.data(), 0, NULL, NULL);
-    (*m_sl)->Realize(m_sl, SL_BOOLEAN_FALSE);
 }
 
 audio_engine::~audio_engine() {
     stop();
     check(m_stream->close(), "Error closing stream: %s");
-    (*m_sl)->Destroy(m_sl);
 }
 
 DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_data, int32_t p_num_frames) {
@@ -54,10 +48,6 @@ DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_d
     m_mixer->render(stream, p_num_frames);
 
     return DataCallbackResult::Continue;
-}
-
-int32_t audio_engine::max_frames() {
-    return m_max_frames;
 }
 
 void audio_engine::resume() {
@@ -69,8 +59,7 @@ void audio_engine::stop() {
 }
 
 soundpool* audio_engine::new_soundpool(std::string_view p_path) {
-    SLEngineItf engine;
-    (*m_sl)->GetInterface(m_sl, SL_IID_ENGINE, &engine);
+    auto engine = m_slcontext->engine();
 
     // use asset manager to open asset by filename
     AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
@@ -86,12 +75,8 @@ soundpool* audio_engine::new_soundpool(std::string_view p_path) {
     assert(0 <= fd);
     AAsset_close(asset);
 
-    // configure audio source
-    SLDataLocator_AndroidFD loc_fd = { SL_DATALOCATOR_ANDROIDFD, fd, start, length };
-    SLDataFormat_MIME format_mime = { SL_DATAFORMAT_MIME, NULL, SL_CONTAINERTYPE_UNSPECIFIED };
-    SLDataSource audio_source = { &loc_fd, &format_mime };
-
-    auto new_soundpool = new soundpool(engine, audio_source);
+    auto pcm = opensl::decoder::decode_full(*m_slcontext, fd, start, length);
+    auto new_soundpool = new soundpool(std::move(pcm), m_channels);
     m_mixer->play_audio(new_soundpool);
 
     return new_soundpool;
