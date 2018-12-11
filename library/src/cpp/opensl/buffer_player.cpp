@@ -92,6 +92,8 @@ bool buffer_player::is_working() {
 
 void buffer_player::enqueue() {
     if(m_playback_over) return;
+
+    m_queue_buffer.clear();
     // capacity * 2: because this argument in 8 bits, but buffer is in 16 bits
     auto result = (*m_queue)->Enqueue(m_queue, m_queue_buffer.data(), m_queue_buffer.capacity() * 2);
     if(result == SL_RESULT_SUCCESS) {
