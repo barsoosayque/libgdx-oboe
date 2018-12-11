@@ -6,7 +6,7 @@ import com.badlogic.gdx.audio.Sound
 enum class SkinAsset(val path: String) { DEFAULT("uiskin.json") }
 enum class SoundAsset(val path: String) {
     AM("am.wav"),
-    TWO_MOONS("two_moons.wav");
+    TWO_MOONS("two_moons.mp3");
 
     fun get(assetManager: AssetManager): Sound = assetManager[path]
     override fun toString(): String = "${super.toString()} ($path)"
