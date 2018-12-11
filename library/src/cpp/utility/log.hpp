@@ -16,26 +16,16 @@ enum class log_level { debug, info, error };
 
 template<class ... Params>
 void log(log_level p_level, std::string_view p_template, Params... p_params) {
-    std::string tag;
     auto message = fmt::format(p_template, p_params...);
     auto level = ANDROID_LOG_DEBUG;
 
     switch(p_level) {
-        case log_level::debug:
-            tag = "[DEBUG]";
-            level = ANDROID_LOG_DEBUG;
-            break;
-        case log_level::info:
-            tag = "[INFO]";
-            level = ANDROID_LOG_INFO;
-            break;
-        case log_level::error:
-            tag = "[ERROR]";
-            level = ANDROID_LOG_ERROR;
-            break;
+        case log_level::debug: level = ANDROID_LOG_DEBUG; break;
+        case log_level::info: level = ANDROID_LOG_INFO; break;
+        case log_level::error: level = ANDROID_LOG_ERROR; break;
     }
 
-    __android_log_print(level, tag.c_str(), "%s", message.c_str());
+    __android_log_print(level, "[Libgdx Oboe]", "%s", message.c_str());
 }
 
 // <><><><><><><><><><><><><><><><><><><><>
