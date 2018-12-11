@@ -1,41 +1,37 @@
 #pragma once
 #include <vector>
 #include <list>
-#include "../core/playerhandle.hpp"
 #include "../core/renderableaudio.hpp"
-#include <android/asset_manager.h>
-#include <android/asset_manager_jni.h>
-#include <optional>
 #include <functional>
 
-class soundpool : player_handle, public renderable_audio {
+class soundpool: public renderable_audio {
     public:
-        soundpool(SLEngineItf&, SLDataSource&);
-        void render(int16_t*, int32_t) const;
+        using data = std::vector<int16_t>;
+        soundpool(const data&& p_pcm, int8_t p_channels);
+        void render(int16_t* p_stream, int32_t p_frames) const;
         bool is_done() const;
 
-        long play();
-        long play(float);
+        long play(float p_volume = 1.0f);
 
         void pause();
-        void pause(long);
+        void pause(long p_id);
 
         void stop();
-        void stop(long);
+        void stop(long p_id);
 
     private:
         struct sound {
             float m_volume;
             long m_id;
-            bool m_is_paused;
-            int32_t m_cur_sample;
+            bool m_paused;
+            int32_t m_cur_frame;
         };
+        sound gen_sound(float p_volume = 1.0f);
         void do_by_id(long, std::function<void(soundpool::sound&)>);
-
-        long m_last_id;
-        int32_t m_size;
-        int8_t m_channels;
         mutable std::list<sound> m_sounds;
-        std::vector<int16_t> m_pcm_data;
-        const int16_t* dat;
+        long m_last_id;
+
+        int32_t m_frames;
+        int8_t m_channels;
+        std::vector<int16_t> m_pcm;
 };
