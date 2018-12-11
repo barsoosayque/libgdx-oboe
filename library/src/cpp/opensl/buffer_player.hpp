@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <vector>
+#include <atomic>
 #include "context.hpp"
 
 namespace opensl {
@@ -24,6 +25,8 @@ namespace opensl {
         private:
             buffer_callback m_buffer_callback;
             std::vector<int16_t> m_queue_buffer;
+            std::atomic_int m_queued_buffers;
+            std::atomic_bool m_playback_over;
 
             SLObjectItf m_player;
             SLPlayItf m_play;

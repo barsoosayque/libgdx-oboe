@@ -1,5 +1,4 @@
 #include "decoder.hpp"
-
 using namespace opensl;
 
 decoder::decoder(const context& p_context) : m_context(p_context) { }
@@ -27,7 +26,7 @@ std::vector<int16_t> decoder::decode_full(const context& p_context, int p_file_d
 
     dr.m_player->enqueue();
     dr.m_player->play();
-    while(dr.m_player->is_working()) { }
+    while(dr.m_player->is_working()) {};
     dr.m_player->stop();
 
     return pcm;

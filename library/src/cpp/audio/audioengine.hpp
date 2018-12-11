@@ -10,7 +10,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
     private:
         std::unique_ptr<oboe::AudioStream> m_stream;
         std::unique_ptr<audio_mixer> m_mixer;
-        std::unique_ptr<opensl::context> m_slcontext;
+        opensl::context m_slcontext;
         AAssetManager* m_asset_manager;
         int8_t m_channels;
 

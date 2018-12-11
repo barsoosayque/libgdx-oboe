@@ -11,11 +11,13 @@ inline void get_interface(SLObjectItf p_player, const SLInterfaceID p_id,
 }
 
 buffer_player::buffer_player(const context& p_context, SLDataSource p_source)
-    : m_queue_buffer(192) {
-    std::vector<SLInterfaceID> ids { SL_IID_PLAY, SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
-    std::vector<SLboolean> req { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
+    : m_queue_buffer(192)
+    , m_queued_buffers(0)
+    , m_playback_over(false) {
+    std::vector<SLInterfaceID> ids { SL_IID_PLAY, SL_IID_SEEK, SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
+    std::vector<SLboolean> req { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
 
-    SLDataLocator_AndroidSimpleBufferQueue loc_bq = { SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2 };
+    SLDataLocator_AndroidSimpleBufferQueue loc_bq = { SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 1 };
     SLDataFormat_PCM pcm = {
         .formatType = SL_DATAFORMAT_PCM,
         // TODO dynamic channels
@@ -51,6 +53,14 @@ buffer_player::buffer_player(const context& p_context, SLDataSource p_source)
             // TODO fix endiannes if CPU is big endian
             self->m_buffer_callback(self->m_queue_buffer);
         }
+        self->m_queued_buffers--;
+    }, this);
+
+    (*m_play)->SetCallbackEventsMask(m_play, SL_PLAYEVENT_HEADATEND);
+    (*m_play)->RegisterCallback(m_play, [](SLPlayItf caller, void *context, SLuint32 event) {
+        if(event == SL_PLAYEVENT_HEADATEND) {
+            reinterpret_cast<buffer_player*>(context)->m_playback_over = true;
+        }
     }, this);
 }
 
@@ -73,17 +83,20 @@ void buffer_player::pause() {
 
 void buffer_player::stop() {
     (*m_play)->SetPlayState(m_play, SL_PLAYSTATE_STOPPED);
+    m_playback_over = false;
 }
 
 bool buffer_player::is_working() {
-    SLBufferQueueState state;
-    (*m_queue)->GetState(m_queue, &state);
-    return state.count > 0;
+    return m_queued_buffers > 0 && !m_playback_over;
 }
 
 void buffer_player::enqueue() {
+    if(m_playback_over) return;
     // capacity * 2: because this argument in 8 bits, but buffer is in 16 bits
-    (*m_queue)->Enqueue(m_queue, m_queue_buffer.data(), m_queue_buffer.capacity() * 2);
+    auto result = (*m_queue)->Enqueue(m_queue, m_queue_buffer.data(), m_queue_buffer.capacity() * 2);
+    if(result == SL_RESULT_SUCCESS) {
+        m_queued_buffers++;
+    }
 }
 
 void buffer_player::resize_buffer(int p_size) {

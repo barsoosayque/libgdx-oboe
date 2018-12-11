@@ -9,7 +9,6 @@ using namespace oboe;
 
 audio_engine::audio_engine(int32_t p_channels, AAssetManager* p_asset_manager)
     : AudioStreamCallback()
-    , m_slcontext(std::make_unique<opensl::context>())
     , m_channels(p_channels)
     , m_asset_manager(p_asset_manager) {
 
@@ -59,8 +58,6 @@ void audio_engine::stop() {
 }
 
 soundpool* audio_engine::new_soundpool(std::string_view p_path) {
-    auto engine = m_slcontext->engine();
-
     // use asset manager to open asset by filename
     AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
 
@@ -75,7 +72,7 @@ soundpool* audio_engine::new_soundpool(std::string_view p_path) {
     assert(0 <= fd);
     AAsset_close(asset);
 
-    auto pcm = opensl::decoder::decode_full(*m_slcontext, fd, start, length);
+    auto pcm = opensl::decoder::decode_full(m_slcontext, fd, start, length);
     auto new_soundpool = new soundpool(std::move(pcm), m_channels);
     m_mixer->play_audio(new_soundpool);
 
