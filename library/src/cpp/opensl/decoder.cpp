@@ -4,7 +4,7 @@ using namespace opensl;
 
 decoder::decoder(const context& p_context) : m_context(p_context) { }
 
-decoder::open(int p_file_descriptor, off_t p_start, off_t p_length) {
+void decoder::open(int p_file_descriptor, off_t p_start, off_t p_length) {
     // <----- SOURCE ----->
     SLDataLocator_AndroidFD loc_fd = { SL_DATALOCATOR_ANDROIDFD, p_file_descriptor, p_start, p_length };
     // NOTE: Android OpenSL demands NULL and SL_CONTAINERTYPE_UNSPECIFIED
@@ -31,6 +31,6 @@ decoder::open(int p_file_descriptor, off_t p_start, off_t p_length) {
     };
     SLDataSink sink = { &loc_bq, &pcm };
 
-    m_player = player(m_context, source, sink);
+    m_player = std::make_unique<player>(m_context, source, sink);
 }
 

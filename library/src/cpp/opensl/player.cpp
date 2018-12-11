@@ -1,5 +1,6 @@
 #include "player.hpp"
 #include "../utility/log.hpp"
+#include <vector>
 
 using namespace opensl;
 
@@ -9,7 +10,7 @@ inline void get_interface(SLObjectItf p_player, const SLInterfaceID p_id,
     if(result != SL_RESULT_SUCCESS) error("Cannot access interface \"{}\" in opensl::player.", p_id_desc);
 }
 
-player::player(const context& p_context SLDataSource p_source, SLDataSink p_sink) {
+player::player(const context& p_context, SLDataSource p_source, SLDataSink p_sink) {
     std::vector<SLInterfaceID> ids { SL_IID_PLAY, SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
     std::vector<SLboolean> req { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
 
