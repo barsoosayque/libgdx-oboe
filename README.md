@@ -25,14 +25,15 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 
 **OboeSound** class:
 
-- [ ] `play` methods;
-- [ ] `loop` methods;
-- [ ] `pause` methods;
-- [ ] `resume` methods;
-- [ ] `dispose` method;
-- [ ] `setLooping` method;
+- [x] `play` methods (except pan and pitch);
+- [x] `loop` methods (except pan and pitch);
+- [x] `pause` methods;
+- [x] `resume` methods;
+- [x] `stop` methods;
+- [x] `dispose` method;
+- [x] `setLooping` method;
+- [x] `setVolume` method;
 - [ ] `setPitch` method;
-- [ ] `setVolume` method;
 - [ ] `setPan` method.
 
 *WARN: not marked methods will throw an exception.*
