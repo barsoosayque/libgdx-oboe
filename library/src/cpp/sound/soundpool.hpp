@@ -19,6 +19,8 @@ class soundpool: public renderable_audio {
         void stop();
         void stop(long p_id);
 
+        void resume();
+        void resume(long p_id);
     private:
         struct sound {
             float m_volume;

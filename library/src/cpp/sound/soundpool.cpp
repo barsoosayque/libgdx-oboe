@@ -33,13 +33,19 @@ long soundpool::play(float p_volume) {
 }
 
 void soundpool::pause() {
-    for(auto& sound : m_sounds) {
-        sound.m_paused = true;
-    }
+    for(auto& sound : m_sounds) { sound.m_paused = true; }
 }
 
 void soundpool::pause(long p_id) {
     do_by_id(p_id, [](sound& p_sound) { p_sound.m_paused = true; });
+}
+
+void soundpool::resume() {
+    for(auto& sound : m_sounds) { sound.m_paused = false; }
+}
+
+void soundpool::resume(long p_id) {
+    do_by_id(p_id, [](sound& p_sound) { p_sound.m_paused = false; });
 }
 
 void soundpool::stop() {

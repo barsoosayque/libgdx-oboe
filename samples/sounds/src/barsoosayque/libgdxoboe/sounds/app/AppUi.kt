@@ -28,25 +28,29 @@ class AppUi(
         label("Libgdx Oboe: Sounds").cell(row = true, padBottom = 60f)
         verticalGroup {
             center()
-            space(60f)
+            space(30f)
             verticalGroup {
                 label("Select one of the sounds:")
                 selectBoxOf<SoundAsset>(GdxArray(sounds)).onChangeEvent { _, selectBox ->
                     selectedSound = selectBox.selected.get(assetManager)
                 }
             }
-            verticalGroup {
-                space(30f)
-                label("Playback controls:")
+            table {
+                defaults().pad(10f)
+                label("Soundpool controls: ")
                 horizontalGroup {
+                    space(10f)
                     textButton("Play").onChange { selectedSound.play(volume) }
+                    textButton("Resume").onChange { selectedSound.resume() }
+                    textButton("Pause").onChange { selectedSound.pause() }
+                    textButton("Stop").onChange { selectedSound.stop() }
                 }
+                row()
+                label("Volume: ")
                 horizontalGroup {
-                    label("Volume: ")
                     volumeSlider = slider { value = 1.0f }
                 }
             }
         }.cell(grow = true)
-
     }.let(::addActor)
 }
