@@ -9,6 +9,13 @@ OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self, jobject asset_manager) 
     set_var_as(env, self, "audioEngine", new audio_engine(2, mgr));
 }
 
+OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jstring path) {
+    const char *cpp_path = env->GetStringUTFChars(path, NULL);
+    auto music = get_var_as<audio_engine>(env, self, "audioEngine")->new_music(cpp_path);
+    env->ReleaseStringUTFChars(path, cpp_path);
+    return reinterpret_cast<jlong>(music);
+}
+
 OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jstring path) {
     const char *cpp_path = env->GetStringUTFChars(path, NULL);
     auto soundpool = get_var_as<audio_engine>(env, self, "audioEngine")->new_soundpool(cpp_path);

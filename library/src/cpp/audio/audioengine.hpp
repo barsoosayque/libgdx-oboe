@@ -3,6 +3,7 @@
 #include "mixer.hpp"
 #include "../opensl/context.hpp"
 #include "../sound/soundpool.hpp"
+#include "../music/music.hpp"
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
@@ -13,6 +14,8 @@ class audio_engine : protected oboe::AudioStreamCallback {
         opensl::context m_slcontext;
         AAssetManager* m_asset_manager;
         int8_t m_channels;
+
+        std::tuple<int, off_t, off_t> path_to_fd(std::string_view);
 
         oboe::DataCallbackResult onAudioReady(oboe::AudioStream*, void*, int32_t);
     public:
@@ -30,4 +33,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
 
         /// Creates new soundpool which is connected to this
         soundpool* new_soundpool(std::string_view);
+
+        /// Creates new soundpool which is connected to this
+        music* new_music(std::string_view);
 };

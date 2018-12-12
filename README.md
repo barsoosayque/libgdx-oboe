@@ -19,7 +19,7 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 **OboeAudio** class:
 
 - [x] `newSound` method;
-- [ ] `newMusic` method;
+- [x] `newMusic` method;
 - [ ] `newAudioDevice` method;
 - [ ] `newAudioRecorder` method.
 
@@ -35,6 +35,22 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 - [x] `setVolume` method;
 - [ ] `setPitch` method;
 - [ ] `setPan` method.
+
+**OboeMusic** class:
+
+- [ ] `play` method;
+- [ ] `pause` method;
+- [ ] `stop` method;
+- [ ] `getPosition` method;
+- [ ] `setPosition` method;
+- [ ] `getVolume` method;
+- [ ] `setVolume` method;
+- [ ] `isLooping` method;
+- [ ] `setLooping` method;
+- [ ] `isPlaying` method;
+- [ ] `setPan` method;
+- [ ] `setOnCompletionListener` method;
+- [ ] `dispose` method.
 
 *WARN: not marked methods will throw an exception.*
 

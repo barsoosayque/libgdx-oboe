@@ -19,17 +19,22 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
     /** @see <a>https://developer.android.com/guide/topics/media/media-formats</a> */
     private fun checkFileFormat(file: FileHandle) = when (file.extension().toLowerCase()) {
         "flac", "mp3", "wav", "aac", "ogg" -> file
-        else -> throw IllegalArgumentException("Unknow file format (\"$file\"). Only FLAC, MP3, WAV, AAC and OGG is allowed here.")
+        else -> throw IllegalArgumentException("Unknown file format (\"$file\"). Only FLAC, MP3, WAV, AAC and OGG is allowed here.")
     }
 
     private external fun init(assetManager: AssetManager)
     private external fun createSoundpool(path: String): NativeSoundpool
+    private external fun createMusic(path: String): NativeMusic
 
     external fun resume()
     external fun stop()
     external fun dispose()
 
-    override fun newMusic(file: FileHandle): Music = TODO()
+    override fun newMusic(file: FileHandle): Music =
+            checkFileFormat(file).path()
+                    .let(::createMusic)
+                    .let(::OboeMusic)
+
     override fun newSound(file: FileHandle): Sound =
             checkFileFormat(file).path()
                     .let(::createSoundpool)

@@ -57,7 +57,7 @@ void audio_engine::stop() {
     check(m_stream->requestStop(), "Error stopping stream: %s");
 }
 
-soundpool* audio_engine::new_soundpool(std::string_view p_path) {
+std::tuple<int, off_t, off_t> audio_engine::path_to_fd(std::string_view p_path) {
     // use asset manager to open asset by filename
     AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
 
@@ -70,7 +70,20 @@ soundpool* audio_engine::new_soundpool(std::string_view p_path) {
     off_t start, length;
     int fd = AAsset_openFileDescriptor(asset, &start, &length);
     assert(0 <= fd);
-    AAsset_close(asset);
+
+    return std::make_tuple(fd, start, length);
+}
+
+music* audio_engine::new_music(std::string_view p_path) {
+    auto [fd, start, length] = path_to_fd(p_path);
+
+    auto new_music = new music();
+
+    return new_music;
+}
+
+soundpool* audio_engine::new_soundpool(std::string_view p_path) {
+    auto [fd, start, length] = path_to_fd(p_path);
 
     auto pcm = opensl::decoder::decode_full(m_slcontext, fd, start, length);
     auto new_soundpool = new soundpool(std::move(pcm), m_channels);

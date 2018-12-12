@@ -10,8 +10,11 @@ extern "C" {
 // fun OboeAudio::init(AssetManager): Unit
 OBOEAUDIO_METHOD(void, init) (JNIEnv*, jobject, jobject);
 
-// fun OboeAudio::createSoundpool(): Unit
+// fun OboeAudio::createSoundpool(): NativeSoundpool
 OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv*, jobject, jstring);
+
+// fun OboeAudio::createMusic(): NativeMusic
+OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv*, jobject, jstring);
 
 // fun OboeAudio::dispose(): Unit
 OBOEAUDIO_METHOD(void, dispose) (JNIEnv*, jobject);
