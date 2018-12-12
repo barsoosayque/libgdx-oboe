@@ -23,7 +23,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
     }
 
     private external fun init(assetManager: AssetManager)
-    private external fun createSoundpool(path: String): Long
+    private external fun createSoundpool(path: String): NativeSoundpool
 
     external fun resume()
     external fun stop()
