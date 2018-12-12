@@ -62,6 +62,8 @@ buffer_player::buffer_player(const context& p_context, SLDataSource p_source)
             reinterpret_cast<buffer_player*>(context)->m_playback_over = true;
         }
     }, this);
+
+    (*m_play)->GetDuration(m_play, m_duration);
 }
 
 buffer_player::~buffer_player() {
@@ -86,8 +88,17 @@ void buffer_player::stop() {
     m_playback_over = false;
 }
 
-bool buffer_player::is_working() {
+bool buffer_player::is_working() const {
     return m_queued_buffers > 0 && !m_playback_over;
+}
+
+float buffer_player::duration() const {
+    return m_duration / 1000f;
+}
+
+float buffer_player::position() const {
+    (*m_play)->GetPosition(m_play, m_position);
+    return m_position;
 }
 
 void buffer_player::enqueue() {

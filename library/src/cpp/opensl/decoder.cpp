@@ -12,6 +12,14 @@ void decoder::open(int p_file_descriptor, off_t p_start, off_t p_length) {
     m_player = std::make_unique<buffer_player>(m_context, source);
 }
 
+float decoder::position() {
+    return m_player->position();
+}
+
+float decoder::content_duration() {
+    return m_player->duration();
+}
+
 bool decoder::is_opened() {
     return m_player != nullptr;
 }

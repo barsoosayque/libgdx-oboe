@@ -8,6 +8,14 @@ music::music(opensl::decoder&& p_decoder)
     }
 }
 
+float position() {
+    return m_decoder.position();
+}
+
+float duration() {
+    return m_decoder.content_duration();
+}
+
 void music::render(int16_t* p_stream, int32_t p_frames) const {
 
 }

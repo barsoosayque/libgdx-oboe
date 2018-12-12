@@ -21,7 +21,10 @@ namespace opensl {
             void pause();
             void stop();
 
-            bool is_working();
+            float duration() const;
+            float position() const;
+
+            bool is_working() const;
         private:
             buffer_callback m_buffer_callback;
             std::vector<int16_t> m_queue_buffer;
@@ -32,5 +35,8 @@ namespace opensl {
             SLPlayItf m_play;
             SLSeekItf m_seek;
             SLBufferQueueItf m_queue;
+
+            SLmillisecond m_duration;
+            SLmillisecond m_position;
     };
 }

@@ -14,6 +14,9 @@ namespace opensl {
 
             bool is_opened();
 
+            float position();
+            float content_duration();
+
             static std::vector<int16_t> decode_full(const context& p_context,
                                                     int p_file_descriptor,
                                                     off_t p_start,

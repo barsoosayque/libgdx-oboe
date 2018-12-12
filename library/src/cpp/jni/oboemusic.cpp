@@ -1,56 +1,53 @@
 #include "oboemusic.hpp"
 #include "../audio/audioengine.hpp"
+#include "../music/music.hpp"
 #include "../utility/var.hpp"
 
-OBOEMUSIC_METHOD(void, pause__) (JNIEnv*, jobject) {
+OBOEMUSIC_METHOD(bool, isPlaying) (JNIEnv* env, jobject self) {
 
 }
 
-OBOEMUSIC_METHOD(void, pause__J) (JNIEnv*, jobject, jlong) {
+OBOEMUSIC_METHOD(bool, isLooping) (JNIEnv* env, jobject self) {
 
 }
 
-OBOEMUSIC_METHOD(jlong, play__) (JNIEnv*, jobject) {
+OBOEMUSIC_METHOD(void, pause) (JNIEnv* env, jobject self) {
 
 }
 
-OBOEMUSIC_METHOD(jlong, play__F) (JNIEnv*, jobject, jfloat) {
+OBOEMUSIC_METHOD(void, setPan) (JNIEnv* env, jobject self, jfloat, jfloat) {
 
 }
 
-OBOEMUSIC_METHOD(void, stop__) (JNIEnv*, jobject) {
+OBOEMUSIC_METHOD(jfloat, getPosition) (JNIEnv* env, jobject self) {
+    return get_var_as<music>(env, self, "music")->position();
+}
+
+OBOEMUSIC_METHOD(void, setLooping) (JNIEnv* env, jobject self, jfloat) {
 
 }
 
-OBOEMUSIC_METHOD(void, stop__J) (JNIEnv*, jobject, jlong) {
+OBOEMUSIC_METHOD(jfloat, getVolume) (JNIEnv* env, jobject self) {
 
 }
 
-OBOEMUSIC_METHOD(void, resume__) (JNIEnv*, jobject) {
+OBOEMUSIC_METHOD(void, play) (JNIEnv* env, jobject self) {
 
 }
 
-OBOEMUSIC_METHOD(void, resume__J) (JNIEnv*, jobject, jlong) {
+OBOEMUSIC_METHOD(void, stop) (JNIEnv* env, jobject self) {
 
 }
 
-OBOEMUSIC_METHOD(void, setVolume) (JNIEnv*, jobject, jlong, jfloat) {
+OBOEMUSIC_METHOD(void, setVolume) (JNIEnv* env, jobject self, jfloat) {
 
 }
 
-OBOEMUSIC_METHOD(void, dispose) (JNIEnv*, jobject) {
-
+OBOEMUSIC_METHOD(void, setPosition) (JNIEnv* env, jobject self, jfloat) {
+    return get_var_as<music>(env, self, "music")->position();
 }
 
-OBOEMUSIC_METHOD(jlong, loop__) (JNIEnv*, jobject) {
-
-}
-
-OBOEMUSIC_METHOD(jlong, loop__F) (JNIEnv*, jobject, jfloat) {
-
-}
-
-OBOEMUSIC_METHOD(void, setLooping) (JNIEnv*, jobject, jlong, bool) {
+OBOEMUSIC_METHOD(void, dispose) (JNIEnv* env, jobject self) {
 
 }
 
