@@ -8,11 +8,15 @@ music::music(opensl::decoder&& p_decoder)
     }
 }
 
-float position() {
+void music::position(float p_position) {
+    m_decoder.position(p_position);
+}
+
+float music::position() {
     return m_decoder.position();
 }
 
-float duration() {
+float music::duration() {
     return m_decoder.content_duration();
 }
 

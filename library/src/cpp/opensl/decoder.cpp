@@ -16,6 +16,10 @@ float decoder::position() {
     return m_player->position();
 }
 
+void decoder::position(float p_position) {
+    m_player->seek(p_position);
+}
+
 float decoder::content_duration() {
     return m_player->duration();
 }

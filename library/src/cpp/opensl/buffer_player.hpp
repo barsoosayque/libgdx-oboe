@@ -23,6 +23,7 @@ namespace opensl {
 
             float duration() const;
             float position() const;
+            void seek(float p_position);
 
             bool is_working() const;
         private:
@@ -37,6 +38,6 @@ namespace opensl {
             SLBufferQueueItf m_queue;
 
             SLmillisecond m_duration;
-            SLmillisecond m_position;
+            mutable SLmillisecond m_position;
     };
 }

@@ -63,7 +63,8 @@ buffer_player::buffer_player(const context& p_context, SLDataSource p_source)
         }
     }, this);
 
-    (*m_play)->GetDuration(m_play, m_duration);
+    (*m_play)->GetDuration(m_play, &m_duration);
+    (*m_play)->SetPositionUpdatePeriod(m_play, 25);
 }
 
 buffer_player::~buffer_player() {
@@ -93,12 +94,16 @@ bool buffer_player::is_working() const {
 }
 
 float buffer_player::duration() const {
-    return m_duration / 1000f;
+    return m_duration / 1000.0f;
 }
 
 float buffer_player::position() const {
-    (*m_play)->GetPosition(m_play, m_position);
+    (*m_play)->GetPosition(m_play, &m_position);
     return m_position;
+}
+
+void buffer_player::seek(float p_position) {
+    (*m_seek)->SetPosition(m_seek, p_position, SL_SEEKMODE_FAST);
 }
 
 void buffer_player::enqueue() {

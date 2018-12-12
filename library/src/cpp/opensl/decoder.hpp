@@ -14,6 +14,7 @@ namespace opensl {
 
             bool is_opened();
 
+            void position(float p_position);
             float position();
             float content_duration();
 
