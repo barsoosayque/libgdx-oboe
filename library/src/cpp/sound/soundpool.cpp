@@ -64,7 +64,7 @@ void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) const {
 
             for(int frame = 0; frame < size; ++frame, ++p_sound.m_cur_frame) {
                 for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
-                    p_audio_data[frame * m_channels + sample] += *iter;
+                    p_audio_data[frame * m_channels + sample] += *iter * p_sound.m_volume;
                 }
             }
         }

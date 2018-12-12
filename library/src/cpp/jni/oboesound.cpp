@@ -15,7 +15,7 @@ OBOESOUND_METHOD(jlong, play__) (JNIEnv* env, jobject self) {
 }
 
 OBOESOUND_METHOD(jlong, play__F) (JNIEnv* env, jobject self, jfloat volume) {
-    return 0;
+    return get_var_as<soundpool>(env, self, "soundpool")->play(volume);
 }
 
 OBOESOUND_METHOD(void, stop__) (JNIEnv* env, jobject self) {
