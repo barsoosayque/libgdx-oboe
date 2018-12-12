@@ -11,7 +11,7 @@ class soundpool: public renderable_audio {
         void render(int16_t* p_stream, int32_t p_frames) const;
         bool is_done() const;
 
-        long play(float p_volume = 1.0f);
+        long play(float p_volume = 1.0f, bool p_loop = false);
 
         void pause();
         void pause(long p_id);
@@ -23,14 +23,16 @@ class soundpool: public renderable_audio {
         void resume(long p_id);
 
         void volume(long p_id, float p_volume);
+        void looping(long p_id, bool p_loop);
     private:
         struct sound {
             float m_volume;
             long m_id;
             bool m_paused;
+            bool m_looping;
             int32_t m_cur_frame;
         };
-        sound gen_sound(float p_volume = 1.0f);
+        sound gen_sound(float p_volume = 1.0f, bool p_loop = false);
         void do_by_id(long, std::function<void(soundpool::sound&)>);
         mutable std::list<sound> m_sounds;
         long m_last_id;
