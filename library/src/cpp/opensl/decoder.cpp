@@ -12,6 +12,10 @@ void decoder::open(int p_file_descriptor, off_t p_start, off_t p_length) {
     m_player = std::make_unique<buffer_player>(m_context, source);
 }
 
+bool decoder::is_opened() {
+    return m_player != nullptr;
+}
+
 std::vector<int16_t> decoder::decode_full(const context& p_context, int p_file_descriptor,
                                           off_t p_start, off_t p_length) {
     auto dr = decoder(p_context);

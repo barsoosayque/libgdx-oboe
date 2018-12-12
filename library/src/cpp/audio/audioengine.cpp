@@ -77,7 +77,11 @@ std::tuple<int, off_t, off_t> audio_engine::path_to_fd(std::string_view p_path) 
 music* audio_engine::new_music(std::string_view p_path) {
     auto [fd, start, length] = path_to_fd(p_path);
 
-    auto new_music = new music();
+    auto music_decoder = opensl::decoder(m_slcontext);
+    music_decoder.open(fd, start, length);
+
+    auto new_music = new music(std::move(music_decoder));
+    m_mixer->play_audio(new_music);
 
     return new_music;
 }
