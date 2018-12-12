@@ -35,10 +35,10 @@ OBOESOUND_METHOD(void, resume__J) (JNIEnv* env, jobject self, jlong id) {
 }
 
 OBOESOUND_METHOD(void, setVolume) (JNIEnv* env, jobject self, jlong id, jfloat volume) {
-
+    get_var_as<soundpool>(env, self, "soundpool")->volume(id, volume);
 }
 
 OBOESOUND_METHOD(void, dispose) (JNIEnv* env, jobject self) {
-
+    delete get_var_as<soundpool>(env, self, "soundpool");
 }
 

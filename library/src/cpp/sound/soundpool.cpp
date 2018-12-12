@@ -62,6 +62,10 @@ void soundpool::stop(long p_id) {
     });
 }
 
+void volume(long p_id, float p_volume) {
+    do_by_id(p_id, [](sound& p_sound) { p_sound.m_volume = p_volume; }
+}
+
 void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) const {
     m_sounds.remove_if([&](sound& p_sound) {
         if(!p_sound.m_paused) {

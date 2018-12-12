@@ -21,6 +21,8 @@ class soundpool: public renderable_audio {
 
         void resume();
         void resume(long p_id);
+
+        void volume(long p_id, float p_volume);
     private:
         struct sound {
             float m_volume;
