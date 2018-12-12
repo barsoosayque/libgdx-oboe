@@ -1,2 +1,3 @@
 include ':library'
 include ':samples:sounds'
+include ':samples:music'
