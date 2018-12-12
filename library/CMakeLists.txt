@@ -18,6 +18,7 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/sound/soundpool.cpp
             ${SRC_DIR}/music/music.cpp
             ${SRC_DIR}/jni/oboesound.cpp
+            ${SRC_DIR}/jni/oboemusic.cpp
             ${SRC_DIR}/jni/oboeaudio.cpp)
 
 target_link_libraries(libgdx-oboe android log oboe fmt OpenSLES)
