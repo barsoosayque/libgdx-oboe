@@ -9,6 +9,11 @@
 ### Build steps:
 
 ```bash
+// Clone repository with dependencies
+$ git clone https://gitlab.com/barsoosayque/libgdx-oboe.git --recurse-submodules
+
+// Cd in and build
+$ cd libgdx-oboe
 $ ./gradlew :library:build
 ```
 
