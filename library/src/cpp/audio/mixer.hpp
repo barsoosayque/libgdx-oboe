@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../core/renderableaudio.hpp"
+#include "renderableaudio.hpp"
 #include <memory>
 #include <list>
 #include <vector>
 
-class audio_mixer: renderable_audio {
+class mixer: renderable_audio {
     public:
         /// Initialize mixer with specified buffer size and channel size
-        audio_mixer(int32_t, int8_t);
+        mixer(int32_t, int8_t);
 
         void play_audio(const renderable_audio&);
         void play_audio(renderable_audio*);

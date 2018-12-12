@@ -13,9 +13,8 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/opensl/context.cpp
             ${SRC_DIR}/opensl/buffer_player.cpp
             ${SRC_DIR}/opensl/decoder.cpp
-            ${SRC_DIR}/core/playerhandle.cpp
             ${SRC_DIR}/audio/audioengine.cpp
-            ${SRC_DIR}/audio/audiomixer.cpp
+            ${SRC_DIR}/audio/mixer.cpp
             ${SRC_DIR}/sound/soundpool.cpp
             ${SRC_DIR}/jni/oboesound.cpp
             ${SRC_DIR}/jni/oboeaudio.cpp)

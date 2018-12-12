@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <list>
-#include "../core/renderableaudio.hpp"
+#include "../audio/renderableaudio.hpp"
 #include <functional>
 
 class soundpool: public renderable_audio {

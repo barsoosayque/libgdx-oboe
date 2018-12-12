@@ -28,7 +28,7 @@ audio_engine::audio_engine(int32_t p_channels, AAssetManager* p_asset_manager)
 
     int m_max_frames = m_stream->getFramesPerBurst() * 2;
     auto result = m_stream->setBufferSizeInFrames(m_max_frames);
-    m_mixer = std::make_unique<audio_mixer>(m_max_frames * p_channels, p_channels);
+    m_mixer = std::make_unique<mixer>(m_max_frames * p_channels, p_channels);
 
     if (result) {
         debug("New buffer size is %d frame", result.value());

@@ -1,22 +1,22 @@
-#include "audiomixer.hpp"
+#include "mixer.hpp"
 #include <algorithm>
 
-audio_mixer::audio_mixer(int32_t p_buffer_size, int8_t p_channels)
+mixer::mixer(int32_t p_buffer_size, int8_t p_channels)
     : m_buffer(p_buffer_size)
     , m_channels(p_channels) { }
 
-void audio_mixer::play_audio(const renderable_audio& p_track) {
+void mixer::play_audio(const renderable_audio& p_track) {
     m_tracks.emplace_back(&p_track);
 }
-void audio_mixer::play_audio(renderable_audio* p_track) {
+void mixer::play_audio(renderable_audio* p_track) {
     m_tracks.emplace_back(p_track);
 }
 
-bool audio_mixer::is_done() const {
+bool mixer::is_done() const {
     return m_tracks.empty();
 }
 
-void audio_mixer::render(int16_t* p_audio_data, int32_t p_num_frames) const {
+void mixer::render(int16_t* p_audio_data, int32_t p_num_frames) const {
     for (int j = 0; j < p_num_frames * m_channels; ++j) {
             p_audio_data[j] = 0;
     }
