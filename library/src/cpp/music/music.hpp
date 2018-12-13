@@ -6,7 +6,7 @@ class music: public renderable_audio {
     public:
         music(opensl::decoder&& p_decoder);
 
-        void render(int16_t* p_stream, int32_t p_frames) const;
+        void render(int16_t* p_stream, int32_t p_frames);
         bool is_done() const;
 
         void play();

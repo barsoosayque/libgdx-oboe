@@ -71,7 +71,7 @@ void soundpool::looping(long p_id, bool p_loop) {
     do_by_id(p_id, [p_loop](sound& p_sound) { p_sound.m_looping = p_loop; });
 }
 
-void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) const {
+void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) {
     m_sounds.remove_if([&](sound& p_sound) {
         if(!p_sound.m_paused) {
             auto iter = std::next(m_pcm.begin(), p_sound.m_cur_frame * m_channels);
