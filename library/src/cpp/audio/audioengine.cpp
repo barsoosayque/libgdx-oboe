@@ -80,7 +80,7 @@ music* audio_engine::new_music(std::string_view p_path) {
     auto music_decoder = opensl::decoder(m_slcontext);
     music_decoder.open(fd, start, length);
 
-    auto new_music = new music(std::move(music_decoder));
+    auto new_music = new music(std::move(music_decoder), m_channels);
     m_mixer->play_audio(new_music);
 
     return new_music;

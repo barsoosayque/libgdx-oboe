@@ -1,8 +1,9 @@
 #include "music.hpp"
 #include "../utility/log.hpp"
 
-music::music(opensl::decoder&& p_decoder)
-    : m_decoder(std::move(p_decoder)) {
+music::music(opensl::decoder&& p_decoder, int8_t p_channels)
+    : m_decoder(std::move(p_decoder))
+    , m_channels(p_channels) {
     if(!m_decoder.is_opened()) {
         error("Trying to create music with decoder that is not open.");
     }
