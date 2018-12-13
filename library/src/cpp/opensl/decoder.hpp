@@ -11,6 +11,7 @@ namespace opensl {
             decoder(const context& p_context);
 
             void open(int p_file_descriptor, off_t p_start, off_t p_length);
+            std::vector<int16_t> request_more(int p_samples);
 
             bool is_opened();
 
@@ -23,6 +24,8 @@ namespace opensl {
                                                     off_t p_start,
                                                     off_t p_length);
         private:
+            int m_requested_buffers;
+            std::vector<int16_t> m_merged_buffers;
             const context& m_context;
             std::unique_ptr<buffer_player> m_player;
     };
