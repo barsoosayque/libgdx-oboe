@@ -13,16 +13,20 @@ void decoder::open(int p_file_descriptor, off_t p_start, off_t p_length) {
     m_player = std::make_unique<buffer_player>(m_context, source);
 
     m_player->on_buffer_update([this] (const std::vector<int16_t>& p_buffer) {
-        auto cend = std::next(p_buffer.cend(), p_buffer.capacity());
+        auto cend = std::next(p_buffer.cbegin(), p_buffer.capacity());
         std::move(p_buffer.cbegin(), cend, std::back_inserter(m_merged_buffers));
-        if(--m_requested_buffers > 0) {
+        if(--m_requested_buffers) {
             m_player->enqueue();
         }
     });
 }
 
 std::vector<int16_t> decoder::request_more(int p_samples) {
-    m_merged_buffers.reserve(p_samples);
+    m_requested_buffers = p_samples >= 0 ? std::ceil(p_samples / static_cast<float>(m_player->buffer_size()))
+                                         : -1;
+    if(m_requested_buffers >= 1) {
+        m_merged_buffers.reserve(m_requested_buffers * m_player->buffer_size());
+    }
     m_merged_buffers.clear();
     m_requested_buffers = std::ceil(p_samples / static_cast<float>(m_player->buffer_size()));
 
@@ -54,5 +58,5 @@ std::vector<int16_t> decoder::decode_full(const context& p_context, int p_file_d
                                           off_t p_start, off_t p_length) {
     auto dr = decoder(p_context);
     dr.open(p_file_descriptor, p_start, p_length);
-    return dr.request_more(p_length * 2);
+    return dr.request_more(-1);
 }
