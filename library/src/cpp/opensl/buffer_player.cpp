@@ -105,6 +105,9 @@ float buffer_player::position() const {
 }
 
 void buffer_player::seek(float p_position) {
+    if(p_position < m_duration) {
+        m_playback_over = false;
+    }
     (*m_seek)->SetPosition(m_seek, p_position, SL_SEEKMODE_FAST);
 }
 
@@ -121,4 +124,8 @@ void buffer_player::enqueue() {
 
 void buffer_player::resize_buffer(int p_size) {
     m_queue_buffer.reserve(p_size);
+}
+
+int buffer_player::buffer_size() {
+    return m_queue_buffer.capacity();
 }

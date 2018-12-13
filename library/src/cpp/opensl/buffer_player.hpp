@@ -18,6 +18,7 @@ namespace opensl {
 
             void enqueue();
             void resize_buffer(int p_size);
+            int buffer_size();
 
             void play();
             void pause();
