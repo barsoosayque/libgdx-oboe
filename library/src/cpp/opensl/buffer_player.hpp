@@ -7,7 +7,9 @@
 namespace opensl {
     class buffer_player {
         public:
-            using buffer_callback = std::function<void(const std::vector<int16_t>&)>;
+            using pcm_container = std::vector<int16_t>;
+            using buffer_iterator = pcm_container::const_iterator;
+            using buffer_callback = std::function<void(buffer_iterator, buffer_iterator)>;
 
             buffer_player(const context& p_context, SLDataSource p_source);
             ~buffer_player();
@@ -28,7 +30,7 @@ namespace opensl {
             bool is_working() const;
         private:
             buffer_callback m_buffer_callback;
-            std::vector<int16_t> m_queue_buffer;
+            pcm_container m_queue_buffer;
             std::atomic_int m_queued_buffers;
             std::atomic_bool m_playback_over;
 

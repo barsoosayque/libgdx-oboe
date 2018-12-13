@@ -1,4 +1,5 @@
 #include "decoder.hpp"
+#include "../utility/log.hpp"
 #include <cmath>
 using namespace opensl;
 
@@ -12,9 +13,9 @@ void decoder::open(int p_file_descriptor, off_t p_start, off_t p_length) {
 
     m_player = std::make_unique<buffer_player>(m_context, source);
 
-    m_player->on_buffer_update([this] (const std::vector<int16_t>& p_buffer) {
-        auto cend = std::next(p_buffer.cbegin(), p_buffer.capacity());
-        std::move(p_buffer.cbegin(), cend, std::back_inserter(m_merged_buffers));
+    m_player->on_buffer_update([this] (buffer_player::buffer_iterator p_begin,
+                                       buffer_player::buffer_iterator p_end) {
+        std::move(p_begin, p_end, std::back_inserter(m_merged_buffers));
         if(--m_requested_buffers) {
             m_player->enqueue();
         }

@@ -51,7 +51,9 @@ buffer_player::buffer_player(const context& p_context, SLDataSource p_source)
         auto self = reinterpret_cast<buffer_player*>(p_self);
         if(self->m_buffer_callback) {
             // TODO fix endiannes if CPU is big endian
-            self->m_buffer_callback(self->m_queue_buffer);
+            auto cbegin = self->m_queue_buffer.cbegin();
+            auto cend = std::next(cbegin, self->m_queue_buffer.capacity());
+            self->m_buffer_callback(cbegin, cend);
         }
         self->m_queued_buffers--;
     }, this);
