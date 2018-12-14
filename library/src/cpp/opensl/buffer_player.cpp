@@ -123,7 +123,7 @@ void buffer_player::enqueue() {
 }
 
 void buffer_player::resize_buffer(int p_size) {
-    m_queue_buffer.reserve(p_size);
+    pcm_container(p_size).swap(m_queue_buffer);
 }
 
 int buffer_player::buffer_size() {

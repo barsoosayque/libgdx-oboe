@@ -29,23 +29,35 @@ void decoder::reattach_callback() {
                                                         std::make_move_iterator(p_end));
         if(--m_requested_buffers) {
             m_player->enqueue();
+        } else {
+            m_player->pause();
         }
     });
 }
 
 std::vector<int16_t> decoder::request_more(int p_samples) {
-    m_requested_buffers = p_samples >= 0 ? std::ceil(p_samples / static_cast<float>(m_player->buffer_size()))
+    int buffer_size = m_player->buffer_size();
+    int remainder = 0;
+    m_requested_buffers = p_samples >= 0 ? std::floor(p_samples / static_cast<float>(buffer_size))
                                          : -1;
     if(m_requested_buffers >= 1) {
-        m_merged_buffers.reserve(m_requested_buffers * m_player->buffer_size());
+        m_merged_buffers.reserve(p_samples);
+        remainder = p_samples - buffer_size * m_requested_buffers;
     }
     m_merged_buffers.clear();
 
     m_player->enqueue();
     m_player->play();
     while(m_player->is_working()) {};
-    m_player->pause();
 
+    if(remainder) {
+        m_requested_buffers++;
+        m_player->resize_buffer(remainder);
+        m_player->enqueue();
+        m_player->play();
+        while(m_player->is_working()) {};
+        m_player->resize_buffer(buffer_size);
+    }
 
     return m_merged_buffers;
 }
