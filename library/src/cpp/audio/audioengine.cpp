@@ -1,5 +1,5 @@
 #include "audioengine.hpp"
-#include "../opensl/decoder.hpp"
+#include "../audio/decoder.hpp"
 #include "../utility/ptrptr.hpp"
 #include "../utility/log.hpp"
 #include "../utility/oboeutils.hpp"

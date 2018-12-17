@@ -4,8 +4,8 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
-#include "context.hpp"
-#include "buffer_player.hpp"
+#include "../opensl/context.hpp"
+#include "../opensl/buffer_player.hpp"
 
 namespace opensl {
     class decoder {

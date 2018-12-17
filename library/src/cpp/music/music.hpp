@@ -1,5 +1,5 @@
 #pragma once
-#include "../opensl/decoder.hpp"
+#include "../audio/decoder.hpp"
 #include "../audio/renderableaudio.hpp"
 
 class music: public renderable_audio {
