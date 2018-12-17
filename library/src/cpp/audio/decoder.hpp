@@ -25,6 +25,7 @@ namespace opensl {
 
             static std::vector<int16_t> decode_full(const context& p_context, AAsset* p_asset);
         private:
+            void enqueue_and_wait(int p_buffers);
             void reattach_callback();
 
             const context& m_context;

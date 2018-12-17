@@ -38,6 +38,11 @@ void decoder::reattach_callback() {
     });
 }
 
+void decoder::enqueue_and_wait(int p_buffers) {
+    m_player->enqueue(p_buffers);
+    while(m_player->is_working()) {};
+}
+
 std::vector<int16_t> decoder::request_more(int p_samples) {
     int buffer_size = m_player->buffer_size();
     int remainder = 0;
@@ -49,13 +54,11 @@ std::vector<int16_t> decoder::request_more(int p_samples) {
     }
     m_merged_buffers.clear();
 
-    m_player->enqueue(requested_buffers);
-    while(m_player->is_working()) {};
+    enqueue_and_wait(requested_buffers);
 
     if(remainder) {
         m_player->resize_buffer(remainder);
-        m_player->enqueue(1);
-        while(m_player->is_working()) {};
+        enqueue_and_wait(1);
         m_player->resize_buffer(buffer_size);
     }
 
