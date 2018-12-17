@@ -1,6 +1,8 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
 
 #include "context.hpp"
 #include "buffer_player.hpp"
@@ -12,6 +14,7 @@ namespace opensl {
             decoder(decoder&& p_decoder);
 
             void open(int p_file_descriptor, off_t p_start, off_t p_length);
+            void open(AAsset* p_asset);
             std::vector<int16_t> request_more(int p_samples);
 
             bool is_opened();
@@ -20,10 +23,7 @@ namespace opensl {
             float position();
             float content_duration();
 
-            static std::vector<int16_t> decode_full(const context& p_context,
-                                                    int p_file_descriptor,
-                                                    off_t p_start,
-                                                    off_t p_length);
+            static std::vector<int16_t> decode_full(const context& p_context, AAsset* p_asset);
         private:
             void reattach_callback();
 

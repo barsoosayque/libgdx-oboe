@@ -22,6 +22,14 @@ void decoder::open(int p_file_descriptor, off_t p_start, off_t p_length) {
     reattach_callback();
 }
 
+void decoder::open(AAsset* p_asset) {
+    off_t start, length;
+    int fd = AAsset_openFileDescriptor(p_asset, &start, &length);
+    assert(0 <= fd);
+
+    open(fd, start, length);
+}
+
 void decoder::reattach_callback() {
     m_player->on_buffer_update([&] (buffer_player::buffer_iterator p_begin,
                                     buffer_player::buffer_iterator p_end) {
@@ -70,9 +78,8 @@ bool decoder::is_opened() {
     return m_player != nullptr;
 }
 
-std::vector<int16_t> decoder::decode_full(const context& p_context, int p_file_descriptor,
-                                          off_t p_start, off_t p_length) {
+std::vector<int16_t> decoder::decode_full(const context& p_context, AAsset* p_asset) {
     auto dr = decoder(p_context);
-    dr.open(p_file_descriptor, p_start, p_length);
+    dr.open(p_asset);
     return dr.request_more(-1);
 }

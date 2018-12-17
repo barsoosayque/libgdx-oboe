@@ -15,8 +15,6 @@ class audio_engine : protected oboe::AudioStreamCallback {
         AAssetManager* m_asset_manager;
         int8_t m_channels;
 
-        std::tuple<int, off_t, off_t> path_to_fd(std::string_view);
-
         oboe::DataCallbackResult onAudioReady(oboe::AudioStream*, void*, int32_t);
     public:
         /// Opening audio stream with specified number of channels

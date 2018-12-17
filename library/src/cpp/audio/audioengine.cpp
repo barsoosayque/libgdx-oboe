@@ -57,28 +57,12 @@ void audio_engine::stop() {
     check(m_stream->requestStop(), "Error stopping stream: %s");
 }
 
-std::tuple<int, off_t, off_t> audio_engine::path_to_fd(std::string_view p_path) {
-    // use asset manager to open asset by filename
-    AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
-
-    // the asset might not be found
-    if (NULL == asset) {
-        error("Failed loading asset \"%s\".", p_path);
-    }
-
-    // open asset as file descriptor
-    off_t start, length;
-    int fd = AAsset_openFileDescriptor(asset, &start, &length);
-    assert(0 <= fd);
-
-    return std::make_tuple(fd, start, length);
-}
-
 music* audio_engine::new_music(std::string_view p_path) {
-    auto [fd, start, length] = path_to_fd(p_path);
+    AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
+    if (NULL == asset) { error("Failed loading asset \"%s\".", p_path); }
 
     auto music_decoder = opensl::decoder(m_slcontext);
-    music_decoder.open(fd, start, length);
+    music_decoder.open(asset);
 
     auto new_music = new music(std::move(music_decoder), m_channels);
     m_mixer->play_audio(new_music);
@@ -87,9 +71,10 @@ music* audio_engine::new_music(std::string_view p_path) {
 }
 
 soundpool* audio_engine::new_soundpool(std::string_view p_path) {
-    auto [fd, start, length] = path_to_fd(p_path);
+    AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
+    if (NULL == asset) { error("Failed loading asset \"%s\".", p_path); }
 
-    auto pcm = opensl::decoder::decode_full(m_slcontext, fd, start, length);
+    auto pcm = opensl::decoder::decode_full(m_slcontext, asset);
     auto new_soundpool = new soundpool(std::move(pcm), m_channels);
     m_mixer->play_audio(new_soundpool);
 
