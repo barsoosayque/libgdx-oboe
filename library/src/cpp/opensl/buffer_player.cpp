@@ -55,7 +55,11 @@ buffer_player::buffer_player(const context& p_context, SLDataSource p_source)
             auto cend = std::next(cbegin, self->m_queue_buffer.capacity());
             self->m_buffer_callback(cbegin, cend);
         }
-        self->m_queued_buffers--;
+        if(--(self->m_queued_buffers)) {
+            self->enqueue();
+        } else {
+            self->pause();
+        }
     }, this);
 
     (*m_play)->SetCallbackEventsMask(m_play, SL_PLAYEVENT_HEADATEND);
@@ -92,7 +96,7 @@ void buffer_player::stop() {
 }
 
 bool buffer_player::is_working() const {
-    return m_queued_buffers > 0 && !m_playback_over;
+    return m_queued_buffers != 0 && !m_playback_over;
 }
 
 float buffer_player::duration() const {
@@ -117,9 +121,12 @@ void buffer_player::enqueue() {
     m_queue_buffer.clear();
     // capacity * 2: because this argument in 8 bits, but buffer is in 16 bits
     auto result = (*m_queue)->Enqueue(m_queue, m_queue_buffer.data(), m_queue_buffer.capacity() * 2);
-    if(result == SL_RESULT_SUCCESS) {
-        m_queued_buffers++;
-    }
+}
+
+void buffer_player::enqueue(int p_buffers) {
+    m_queued_buffers += p_buffers;
+    enqueue();
+    play();
 }
 
 void buffer_player::resize_buffer(int p_size) {

@@ -27,9 +27,8 @@ namespace opensl {
         private:
             void reattach_callback();
 
-            int m_requested_buffers;
-            std::vector<int16_t> m_merged_buffers;
             const context& m_context;
             std::unique_ptr<buffer_player> m_player;
+            buffer_player::pcm_container m_merged_buffers;
     };
 }

@@ -16,7 +16,8 @@ namespace opensl {
 
             void on_buffer_update(buffer_callback p_callback);
 
-            void enqueue();
+            // pass -1 to enqueue to the EOF
+            void enqueue(int p_buffers);
             void resize_buffer(int p_size);
             int buffer_size();
 
@@ -30,6 +31,8 @@ namespace opensl {
 
             bool is_working() const;
         private:
+            void enqueue();
+
             buffer_callback m_buffer_callback;
             pcm_container m_queue_buffer;
             std::atomic_int m_queued_buffers;
