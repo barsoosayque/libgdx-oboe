@@ -27,9 +27,13 @@ namespace opensl {
 
             float duration() const;
             float position() const;
+
+            // in seconds
             void seek(float p_position);
 
             bool is_working() const;
+
+            float samples_to_seconds(int p_samples);
         private:
             void enqueue();
 

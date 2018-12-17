@@ -100,19 +100,26 @@ bool buffer_player::is_working() const {
 }
 
 float buffer_player::duration() const {
-    return m_duration / 1000.0f;
+    return m_duration * .001f;
 }
 
 float buffer_player::position() const {
     (*m_play)->GetPosition(m_play, &m_position);
-    return m_position;
+    return m_position * .001f;
 }
 
 void buffer_player::seek(float p_position) {
     if(p_position < m_duration) {
         m_playback_over = false;
     }
-    (*m_seek)->SetPosition(m_seek, p_position, SL_SEEKMODE_FAST);
+    (*m_seek)->SetPosition(m_seek, p_position * 1000, SL_SEEKMODE_ACCURATE);
+}
+
+float buffer_player::samples_to_seconds(int p_samples) {
+    // 2 channels
+    // 44100 Hz
+    // 16 bit each
+    return (p_samples * 0.5f) / 44100.0f;
 }
 
 void buffer_player::enqueue() {
