@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-set (MEDIACODEC_DIR dependencies/libmediacodec-wrapper)
-add_subdirectory (${MEDIACODEC_DIR} ./mediacodec-wrapper)
-include_directories (${MEDIACODEC_DIR}/include)
-
 set (OBOE_DIR dependencies/oboe)
 add_subdirectory (${OBOE_DIR} ./oboe)
 include_directories (${OBOE_DIR}/include)
@@ -25,4 +21,4 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/jni/oboemusic.cpp
             ${SRC_DIR}/jni/oboeaudio.cpp)
 
-target_link_libraries(libgdx-oboe android log oboe fmt mediacodec-wrapper OpenSLES)
+target_link_libraries(libgdx-oboe android log oboe fmt OpenSLES)

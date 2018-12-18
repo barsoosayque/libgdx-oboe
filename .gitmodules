@@ -4,6 +4,3 @@
 [submodule "dependencies/fmt"]
 	path = library/dependencies/fmt
 	url = https://github.com/fmtlib/fmt.git
-[submodule "dependencies/libmediacodec-wrapper"]
-	path = library/dependencies/libmediacodec-wrapper
-	url = https://github.com/barsoosayque/libmediacodec-wrapper.git
