@@ -4,3 +4,6 @@
 [submodule "dependencies/fmt"]
 	path = library/dependencies/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "library/dependencies/frozen_string"]
+	path = library/dependencies/frozen_string
+	url = https://github.com/rhysd/FrozenString.git

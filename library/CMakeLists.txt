@@ -4,6 +4,9 @@ set (OBOE_DIR dependencies/oboe)
 add_subdirectory (${OBOE_DIR} ./oboe)
 include_directories (${OBOE_DIR}/include)
 
+set (FROZEN_STRING dependencies/frozen_string)
+include_directories (${FROZEN_STRING})
+
 set (FMT_DIR dependencies/fmt)
 add_subdirectory (${FMT_DIR} ./fmt)
 include_directories (${FMT_DIR}/include)
