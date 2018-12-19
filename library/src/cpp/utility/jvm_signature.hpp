@@ -37,6 +37,8 @@ template <>
 struct jvm_signature_t<jstring> { static constexpr auto value = "Ljava/lang/String;"_fstr; };
 
 // --- Method type ---
+template <>
+struct jvm_params_signature_t<> { static constexpr auto value = ""_fstr; };
 template <class T>
 struct jvm_params_signature_t<T> { static constexpr auto value = jvm_signature_t<T>::value; };
 template <class T, class ... Targs>
