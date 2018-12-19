@@ -29,7 +29,12 @@ class AudioDecoder(fd: AssetFileDescriptor) {
     /** Read more data and decode it.
      * @param samples Amount of new samples to be decoded */
     fun decode(samples: Int): ByteBuffer {
-        return ByteBuffer.allocate(0)
+        return ByteBuffer.allocateDirect(10)
+    }
+
+    /** Read file to EOF and decode it all. */
+    fun decode(): ByteBuffer {
+        return ByteBuffer.allocateDirect(10)
     }
 
     /** Move head of the decoder to the @position (in seconds) */
