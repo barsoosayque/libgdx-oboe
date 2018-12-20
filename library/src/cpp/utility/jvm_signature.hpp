@@ -35,6 +35,10 @@ struct jvm_signature_t<T[]> { static constexpr auto value = "["_fstr + jvm_signa
 // --- JNI types ---
 template <>
 struct jvm_signature_t<jstring> { static constexpr auto value = "Ljava/lang/String;"_fstr; };
+template <>
+struct jvm_signature_t<jbyte> { static constexpr auto value = "B"_fstr; };
+template <>
+struct jvm_signature_t<jbyteArray> { static constexpr auto value = jvm_signature_t<jbyte[]>::value; };
 
 // --- Method type ---
 template <>

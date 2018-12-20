@@ -52,7 +52,7 @@ class jvm_class {
                 return m_context->CallDoubleMethod(p_obj, method, p_args...);
             }
             else {
-                return return_type { m_context->CallObjectMethod(p_obj, method, p_args...) };
+                return static_cast<return_type>(m_context->CallObjectMethod(p_obj, method, p_args...));
             }
         }
     private:

@@ -7,13 +7,13 @@ class jni_context {
             p_env->GetJavaVM(&m_jvm);
         }
 
-        JNIEnv* env() {
+        JNIEnv* env() const {
             JNIEnv* env;
             m_jvm->AttachCurrentThread(&env, NULL);
             return env;
         }
 
-        JNIEnv* operator->() {
+        JNIEnv* operator->() const {
             return env();
         }
     private:
