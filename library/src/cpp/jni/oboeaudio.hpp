@@ -11,7 +11,7 @@ extern "C" {
 OBOEAUDIO_METHOD(void, init) (JNIEnv*, jobject, jobject);
 
 // fun OboeAudio::createSoundpool(): NativeSoundpool
-OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv*, jobject, jstring);
+OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv*, jobject, jobject);
 
 // fun OboeAudio::createMusic(): NativeMusic
 OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv*, jobject, jstring);

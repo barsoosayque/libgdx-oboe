@@ -2,6 +2,7 @@
 #include "../utility/log.hpp"
 #include "../audio/audioengine.hpp"
 #include "../utility/var.hpp"
+#include "../mediacodec/audio_decoder.hpp"
 
 OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self, jobject asset_manager) {
     // set audioEngine in OboeAudio class
@@ -16,10 +17,13 @@ OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jstring path) {
     return reinterpret_cast<jlong>(music);
 }
 
-OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jstring path) {
-    const char *cpp_path = env->GetStringUTFChars(path, NULL);
-    auto soundpool = get_var_as<audio_engine>(env, self, "audioEngine")->new_soundpool(cpp_path);
-    env->ReleaseStringUTFChars(path, cpp_path);
+OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd) {
+    auto decoder = audio_decoder(env, AssetFileDescriptor { fd });
+    auto pcm = decoder.decode();
+    auto soundpool = new class soundpool(std::move(pcm), 2);
+
+    get_var_as<audio_engine>(env, self, "audioEngine")->play(soundpool);
+
     return reinterpret_cast<jlong>(soundpool);
 }
 

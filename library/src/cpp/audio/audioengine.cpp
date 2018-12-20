@@ -57,6 +57,10 @@ void audio_engine::stop() {
     check(m_stream->requestStop(), "Error stopping stream: %s");
 }
 
+void audio_engine::play(renderable_audio* p_audio) {
+    m_mixer->play_audio(p_audio);
+}
+
 music* audio_engine::new_music(std::string_view p_path) {
     AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
     if (NULL == asset) { error("Failed loading asset \"%s\".", p_path); }
@@ -68,15 +72,4 @@ music* audio_engine::new_music(std::string_view p_path) {
     m_mixer->play_audio(new_music);
 
     return new_music;
-}
-
-soundpool* audio_engine::new_soundpool(std::string_view p_path) {
-    AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
-    if (NULL == asset) { error("Failed loading asset \"%s\".", p_path); }
-
-    auto pcm = opensl::decoder::decode_full(m_slcontext, asset);
-    auto new_soundpool = new soundpool(std::move(pcm), m_channels);
-    m_mixer->play_audio(new_soundpool);
-
-    return new_soundpool;
 }

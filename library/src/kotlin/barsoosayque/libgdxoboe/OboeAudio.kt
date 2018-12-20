@@ -1,5 +1,6 @@
 package barsoosayque.libgdxoboe
 
+import android.content.res.AssetFileDescriptor
 import android.content.res.AssetManager
 import com.badlogic.gdx.Audio
 import com.badlogic.gdx.audio.AudioDevice
@@ -13,6 +14,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
 
     init {
         System.loadLibrary("libgdx-oboe")
+        // FIXME delete this
         init(assetManager)
     }
 
@@ -23,7 +25,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
     }
 
     private external fun init(assetManager: AssetManager)
-    private external fun createSoundpool(path: String): NativeSoundpool
+    private external fun createSoundpool(fd: AssetFileDescriptor): NativeSoundpool
     private external fun createMusic(path: String): NativeMusic
 
     external fun resume()
@@ -37,6 +39,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
 
     override fun newSound(file: FileHandle): Sound =
             checkFileFormat(file).path()
+                    .let(assetManager::openFd)
                     .let(::createSoundpool)
                     .let(::OboeSound)
 
