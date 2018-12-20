@@ -14,16 +14,15 @@ class AudioDecoder(fd: AssetFileDescriptor) {
         setDataSource(fd.fileDescriptor, fd.startOffset, fd.declaredLength)
     }
     private val decoder = let {
-        (0 until extractor.trackCount).fold<Int, MediaCodec?>(null) { acc, i ->
-            val mediaFormat = extractor.getTrackFormat(i)
-            val mime = mediaFormat.getString(MediaFormat.KEY_MIME)
-            if (mime.startsWith("audio/") && acc == null) {
-                extractor.selectTrack(i)
-                MediaCodec.createDecoderByType(mime).apply {
-                    configure(mediaFormat, null, null, 0)
-                }
-            } else acc
-        }
+        if (extractor.trackCount > 1) throw IllegalArgumentException("Wrong track count in $fd")
+        val mediaFormat = extractor.getTrackFormat(0)
+        val mime = mediaFormat.getString(MediaFormat.KEY_MIME)
+        if (mime.startsWith("audio/")) {
+            extractor.selectTrack(0)
+            MediaCodec.createDecoderByType(mime).apply {
+                configure(mediaFormat, null, null, 0)
+            }
+        } else null
     } ?: throw IllegalArgumentException("Can't extract audio from \"$fd\".")
 
     /** Read more data and decode it.
