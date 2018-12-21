@@ -6,6 +6,7 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.util.Log
 import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 import kotlin.math.min
 
 
@@ -30,9 +31,10 @@ class AudioDecoder(fd: AssetFileDescriptor) {
         } else null
     } ?: throw IllegalArgumentException("Can't extract audio from \"$fd\".")
     private val info = MediaCodec.BufferInfo()
+    private var cachedBuffer: ByteBuffer? = null
 
     private fun readSampleData(): Boolean? =
-            decoder.dequeueInputBuffer(-1).takeIf { it >= 0 }?.let { bufferIndex ->
+            decoder.dequeueInputBuffer(100).takeIf { it >= 0 }?.let { bufferIndex ->
                 extractor.readSampleData(decoder.inputBuffers[bufferIndex], 0).let { size ->
                     if(size > 0) {
                         decoder.queueInputBuffer(bufferIndex, 0, size, extractor.sampleTime, 0)
@@ -47,20 +49,26 @@ class AudioDecoder(fd: AssetFileDescriptor) {
 
     private fun parseSamples(destination: ByteArrayOutputStream, maximumBytes: Int? = null): Int {
         var bytesProcessed = 0
-        decoder.dequeueOutputBuffer(info, -1).takeIf { it >= 0 }?.also { bufferIndex ->
+        decoder.dequeueOutputBuffer(info, 100).takeIf { it >= 0 }?.also { bufferIndex ->
             when (bufferIndex) {
                 MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED -> Log.d("AudioDecoder", "Buffers changed.")
                 MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> Log.d("AudioDecoder", "Format changed.")
                 MediaCodec.INFO_TRY_AGAIN_LATER -> Log.d("AudioDecoder", "Timeout. Trying again...")
                 else -> {
                     decoder.outputBuffers[bufferIndex].also { buffer ->
-                        Log.d("AudioDecoder", "Actually writing to the stream ${info.size}")
+                        Log.d("AudioDecoder", "Actually writing to the stream ${destination.size()} + ${info.size}")
                         buffer.position(info.offset)
-                        buffer.limit(info.offset + (maximumBytes?.let { min(info.size, it) } ?: info.size))
-                        val tmp = ByteArray(buffer.remaining())
-                        buffer.get(tmp)
-                        destination.write(tmp)
-                        bytesProcessed = tmp.size
+                        buffer.limit(info.offset + info.size)
+                        ByteArray(buffer.remaining()).also { tmp ->
+                            val size = maximumBytes?.let { min(info.size, it) } ?: info.size
+                            buffer.get(tmp)
+                            destination.write(tmp, 0, size)
+                            bytesProcessed = size
+                            if(size < info.size) {
+                                cachedBuffer = ByteBuffer.wrap(tmp)
+                                cachedBuffer?.position(size)
+                            }
+                        }
                     }
                     decoder.releaseOutputBuffer(bufferIndex, false)
                 }
@@ -69,7 +77,6 @@ class AudioDecoder(fd: AssetFileDescriptor) {
 
         return bytesProcessed
     }
-
 
     /** Read more data and decode it.
      * @param samples Amount of new samples to be decoded
@@ -80,6 +87,14 @@ class AudioDecoder(fd: AssetFileDescriptor) {
         var bytesLeft = samples * 2
         var eofExtractor = false
         var eofDecoder = false
+
+        cachedBuffer?.let {
+            Log.d("AudioDecoder", "Last decode leftovers: ${it.remaining()}")
+            bytesLeft -= it.remaining()
+            stream.write(it.array(), it.position(), it.remaining())
+            Log.d("AudioDecoder", "New stream size: ${stream.size()}, bytes left: ${bytesLeft}")
+        }
+        cachedBuffer = null
 
         while (!(eofExtractor && eofDecoder) && bytesLeft != 0) {
             Log.d("AudioDecoder", "Bytes Left: $bytesLeft (eofe $eofExtractor | eofd $eofDecoder)")
@@ -102,6 +117,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
 
     /** Move head of the decoder to the @position (in seconds) */
     fun seek(position: Float) {
+        cachedBuffer = null
         extractor.seekTo((position * 1000).toLong(), MediaExtractor.SEEK_TO_CLOSEST_SYNC)
     }
 
