@@ -1,13 +1,33 @@
 ## Usage
 
-- TODO (Maven packages)
+### Package
 
-Right now, you can only build aar, and then manualy add it to your project.
+- TODO: Maven packages
+
+Build the library and include aar in your project
+
+Right now, you can only build aar, and then manually add it to your project.
+
+### Launcher
 
 Since **Libgdx** does not allow you to inherit from an *AndroidAudio* (and this is the only class that can be overloaded in your Android Launcher) class, the only workaround to it is just to mimic defualt *audio* behaviour.
 
 But you don't have to do that. If your intentions to just utilize the library, then you can use special *OboeAndroidApplication* class instead of the default one:
 
+Java:
+```java
+public class AndroidLauncher extends OboeAndroidApplication {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
+        initialize(new SomeApp(), config);
+    }
+}
+```
+
+Kotlin:
 ```kotlin
 // Note super class.
 class AndroidLauncher : OboeAndroidApplication() {
