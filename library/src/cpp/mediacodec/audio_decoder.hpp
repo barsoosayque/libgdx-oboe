@@ -9,7 +9,6 @@
 class audio_decoder {
     public:
         audio_decoder(jni_context p_context, AssetFileDescriptor p_asset_fd);
-        ~audio_decoder();
 
         std::vector<int16_t> decode(int p_samples);
         std::vector<int16_t> decode();
