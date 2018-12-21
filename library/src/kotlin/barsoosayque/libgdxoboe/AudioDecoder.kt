@@ -25,6 +25,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
             extractor.selectTrack(0)
             MediaCodec.createDecoderByType(mime).apply {
                 configure(mediaFormat, null, null, 0)
+                start()
             }
         } else null
     } ?: throw IllegalArgumentException("Can't extract audio from \"$fd\".")
@@ -80,7 +81,6 @@ class AudioDecoder(fd: AssetFileDescriptor) {
         var eofExtractor = false
         var eofDecoder = false
 
-        decoder.start()
         while (!(eofExtractor && eofDecoder) && bytesLeft != 0) {
             Log.d("AudioDecoder", "Bytes Left: $bytesLeft (eofe $eofExtractor | eofd $eofDecoder)")
             if (!eofExtractor) {
@@ -92,7 +92,6 @@ class AudioDecoder(fd: AssetFileDescriptor) {
                 bytesLeft -= parseSamples(stream, bytesLeft.takeIf { it > 0 })
             }
         }
-        decoder.stop()
 
         Log.d("AudioDecoder", "Stream size: ${stream.size()}")
         return stream.toByteArray()
@@ -108,6 +107,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
 
     /** Release native resources */
     fun dispose() {
+        decoder.stop()
         decoder.release()
         extractor.release()
     }
