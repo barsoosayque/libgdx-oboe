@@ -2,18 +2,16 @@
 #include "jni.h"
 #include "../utility/jvm_signature.hpp"
 #include "jni_context.hpp"
+#include "jvm_object.hpp"
+#include <memory>
 #include <string_view>
 #include <type_traits>
 
 class jvm_class {
     public:
         jvm_class(jni_context p_context, std::string_view p_class_name)
-            : m_class(cache_class(p_context, p_class_name))
-            , m_context(p_context) { }
-
-        ~jvm_class() {
-            m_context->DeleteGlobalRef(m_class);
-        }
+            : m_context(p_context)
+            , m_class(m_context, m_context->FindClass(p_class_name.data())) {}
 
         template <class... Args>
         jobject construct(Args... p_args) {
@@ -60,11 +58,6 @@ class jvm_class {
             }
         }
     private:
-        jclass cache_class(jni_context p_context, std::string_view p_class_name) {
-            auto cls = p_context->FindClass(p_class_name.data());
-            return static_cast<jclass>(p_context->NewGlobalRef(cls));
-        }
-
         jni_context m_context;
-        jclass m_class;
+        jvm_object<jclass> m_class;
 };

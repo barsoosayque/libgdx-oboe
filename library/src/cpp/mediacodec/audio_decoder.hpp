@@ -1,5 +1,6 @@
 #pragma once
 #include "jni.h"
+#include "../jni/jvm_object.hpp"
 #include "../jni/jvm_class.hpp"
 #include "../jni/jvm_definitions.hpp"
 #include <vector>
@@ -17,5 +18,5 @@ class audio_decoder {
     private:
         jni_context m_context;
         jvm_class m_decoder_class;
-        jobject m_decoder_object;
+        jvm_object<jobject> m_decoder_object;
 };
