@@ -24,13 +24,12 @@ class music: public renderable_audio {
 
         bool m_playing;
         int m_cache_size;
+        float m_position;
         int8_t m_channels;
         audio_decoder m_decoder;
-
         std::thread m_decoder_thread;
 
         int32_t m_current_frame;
         std::vector<int16_t> m_main_pcm;
-
         std::vector<int16_t> m_second_pcm;
 };

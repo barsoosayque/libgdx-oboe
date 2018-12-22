@@ -6,7 +6,7 @@
 music::music(audio_decoder&& p_decoder, int8_t p_channels)
     : m_decoder(std::move(p_decoder))
     , m_channels(p_channels)
-    , m_cache_size(16 * 1024 * 2)
+    , m_cache_size(16 * 1024 * p_channels)
     , m_current_frame(0) {
     m_second_pcm.reserve(m_cache_size);
     m_main_pcm.reserve(m_cache_size);
@@ -43,6 +43,7 @@ bool music::is_playing() {
 }
 
 void music::position(float p_position) {
+    m_position = p_position;
     if(m_decoder_thread.joinable()) m_decoder_thread.join();
     m_decoder.seek(p_position);
     fill_second_buffer();
@@ -50,8 +51,7 @@ void music::position(float p_position) {
 }
 
 float music::position() {
-    // FIXME music poistion, not decoder position
-    return 0.0f;
+    return m_position;
 }
 
 void music::render(int16_t* p_stream, int32_t p_frames) {
@@ -75,6 +75,9 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
                 p_stream[frame * m_channels + sample] += *iter;
             }
         }
+
+        // TODO remove hard-coded stuff
+        m_position += p_frames / 44100.0f;
     }
 
     if(perform_swap) {

@@ -41,8 +41,8 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 - [x] `play` method;
 - [x] `pause` method;
 - [x] `stop` method;
-- [ ] `getPosition` method;
-- [ ] `setPosition` method;
+- [x] `getPosition` method;
+- [x] `setPosition` method;
 - [ ] `getVolume` method;
 - [ ] `setVolume` method;
 - [ ] `isLooping` method;
