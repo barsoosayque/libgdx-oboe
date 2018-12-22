@@ -1,6 +1,6 @@
 #pragma once
 #include "jni.h"
-#include "../utility/jvm_signature.hpp"
+#include "jvm_signature.hpp"
 #include "jni_context.hpp"
 #include "jvm_object.hpp"
 #include <memory>
