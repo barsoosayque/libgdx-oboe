@@ -47,10 +47,10 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 - [x] `setVolume` method;
 - [ ] `isLooping` method;
 - [ ] `setLooping` method;
-- [ ] `isPlaying` method;
+- [x] `isPlaying` method;
 - [ ] `setPan` method;
 - [ ] `setOnCompletionListener` method;
-- [ ] `dispose` method.
+- [x] `dispose` method.
 
 *WARN: not marked methods will throw an exception.*
 

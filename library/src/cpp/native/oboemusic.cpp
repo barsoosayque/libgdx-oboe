@@ -4,7 +4,7 @@
 #include "../utility/var.hpp"
 
 OBOEMUSIC_METHOD(bool, isPlaying) (JNIEnv* env, jobject self) {
-
+    return get_var_as<music>(env, self, "music")->is_playing();
 }
 
 OBOEMUSIC_METHOD(bool, isLooping) (JNIEnv* env, jobject self) {
@@ -48,6 +48,6 @@ OBOEMUSIC_METHOD(void, setPosition) (JNIEnv* env, jobject self, jfloat position)
 }
 
 OBOEMUSIC_METHOD(void, dispose) (JNIEnv* env, jobject self) {
-
+    delete get_var_as<music>(env, self, "music");
 }
 
