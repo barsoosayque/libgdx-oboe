@@ -10,15 +10,12 @@ music::music(audio_decoder&& p_decoder, int8_t p_channels)
     , m_current_frame(0) {
     m_second_pcm.reserve(m_cache_size);
     m_main_pcm.reserve(m_cache_size);
-    fill_second_buffer();
-    swap_buffers();
+    stop();
     fill_second_buffer();
 }
 
 void music::fill_second_buffer() {
     auto pcm = m_decoder.decode(m_cache_size);
-
-    debug("requested size: {}, given size: {}", m_cache_size, pcm.size());
     pcm.swap(m_second_pcm);
 }
 
@@ -47,11 +44,12 @@ bool music::is_playing() {
 
 void music::position(float p_position) {
     m_decoder.seek(p_position);
+    fill_second_buffer();
+    swap_buffers();
 }
 
 float music::position() {
     // FIXME music poistion, not decoder position
-//    return m_decoder.position();
     return 0.0f;
 }
 
