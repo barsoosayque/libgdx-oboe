@@ -34,7 +34,7 @@ class jni_context {
 
         JNIEnv* const operator->() const {
             JNIEnv* env;
-            m_jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+            assert(JNI_OK == m_jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6));
             return env;
         }
         scoped_env acquire_thread() const { return scoped_env(m_jvm); }

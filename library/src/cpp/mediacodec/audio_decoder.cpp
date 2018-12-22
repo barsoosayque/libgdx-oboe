@@ -17,13 +17,13 @@ std::vector<int16_t> as_vector(const jni_context& p_context, const jbyteArray p_
 }
 
 std::vector<int16_t> audio_decoder::decode(int p_samples) {
-    m_context.acquire_thread();
+    auto scoped_env = m_context.acquire_thread();
     auto buffer = m_decoder_class.execute_method<jbyteArray(int)>(m_decoder_object, "decode", p_samples);
     return as_vector(m_context, buffer);
 }
 
 std::vector<int16_t> audio_decoder::decode() {
-    m_context.acquire_thread();
+    auto scoped_env = m_context.acquire_thread();
     auto buffer = m_decoder_class.execute_method<jbyteArray()>(m_decoder_object, "decode");
     return as_vector(m_context, buffer);
 }
