@@ -56,7 +56,6 @@ class AudioDecoder(fd: AssetFileDescriptor) {
                 MediaCodec.INFO_TRY_AGAIN_LATER -> Log.d("AudioDecoder", "Timeout. Trying again...")
                 else -> {
                     decoder.outputBuffers[bufferIndex].also { buffer ->
-                        Log.d("AudioDecoder", "Actually writing to the stream ${destination.size()} + ${info.size}")
                         buffer.position(info.offset)
                         buffer.limit(info.offset + info.size)
                         ByteArray(buffer.remaining()).also { tmp ->
@@ -82,22 +81,18 @@ class AudioDecoder(fd: AssetFileDescriptor) {
      * @param samples Amount of new samples to be decoded
      * (negative value to read and decode to eof) */
     fun decode(samples: Int): ByteArray {
-        Log.d("AudioDecoder", "Samples requested: $samples")
         val stream = ByteArrayOutputStream()
         var bytesLeft = samples * 2
         var eofExtractor = false
         var eofDecoder = false
 
         cachedBuffer?.let {
-            Log.d("AudioDecoder", "Last decode leftovers: ${it.remaining()}")
             bytesLeft -= it.remaining()
             stream.write(it.array(), it.position(), it.remaining())
-            Log.d("AudioDecoder", "New stream size: ${stream.size()}, bytes left: ${bytesLeft}")
         }
         cachedBuffer = null
 
         while (!(eofExtractor && eofDecoder) && bytesLeft != 0) {
-            Log.d("AudioDecoder", "Bytes Left: $bytesLeft (eofe $eofExtractor | eofd $eofDecoder)")
             if (!eofExtractor) {
                 eofExtractor = readSampleData() ?: eofExtractor
             }
@@ -108,7 +103,6 @@ class AudioDecoder(fd: AssetFileDescriptor) {
             }
         }
 
-        Log.d("AudioDecoder", "Stream size: ${stream.size()}")
         return stream.toByteArray()
     }
 
@@ -117,7 +111,6 @@ class AudioDecoder(fd: AssetFileDescriptor) {
 
     /** Move head of the decoder to the @position (in seconds) */
     fun seek(position: Float) {
-        Log.d("AudioDecoder", "Performed seek to $position")
         cachedBuffer = null
         extractor.seekTo((position * 1000).toLong(), MediaExtractor.SEEK_TO_CLOSEST_SYNC)
     }
