@@ -60,16 +60,3 @@ void audio_engine::stop() {
 void audio_engine::play(renderable_audio* p_audio) {
     m_mixer->play_audio(p_audio);
 }
-
-music* audio_engine::new_music(std::string_view p_path) {
-    AAsset* asset = AAssetManager_open(m_asset_manager, p_path.data(), AASSET_MODE_UNKNOWN);
-    if (NULL == asset) { error("Failed loading asset \"%s\".", p_path); }
-
-    auto music_decoder = opensl::decoder(m_slcontext);
-    music_decoder.open(asset);
-
-    auto new_music = new music(std::move(music_decoder), m_channels);
-    m_mixer->play_audio(new_music);
-
-    return new_music;
-}

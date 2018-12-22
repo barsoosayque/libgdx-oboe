@@ -26,7 +26,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
 
     private external fun init(assetManager: AssetManager)
     private external fun createSoundpool(fd: AssetFileDescriptor): NativeSoundpool
-    private external fun createMusic(path: String): NativeMusic
+    private external fun createMusic(fd: AssetFileDescriptor): NativeMusic
 
     external fun resume()
     external fun stop()
@@ -34,6 +34,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
 
     override fun newMusic(file: FileHandle): Music =
             checkFileFormat(file).path()
+                    .let(assetManager::openFd)
                     .let(::createMusic)
                     .let(::OboeMusic)
 

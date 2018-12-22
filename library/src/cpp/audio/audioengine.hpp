@@ -30,7 +30,4 @@ class audio_engine : protected oboe::AudioStreamCallback {
         void stop();
 
         void play(renderable_audio* p_audio);
-
-        /// Creates new soundpool which is connected to this
-        music* new_music(std::string_view);
 };

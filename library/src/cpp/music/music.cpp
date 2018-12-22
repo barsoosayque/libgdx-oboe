@@ -3,14 +3,11 @@
 #include <iterator>
 #include <cmath>
 
-music::music(opensl::decoder&& p_decoder, int8_t p_channels)
+music::music(audio_decoder&& p_decoder, int8_t p_channels)
     : m_decoder(std::move(p_decoder))
     , m_channels(p_channels)
     , m_cache_size(16 * 1024 * 2)
     , m_current_frame(0) {
-    if(!m_decoder.is_opened()) {
-        error("Trying to create music with decoder that is not open.");
-    }
     m_second_pcm.reserve(m_cache_size);
     m_main_pcm.reserve(m_cache_size);
     fill_second_buffer();
@@ -19,7 +16,10 @@ music::music(opensl::decoder&& p_decoder, int8_t p_channels)
 }
 
 void music::fill_second_buffer() {
-    m_decoder.request_more(m_cache_size).swap(m_second_pcm);
+    auto pcm = m_decoder.decode(m_cache_size);
+
+    debug("requested size: {}, given size: {}", m_cache_size, pcm.size());
+    pcm.swap(m_second_pcm);
 }
 
 void music::swap_buffers() {
@@ -46,16 +46,13 @@ bool music::is_playing() {
 }
 
 void music::position(float p_position) {
-    m_decoder.position(p_position);
+    m_decoder.seek(p_position);
 }
 
 float music::position() {
     // FIXME music poistion, not decoder position
-    return m_decoder.position();
-}
-
-float music::duration() {
-    return m_decoder.content_duration();
+//    return m_decoder.position();
+    return 0.0f;
 }
 
 void music::render(int16_t* p_stream, int32_t p_frames) {
