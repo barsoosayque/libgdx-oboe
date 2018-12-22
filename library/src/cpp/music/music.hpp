@@ -14,6 +14,9 @@ class music: public renderable_audio {
         void pause();
         void stop();
 
+        void volume(float p_volume);
+        float volume();
+
         void position(float p_position);
         float position();
 
@@ -25,6 +28,7 @@ class music: public renderable_audio {
         bool m_playing;
         int m_cache_size;
         float m_position;
+        float m_volume;
         int8_t m_channels;
         audio_decoder m_decoder;
         std::thread m_decoder_thread;

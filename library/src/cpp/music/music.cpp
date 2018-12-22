@@ -5,6 +5,7 @@
 
 music::music(audio_decoder&& p_decoder, int8_t p_channels)
     : m_decoder(std::move(p_decoder))
+    , m_volume(1.0f)
     , m_channels(p_channels)
     , m_cache_size(16 * 1024 * p_channels)
     , m_current_frame(0) {
@@ -54,6 +55,14 @@ float music::position() {
     return m_position;
 }
 
+void music::volume(float p_volume) {
+    m_volume = std::min(std::max(0.0f, p_volume), 1.0f);
+}
+
+float music::volume() {
+    return m_volume;
+}
+
 void music::render(int16_t* p_stream, int32_t p_frames) {
     int32_t frames_in_pcm = m_cache_size / m_channels;
     bool perform_swap = false;
@@ -72,7 +81,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
                 iter = m_second_pcm.begin();
             }
             for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
-                p_stream[frame * m_channels + sample] += *iter;
+                p_stream[frame * m_channels + sample] += *iter * m_volume;
             }
         }
 

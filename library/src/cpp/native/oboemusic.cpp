@@ -28,7 +28,7 @@ OBOEMUSIC_METHOD(void, setLooping) (JNIEnv* env, jobject self, jfloat) {
 }
 
 OBOEMUSIC_METHOD(jfloat, getVolume) (JNIEnv* env, jobject self) {
-
+    return get_var_as<music>(env, self, "music")->volume();
 }
 
 OBOEMUSIC_METHOD(void, play) (JNIEnv* env, jobject self) {
@@ -39,8 +39,8 @@ OBOEMUSIC_METHOD(void, stop) (JNIEnv* env, jobject self) {
     return get_var_as<music>(env, self, "music")->stop();
 }
 
-OBOEMUSIC_METHOD(void, setVolume) (JNIEnv* env, jobject self, jfloat) {
-
+OBOEMUSIC_METHOD(void, setVolume) (JNIEnv* env, jobject self, jfloat volume) {
+    return get_var_as<music>(env, self, "music")->volume(volume);
 }
 
 OBOEMUSIC_METHOD(void, setPosition) (JNIEnv* env, jobject self, jfloat position) {
