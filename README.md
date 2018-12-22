@@ -38,7 +38,7 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 
 **OboeMusic** class:
 
-- [ ] `play` method;
+- [x] `play` method;
 - [ ] `pause` method;
 - [ ] `stop` method;
 - [ ] `getPosition` method;

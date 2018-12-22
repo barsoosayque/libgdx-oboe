@@ -14,9 +14,6 @@ include_directories (${FMT_DIR}/include)
 set (SRC_DIR src/cpp)
 add_library(libgdx-oboe SHARED
             ${SRC_DIR}/mediacodec/audio_decoder.cpp
-            ${SRC_DIR}/opensl/context.cpp
-            ${SRC_DIR}/opensl/buffer_player.cpp
-            ${SRC_DIR}/audio/decoder.cpp
             ${SRC_DIR}/audio/audioengine.cpp
             ${SRC_DIR}/audio/mixer.cpp
             ${SRC_DIR}/sound/soundpool.cpp

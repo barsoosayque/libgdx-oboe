@@ -1,7 +1,6 @@
 #pragma once
 #include <oboe/Oboe.h>
 #include "mixer.hpp"
-#include "../opensl/context.hpp"
 #include "../sound/soundpool.hpp"
 #include "../music/music.hpp"
 #include <android/asset_manager.h>
@@ -11,7 +10,6 @@ class audio_engine : protected oboe::AudioStreamCallback {
     private:
         std::unique_ptr<oboe::AudioStream> m_stream;
         std::unique_ptr<mixer> m_mixer;
-        opensl::context m_slcontext;
         AAssetManager* m_asset_manager;
         int8_t m_channels;
 
