@@ -29,13 +29,13 @@ class jvm_object {
             public:
                 wrapper(jni_context p_context, T p_obj)
                     : m_context(p_context)
-                    , m_obj(static_cast<T>(p_context.env()->NewGlobalRef(p_obj))) {}
+                    , m_obj(static_cast<T>(p_context->NewGlobalRef(p_obj))) {}
 
                 ~wrapper() {
                     if(m_on_delete) {
                         m_on_delete(m_obj);
                     }
-                    m_context.env()->DeleteGlobalRef(m_obj);
+                    m_context->DeleteGlobalRef(m_obj);
                 }
 
                 std::function<void(T&)> m_on_delete;
