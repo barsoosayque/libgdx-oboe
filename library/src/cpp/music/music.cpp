@@ -43,6 +43,7 @@ bool music::is_playing() {
 }
 
 void music::position(float p_position) {
+    if(m_decoder_thread.joinable()) m_decoder_thread.join();
     m_decoder.seek(p_position);
     fill_second_buffer();
     swap_buffers();

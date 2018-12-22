@@ -117,6 +117,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
 
     /** Move head of the decoder to the @position (in seconds) */
     fun seek(position: Float) {
+        Log.d("AudioDecoder", "Performed seek to $position")
         cachedBuffer = null
         extractor.seekTo((position * 1000).toLong(), MediaExtractor.SEEK_TO_CLOSEST_SYNC)
     }
