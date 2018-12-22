@@ -6,6 +6,7 @@ import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar
+import com.badlogic.gdx.scenes.scene2d.ui.Slider
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import ktx.actors.onChange
 import ktx.actors.onChangeEvent
@@ -18,6 +19,7 @@ class AppUi(
         music: Array<MusicAsset>,
         assetManager: AssetManager
 ) : Stage(ExtendViewport(700f, 480f)) {
+    private lateinit var volumeSlider: Slider
     private lateinit var positionProgressBar: ProgressBar
     private lateinit var positionLabel: Label
     private var selectedAsset: MusicAsset = music.first()
@@ -37,14 +39,24 @@ class AppUi(
                 selectedMusic.stop()
                 selectedAsset = list.selected
                 selectedMusic = selectedAsset.get(assetManager)
+                volumeSlider.value = selectedMusic.volume
             }
             verticalGroup {
+                space(30f)
                 horizontalGroup {
                     space(10f)
                     label("Playback: ")
                     textButton("Play").onChange { selectedMusic.play() }
                     textButton("Pause").onChange { selectedMusic.pause() }
                     textButton("Stop").onChange { selectedMusic.stop() }
+                }
+                horizontalGroup {
+                    space(10f)
+                    label("Volume: ")
+                    volumeSlider = slider {
+                        value = selectedMusic.volume
+                        onChangeEvent { _, slider -> selectedMusic.volume = slider.value }
+                    }
                 }
             }.cell(growX = true)
             row()
