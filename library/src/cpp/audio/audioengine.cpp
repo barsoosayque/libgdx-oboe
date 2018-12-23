@@ -6,10 +6,9 @@
 
 using namespace oboe;
 
-audio_engine::audio_engine(int32_t p_channels, AAssetManager* p_asset_manager)
+audio_engine::audio_engine(int8_t p_channels)
     : AudioStreamCallback()
-    , m_channels(p_channels)
-    , m_asset_manager(p_asset_manager) {
+    , m_channels(p_channels) {
 
     // initialize Oboe audio stream
     AudioStreamBuilder builder;
@@ -21,9 +20,6 @@ audio_engine::audio_engine(int32_t p_channels, AAssetManager* p_asset_manager)
     builder.setSharingMode(SharingMode::Exclusive);
 
     check(builder.openStream(ptrptr(m_stream)), "Error opening stream: %s");
-    debug("Stream channel count: {}", m_stream->getChannelCount());
-    debug("Stream sample rate: {}", m_stream->getSampleRate());
-    debug("Stream format: {} (given: {})", (int)m_stream->getFormat(), (int)AudioFormat::I16);
 
     int m_max_frames = m_stream->getFramesPerBurst() * 2;
     auto result = m_stream->setBufferSizeInFrames(m_max_frames);

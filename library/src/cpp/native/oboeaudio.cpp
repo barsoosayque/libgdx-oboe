@@ -4,10 +4,9 @@
 #include "../utility/var.hpp"
 #include "../mediacodec/audio_decoder.hpp"
 
-OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self, jobject asset_manager) {
+OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
     // set audioEngine in OboeAudio class
-    AAssetManager* mgr = AAssetManager_fromJava(env, asset_manager);
-    set_var_as(env, self, "audioEngine", new audio_engine(2, mgr));
+    set_var_as(env, self, "audioEngine", new audio_engine(2));
 }
 
 OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jobject fd) {

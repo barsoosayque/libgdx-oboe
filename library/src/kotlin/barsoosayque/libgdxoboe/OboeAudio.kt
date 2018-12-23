@@ -14,8 +14,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
 
     init {
         System.loadLibrary("libgdx-oboe")
-        // FIXME delete this
-        init(assetManager)
+        init()
     }
 
     /** @see <a>https://developer.android.com/guide/topics/media/media-formats</a> */
@@ -24,7 +23,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
         else -> throw IllegalArgumentException("Unknown file format (\"$file\"). Only FLAC, MP3, WAV, AAC and OGG is allowed here.")
     }
 
-    private external fun init(assetManager: AssetManager)
+    private external fun init()
     private external fun createSoundpool(fd: AssetFileDescriptor): NativeSoundpool
     private external fun createMusic(fd: AssetFileDescriptor): NativeMusic
 
