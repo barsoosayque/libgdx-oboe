@@ -99,6 +99,9 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
         m_eof = !m_playing;
     }
 
+    // TODO remove hard-coded stuff
+    m_position += max_frames / 44100.0f;
+
     auto iter = std::next(m_main_pcm.begin(), m_current_frame * m_channels);
 
     for(int frame = 0; frame < max_frames; ++frame, ++m_current_frame) {
@@ -113,9 +116,6 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
             p_stream[frame * m_channels + sample] += *iter * m_volume;
         }
     }
-
-    // TODO remove hard-coded stuff
-    m_position += p_frames / 44100.0f;
 
     if(perform_swap) {
         swap_buffers();
