@@ -4,6 +4,7 @@ import barsoosayque.libgdxoboe.music.content.MusicAsset
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar
 import com.badlogic.gdx.scenes.scene2d.ui.Slider
@@ -22,6 +23,7 @@ class AppUi(
     private lateinit var volumeSlider: Slider
     private lateinit var positionProgressBar: ProgressBar
     private lateinit var positionLabel: Label
+    private lateinit var loopingCheck: CheckBox
     private var selectedAsset: MusicAsset = music.first()
     private var selectedMusic: Music = selectedAsset.get(assetManager)
 
@@ -40,9 +42,10 @@ class AppUi(
                 selectedAsset = list.selected
                 selectedMusic = selectedAsset.get(assetManager)
                 volumeSlider.value = selectedMusic.volume
+                loopingCheck.isChecked = selectedMusic.isLooping
             }
             verticalGroup {
-                space(30f)
+                space(20f)
                 horizontalGroup {
                     space(10f)
                     label("Playback: ")
@@ -56,6 +59,12 @@ class AppUi(
                     volumeSlider = slider {
                         value = selectedMusic.volume
                         onChangeEvent { _, slider -> selectedMusic.volume = slider.value }
+                    }
+                }
+                loopingCheck = checkBox("Is looping") {
+                    isChecked = selectedMusic.isLooping
+                    onChange {
+                        selectedMusic.isLooping = isChecked
                     }
                 }
             }.cell(growX = true)
