@@ -14,6 +14,20 @@ And if you ever asked yourself *"Why is my Libgdx app music is so broken ?"*, th
 
 *^ Content of `docs` directory.*
 
+### Quick, show me some code !
+
+Here is how do one essentially "use" this library (code in Kotlin):
+
+```kotlin
+// Note the super class
+class AndroidLauncher : OboeAndroidApplication() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        initialize(AmazingMusicApp(), AndroidApplicationConfiguration())
+    }
+}
+```
+
 ### Progress:
 
 **OboeAudio** class:
