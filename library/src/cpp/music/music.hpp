@@ -20,15 +20,19 @@ class music: public renderable_audio {
         void position(float p_position);
         float position();
 
+        bool is_looping();
+        void is_looping(bool p_loop);
         bool is_playing();
     private:
         void fill_second_buffer();
         void swap_buffers();
 
-        bool m_playing;
+        bool m_playing,
+             m_looping,
+             m_eof;
         int m_cache_size;
-        float m_position;
-        float m_volume;
+        float m_position,
+              m_volume;
         int8_t m_channels;
         audio_decoder m_decoder;
         std::thread m_decoder_thread;

@@ -4,11 +4,9 @@ import android.content.res.AssetFileDescriptor
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
-import android.util.Log
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import kotlin.math.min
-
 
 /** Decoder class which can process audio files to PCM.
  * Uses 16-bit Little-Endian samples.
@@ -30,13 +28,13 @@ class AudioDecoder(fd: AssetFileDescriptor) {
             }
         } else null
     } ?: throw IllegalArgumentException("Can't extract audio from \"$fd\".")
-    private val info = MediaCodec.BufferInfo()
+    private var info = MediaCodec.BufferInfo()
     private var cachedBuffer: ByteBuffer? = null
 
     private fun readSampleData(): Boolean? =
             decoder.dequeueInputBuffer(100).takeIf { it >= 0 }?.let { bufferIndex ->
                 extractor.readSampleData(decoder.inputBuffers[bufferIndex], 0).let { size ->
-                    if(size > 0) {
+                    if (size > 0) {
                         decoder.queueInputBuffer(bufferIndex, 0, size, extractor.sampleTime, 0)
                         extractor.advance()
                         false
@@ -50,32 +48,27 @@ class AudioDecoder(fd: AssetFileDescriptor) {
     private fun parseSamples(destination: ByteArrayOutputStream, maximumBytes: Int? = null): Int {
         var bytesProcessed = 0
         decoder.dequeueOutputBuffer(info, 100).takeIf { it >= 0 }?.also { bufferIndex ->
-            when (bufferIndex) {
-                MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED -> Log.d("AudioDecoder", "Buffers changed.")
-                MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> Log.d("AudioDecoder", "Format changed.")
-                MediaCodec.INFO_TRY_AGAIN_LATER -> Log.d("AudioDecoder", "Timeout. Trying again...")
-                else -> {
-                    decoder.outputBuffers[bufferIndex].also { buffer ->
-                        buffer.position(info.offset)
-                        buffer.limit(info.offset + info.size)
-                        ByteArray(buffer.remaining()).also { tmp ->
-                            val size = maximumBytes?.let { min(info.size, it) } ?: info.size
-                            buffer.get(tmp)
-                            destination.write(tmp, 0, size)
-                            bytesProcessed = size
-                            if(size < info.size) {
-                                cachedBuffer = ByteBuffer.wrap(tmp)
-                                cachedBuffer?.position(size)
-                            }
-                        }
+            decoder.outputBuffers[bufferIndex].also { buffer ->
+                buffer.position(info.offset)
+                buffer.limit(info.offset + info.size)
+                ByteArray(buffer.remaining()).also { tmp ->
+                    val size = maximumBytes?.let { min(info.size, it) } ?: info.size
+                    buffer.get(tmp)
+                    destination.write(tmp, 0, size)
+                    bytesProcessed = size
+                    if (size < info.size) {
+                        cachedBuffer = ByteBuffer.wrap(tmp)
+                        cachedBuffer?.position(size)
                     }
-                    decoder.releaseOutputBuffer(bufferIndex, false)
                 }
             }
+            decoder.releaseOutputBuffer(bufferIndex, false)
         }
 
         return bytesProcessed
     }
+    private val MediaCodec.BufferInfo.isEof: Boolean
+        get() = flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0
 
     /** Read more data and decode it.
      * @param samples Amount of new samples to be decoded
@@ -97,7 +90,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
                 eofExtractor = readSampleData() ?: eofExtractor
             }
 
-            eofDecoder = eofDecoder || info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0
+            eofDecoder = eofDecoder || info.isEof
             if (!eofDecoder) {
                 bytesLeft -= parseSamples(stream, bytesLeft.takeIf { it > 0 })
             }
@@ -109,10 +102,12 @@ class AudioDecoder(fd: AssetFileDescriptor) {
     /** Read file to EOF and decode it all. */
     fun decode(): ByteArray = decode(-1)
 
-    /** Move head of the decoder to the @position (in seconds) */
+    /** Move head of the decoder to the [position] (in seconds) */
     fun seek(position: Float) {
         cachedBuffer = null
         extractor.seekTo((position * 1000).toLong(), MediaExtractor.SEEK_TO_CLOSEST_SYNC)
+        info = MediaCodec.BufferInfo()
+        decoder.flush()
     }
 
     /** Release native resources */
@@ -121,4 +116,5 @@ class AudioDecoder(fd: AssetFileDescriptor) {
         decoder.release()
         extractor.release()
     }
+
 }

@@ -13,6 +13,7 @@ std::vector<int16_t> as_vector(const jni_context& p_context, const jbyteArray p_
     if (length > 0) {
         v.insert(v.end(), std::make_move_iterator(pointer), std::make_move_iterator(pointer + length / 2)) ;
     }
+    p_context->ReleaseByteArrayElements(p_array, reinterpret_cast<jbyte*>(pointer), JNI_ABORT);
     return v;
 }
 
@@ -29,5 +30,6 @@ std::vector<int16_t> audio_decoder::decode() {
 }
 
 void audio_decoder::seek(float p_seconds) {
+    auto scoped_env = m_context.acquire_thread();
     m_decoder_class.execute_method<void(float)>(m_decoder_object, "seek", p_seconds);
 }

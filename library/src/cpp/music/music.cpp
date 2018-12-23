@@ -5,6 +5,7 @@
 
 music::music(audio_decoder&& p_decoder, int8_t p_channels)
     : m_decoder(std::move(p_decoder))
+    , m_looping(false)
     , m_volume(1.0f)
     , m_channels(p_channels)
     , m_cache_size(16 * 1024 * p_channels)
@@ -12,7 +13,6 @@ music::music(audio_decoder&& p_decoder, int8_t p_channels)
     m_second_pcm.reserve(m_cache_size);
     m_main_pcm.reserve(m_cache_size);
     stop();
-    fill_second_buffer();
 }
 
 void music::fill_second_buffer() {
@@ -26,6 +26,7 @@ void music::swap_buffers() {
 }
 
 void music::play() {
+    if(m_eof) stop();
     m_playing = true;
 }
 
@@ -35,8 +36,9 @@ void music::pause() {
 
 void music::stop() {
     m_playing = false;
-    position(0.0f);
+    m_eof = false;
     m_current_frame = 0;
+    position(0.0f);
 }
 
 bool music::is_playing() {
@@ -44,11 +46,12 @@ bool music::is_playing() {
 }
 
 void music::position(float p_position) {
-    m_position = p_position;
     if(m_decoder_thread.joinable()) m_decoder_thread.join();
+    m_position = p_position;
     m_decoder.seek(p_position);
     fill_second_buffer();
     swap_buffers();
+    fill_second_buffer();
 }
 
 float music::position() {
@@ -63,31 +66,56 @@ float music::volume() {
     return m_volume;
 }
 
+bool music::is_looping() {
+    return m_looping;
+}
+
+void music::is_looping(bool p_loop) {
+    m_looping = p_loop;
+}
+
 void music::render(int16_t* p_stream, int32_t p_frames) {
-    int32_t frames_in_pcm = m_cache_size / m_channels;
+    if(!m_playing) return;
+
+    int32_t frames_in_pcm = m_main_pcm.size() / m_channels;
     bool perform_swap = false;
+    bool last_buffer = false;
 
     if((m_current_frame + p_frames) >= frames_in_pcm) {
         if(m_decoder_thread.joinable()) m_decoder_thread.join();
+        if(m_second_pcm.size() < m_cache_size) {
+            last_buffer = true;
+            if(m_looping) {
+                m_decoder.seek(0.0f);
+            }
+        }
         perform_swap = true;
     }
 
-    if(m_playing) {
-        auto iter = std::next(m_main_pcm.begin(), m_current_frame * m_channels);
+    int32_t max_frames = p_frames;
+    if(!m_looping && last_buffer) {
+        max_frames = std::min(max_frames, frames_in_pcm - m_current_frame);
+        m_playing = max_frames >= p_frames;
+        m_eof = !m_playing;
+    }
 
-        for(int frame = 0; frame < p_frames; ++frame, ++m_current_frame) {
-            if(m_current_frame >= frames_in_pcm) {
-                m_current_frame = 0;
-                iter = m_second_pcm.begin();
-            }
-            for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
-                p_stream[frame * m_channels + sample] += *iter * m_volume;
+    auto iter = std::next(m_main_pcm.begin(), m_current_frame * m_channels);
+
+    for(int frame = 0; frame < max_frames; ++frame, ++m_current_frame) {
+        if(m_current_frame >= frames_in_pcm) {
+            m_current_frame = 0;
+            iter = m_second_pcm.begin();
+            if(last_buffer) {
+                m_position = 0.0f;
             }
         }
-
-        // TODO remove hard-coded stuff
-        m_position += p_frames / 44100.0f;
+        for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
+            p_stream[frame * m_channels + sample] += *iter * m_volume;
+        }
     }
+
+    // TODO remove hard-coded stuff
+    m_position += p_frames / 44100.0f;
 
     if(perform_swap) {
         swap_buffers();
