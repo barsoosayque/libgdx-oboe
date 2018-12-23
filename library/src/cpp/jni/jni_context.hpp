@@ -4,6 +4,7 @@
 class jni_context {
     public:
         jni_context(JNIEnv* p_env) { p_env->GetJavaVM(&m_jvm); }
+        jni_context(JavaVM* p_jvm) : m_jvm(p_jvm) { }
 
         // RAII JNIEnv* for multi-threading
         class scoped_env {

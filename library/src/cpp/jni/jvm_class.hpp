@@ -13,6 +13,10 @@ class jvm_class {
             : m_context(p_context)
             , m_class(m_context, p_context->FindClass(p_class_name.data())) {}
 
+        jvm_class(jni_context p_context, jclass p_class)
+            : m_context(p_context)
+            , m_class(m_context, p_class) {}
+
         template <class... Args>
         jobject construct(Args... p_args) {
             auto constructor = find_method<void(Args...)>("<init>");
