@@ -1,6 +1,7 @@
 package barsoosayque.libgdxoboe.music.app
 
 import barsoosayque.libgdxoboe.music.content.MusicAsset
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -43,6 +44,10 @@ class AppUi(
                 selectedMusic = selectedAsset.get(assetManager)
                 volumeSlider.value = selectedMusic.volume
                 loopingCheck.isChecked = selectedMusic.isLooping
+
+                selectedMusic.setOnCompletionListener {
+                    Gdx.app.log("Music", "Is done")
+                }
             }
             verticalGroup {
                 space(20f)
