@@ -74,6 +74,10 @@ void music::is_looping(bool p_loop) {
     m_looping = p_loop;
 }
 
+void music::on_complete(std::function<void()> p_callback) {
+    m_on_complete = p_callback;
+}
+
 void music::render(int16_t* p_stream, int32_t p_frames) {
     if(!m_playing) return;
 
@@ -99,9 +103,6 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
         m_eof = !m_playing;
     }
 
-    // TODO remove hard-coded stuff
-    m_position += max_frames / 44100.0f;
-
     auto iter = std::next(m_main_pcm.begin(), m_current_frame * m_channels);
 
     for(int frame = 0; frame < max_frames; ++frame, ++m_current_frame) {
@@ -109,7 +110,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
             m_current_frame = 0;
             iter = m_second_pcm.begin();
             if(last_buffer) {
-                m_position = 0.0f;
+                m_position = -frame;
             }
         }
         for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
@@ -123,6 +124,13 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
             m_current_frame -= frames_in_pcm;
         }
         m_decoder_thread = std::thread(&music::fill_second_buffer, this);
+    }
+
+    // TODO remove hard-coded stuff
+    m_position += max_frames / 44100.0f;
+
+    if (!m_playing && m_on_complete) {
+        m_on_complete();
     }
 }
 

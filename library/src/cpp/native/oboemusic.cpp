@@ -2,6 +2,29 @@
 #include "../audio/audioengine.hpp"
 #include "../music/music.hpp"
 #include "../utility/var.hpp"
+#include "../jni/jvm_class.hpp"
+
+OBOEMUSIC_METHOD(void, setCompletionCallback) (JNIEnv* env, jobject self, jobject callback) {
+    JavaVM* jvm;
+    env->GetJavaVM(&jvm);
+
+    auto old_callback = get_var_as<_jobject>(env, self, "onComplete");
+    if (old_callback != NULL) {
+        env->DeleteGlobalRef(old_callback) ;
+    }
+
+    auto new_callback = env->NewGlobalRef(callback);
+    set_var_as(env, self, "onComplete", new_callback);
+
+    auto instance = get_var_as<music>(env, self, "music");
+    instance->on_complete([new_callback, jvm] {
+        auto context = jni_context(jvm);
+        auto scoped_env = context.acquire_thread();
+
+        auto callback_class = jvm_class(context, scoped_env->GetObjectClass(new_callback));
+        callback_class.execute_method<void()>(new_callback, "invoke");
+    });
+}
 
 OBOEMUSIC_METHOD(bool, isPlaying) (JNIEnv* env, jobject self) {
     return get_var_as<music>(env, self, "music")->is_playing();
@@ -49,5 +72,6 @@ OBOEMUSIC_METHOD(void, setPosition) (JNIEnv* env, jobject self, jfloat position)
 
 OBOEMUSIC_METHOD(void, dispose) (JNIEnv* env, jobject self) {
     delete get_var_as<music>(env, self, "music");
+    delete get_var_as<jobject>(env, self, "onComplete");
 }
 

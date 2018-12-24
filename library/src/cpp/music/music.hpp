@@ -23,6 +23,8 @@ class music: public renderable_audio {
         bool is_looping();
         void is_looping(bool p_loop);
         bool is_playing();
+
+        void on_complete(std::function<void()> p_callback);
     private:
         void fill_second_buffer();
         void swap_buffers();
@@ -33,6 +35,7 @@ class music: public renderable_audio {
         int m_cache_size;
         float m_position,
               m_volume;
+        std::function<void()> m_on_complete;
         int8_t m_channels;
         audio_decoder m_decoder;
         std::thread m_decoder_thread;

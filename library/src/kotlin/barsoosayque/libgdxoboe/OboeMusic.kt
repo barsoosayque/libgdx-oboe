@@ -2,11 +2,9 @@ package barsoosayque.libgdxoboe
 
 import com.badlogic.gdx.audio.Music
 
-class OboeMusic(private val music: NativeMusic): Music {
-    private var onComplete: Music.OnCompletionListener? = null
-    private fun complete() {
-        onComplete?.onCompletion(this)
-    }
+class OboeMusic(private val music: NativeMusic) : Music {
+    private var onComplete: NativeCallback = NativeCallback(0)
+    private external fun setCompletionCallback(callback: () -> Unit)
 
     external override fun isPlaying(): Boolean
     external override fun isLooping(): Boolean
@@ -22,6 +20,6 @@ class OboeMusic(private val music: NativeMusic): Music {
     external override fun dispose()
 
     override fun setOnCompletionListener(listener: Music.OnCompletionListener?) {
-        onComplete = listener
+        setCompletionCallback { listener?.onCompletion(this) }
     }
 }

@@ -63,7 +63,7 @@ class AndroidLauncher : OboeAndroidApplication() {
 - [x] `setLooping` method;
 - [x] `isPlaying` method;
 - [ ] `setPan` method;
-- [ ] `setOnCompletionListener` method;
+- [x] `setOnCompletionListener` method;
 - [x] `dispose` method.
 
 *WARN: not marked methods will throw an exception.*
