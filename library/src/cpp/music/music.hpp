@@ -1,6 +1,7 @@
 #pragma once
 #include "../mediacodec/audio_decoder.hpp"
 #include "../audio/renderableaudio.hpp"
+#include "../audio/pan_effect.hpp"
 #include <thread>
 
 class music: public renderable_audio {
@@ -17,6 +18,8 @@ class music: public renderable_audio {
         void volume(float p_volume);
         float volume();
 
+        void pan(float p_pan);
+
         void position(float p_position);
         float position();
 
@@ -29,6 +32,7 @@ class music: public renderable_audio {
         void fill_second_buffer();
         void swap_buffers();
 
+        pan_effect m_pan;
         bool m_playing,
              m_looping,
              m_eof;

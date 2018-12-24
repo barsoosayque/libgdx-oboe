@@ -6,6 +6,7 @@
 music::music(audio_decoder&& p_decoder, int8_t p_channels)
     : m_decoder(std::move(p_decoder))
     , m_looping(false)
+    , m_pan(0.0f)
     , m_volume(1.0f)
     , m_channels(p_channels)
     , m_cache_size(16 * 1024 * p_channels)
@@ -78,6 +79,10 @@ void music::on_complete(std::function<void()> p_callback) {
     m_on_complete = p_callback;
 }
 
+void music::pan(float p_pan) {
+    m_pan.pan(p_pan);
+}
+
 void music::render(int16_t* p_stream, int32_t p_frames) {
     if(!m_playing) return;
 
@@ -114,7 +119,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
             }
         }
         for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
-            p_stream[frame * m_channels + sample] += *iter * m_volume;
+            p_stream[frame * m_channels + sample] += *iter * m_volume * m_pan.modulation(sample);
         }
     }
 

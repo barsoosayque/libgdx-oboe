@@ -38,8 +38,10 @@ OBOEMUSIC_METHOD(void, pause) (JNIEnv* env, jobject self) {
     return get_var_as<music>(env, self, "music")->pause();
 }
 
-OBOEMUSIC_METHOD(void, setPan) (JNIEnv* env, jobject self, jfloat, jfloat) {
-
+OBOEMUSIC_METHOD(void, setPan) (JNIEnv* env, jobject self, jfloat pan, jfloat volume) {
+    auto instance = get_var_as<music>(env, self, "music");
+    instance->pan(pan);
+    instance->volume(volume);
 }
 
 OBOEMUSIC_METHOD(jfloat, getPosition) (JNIEnv* env, jobject self) {
