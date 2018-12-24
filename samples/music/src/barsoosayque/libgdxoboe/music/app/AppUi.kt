@@ -22,6 +22,7 @@ class AppUi(
         assetManager: AssetManager
 ) : Stage(ExtendViewport(700f, 480f)) {
     private lateinit var volumeSlider: Slider
+    private lateinit var panSlider: Slider
     private lateinit var positionProgressBar: ProgressBar
     private lateinit var positionLabel: Label
     private lateinit var loopingCheck: CheckBox
@@ -43,6 +44,7 @@ class AppUi(
                 selectedAsset = list.selected
                 selectedMusic = selectedAsset.get(assetManager)
                 volumeSlider.value = selectedMusic.volume
+                panSlider.value = 0.0f
                 loopingCheck.isChecked = selectedMusic.isLooping
 
                 selectedMusic.setOnCompletionListener {
@@ -64,6 +66,14 @@ class AppUi(
                     volumeSlider = slider {
                         value = selectedMusic.volume
                         onChangeEvent { _, slider -> selectedMusic.volume = slider.value }
+                    }
+                }
+                horizontalGroup {
+                    space(10f)
+                    label("Pan: ")
+                    panSlider = slider(-1f) {
+                        value = 0.0f
+                        onChangeEvent { _, slider -> selectedMusic.setPan(slider.value, volumeSlider.value) }
                     }
                 }
                 loopingCheck = checkBox("Is looping") {
