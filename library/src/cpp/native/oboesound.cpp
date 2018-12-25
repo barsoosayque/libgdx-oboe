@@ -54,3 +54,20 @@ OBOESOUND_METHOD(void, dispose) (JNIEnv* env, jobject self) {
     delete get_var_as<soundpool>(env, self, "soundpool");
 }
 
+OBOESOUND_METHOD(void, setPitch) (JNIEnv* env, jobject self, jlong id, jfloat pitch) {
+    get_var_as<soundpool>(env, self, "soundpool")->speed(id, pitch);
+}
+
+OBOESOUND_METHOD(void, setPan) (JNIEnv* env, jobject self, jlong id, jfloat pan, jfloat volume) {
+    auto instance = get_var_as<soundpool>(env, self, "soundpool");
+    instance->pan(id, pan);
+    instance->volume(id, volume);
+}
+
+OBOESOUND_METHOD(void, play) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
+    get_var_as<soundpool>(env, self, "soundpool")->play(volume, pan, pitch, false);
+}
+
+OBOESOUND_METHOD(void, loop) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
+    get_var_as<soundpool>(env, self, "soundpool")->play(volume, pan, pitch, true);
+}

@@ -18,20 +18,20 @@ void soundpool::do_by_id(long p_id, std::function<void(soundpool::sound&)> p_cal
     }
 }
 
-soundpool::sound soundpool::gen_sound(float p_volume, bool p_loop) {
+soundpool::sound soundpool::gen_sound(float p_volume, float p_pan, float p_speed, bool p_loop) {
     return sound {
         .m_volume = p_volume,
         .m_id = ++m_last_id,
         .m_paused = false,
         .m_looping = p_loop,
-        .m_speed = 1.0f,
+        .m_speed = p_speed,
         .m_cur_frame = 0,
-        .m_pan = pan_effect(0.0f)
+        .m_pan = pan_effect(p_pan)
     };
 }
 
-long soundpool::play(float p_volume, bool p_loop) {
-    m_sounds.push_front(gen_sound(p_volume, p_loop));
+long soundpool::play(float p_volume, float p_pan, float p_speed, bool p_loop) {
+    m_sounds.push_front(gen_sound(p_volume, p_pan, p_speed, p_loop));
     return m_sounds.front().m_id;
 }
 

@@ -16,9 +16,8 @@ class OboeSound(private val soundpool: NativeSoundpool) : Sound {
     external override fun loop(): Long
     external override fun loop(volume: Float): Long
     external override fun setLooping(soundId: Long, looping: Boolean)
-
-    override fun setPitch(soundId: Long, pitch: Float) { TODO() }
-    override fun setPan(soundId: Long, pan: Float, volume: Float) { TODO() }
-    override fun play(volume: Float, pitch: Float, pan: Float): Long { TODO() }
-    override fun loop(volume: Float, pitch: Float, pan: Float): Long { TODO() }
+    external override fun setPitch(soundId: Long, pitch: Float)
+    external override fun setPan(soundId: Long, pan: Float, volume: Float)
+    external override fun play(volume: Float, pitch: Float, pan: Float): Long
+    external override fun loop(volume: Float, pitch: Float, pan: Float): Long
 }

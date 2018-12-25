@@ -39,16 +39,16 @@ class AndroidLauncher : OboeAndroidApplication() {
 
 **OboeSound** class:
 
-- [x] `play` methods (except pan and pitch);
-- [x] `loop` methods (except pan and pitch);
+- [x] `play` methods;
+- [x] `loop` methods;
 - [x] `pause` methods;
 - [x] `resume` methods;
 - [x] `stop` methods;
 - [x] `dispose` method;
 - [x] `setLooping` method;
 - [x] `setVolume` method;
-- [ ] `setPitch` method;
-- [ ] `setPan` method.
+- [x] `setPitch` method;
+- [x] `setPan` method.
 
 **OboeMusic** class:
 

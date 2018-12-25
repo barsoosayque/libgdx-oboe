@@ -12,7 +12,10 @@ class soundpool: public renderable_audio {
         void render(int16_t* p_stream, int32_t p_frames);
         bool is_done() const;
 
-        long play(float p_volume = 1.0f, bool p_loop = false);
+        long play(float p_volume = 1.0f,
+                  float p_pan = 0.0f,
+                  float p_speed = 1.0f,
+                  bool p_loop = false);
 
         void pause();
         void pause(long p_id);
@@ -37,7 +40,7 @@ class soundpool: public renderable_audio {
             bool m_looping;
             pan_effect m_pan;
         };
-        sound gen_sound(float p_volume = 1.0f, bool p_loop = false);
+        sound gen_sound(float p_volume, float p_pan, float p_speed, bool p_loop);
         void do_by_id(long, std::function<void(soundpool::sound&)>);
         std::list<sound> m_sounds;
         long m_last_id;
