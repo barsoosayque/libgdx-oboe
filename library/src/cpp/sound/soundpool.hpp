@@ -22,11 +22,13 @@ class soundpool: public renderable_audio {
         void resume();
         void resume(long p_id);
 
+        void speed(long p_id, float p_speed);
         void volume(long p_id, float p_volume);
         void looping(long p_id, bool p_loop);
     private:
         struct sound {
             float m_volume;
+            float m_speed;
             long m_id;
             bool m_paused;
             bool m_looping;

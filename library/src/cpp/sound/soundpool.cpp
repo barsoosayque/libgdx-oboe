@@ -24,6 +24,7 @@ soundpool::sound soundpool::gen_sound(float p_volume, bool p_loop) {
         .m_id = ++m_last_id,
         .m_paused = false,
         .m_looping = p_loop,
+        .m_speed = 1.0f,
         .m_cur_frame = 0
     };
 }
@@ -71,15 +72,29 @@ void soundpool::looping(long p_id, bool p_loop) {
     do_by_id(p_id, [p_loop](sound& p_sound) { p_sound.m_looping = p_loop; });
 }
 
+void soundpool::speed(long p_id, float p_speed) {
+    do_by_id(p_id, [p_loop](sound& p_sound) { p_sound.m_speed = std::max(std::min(p_speed, 2.0f), 0.5f); });
+}
+
 void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) {
     m_sounds.remove_if([&](sound& p_sound) {
         if(!p_sound.m_paused) {
             auto iter = std::next(m_pcm.begin(), p_sound.m_cur_frame * m_channels);
             const int size = std::min(p_num_frames, m_frames - p_sound.m_cur_frame);
+            p_sound.m_cur_frame += size * p_sound.m_speed;
 
-            for(int frame = 0; frame < size; ++frame, ++p_sound.m_cur_frame) {
+            float speed_step = std::log2(p_sound.m_speed),
+                  step_acc = 0.0f;
+
+            for(int frame = 0; frame < size; ++frame) {
                 for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
                     p_audio_data[frame * m_channels + sample] += *iter * p_sound.m_volume;
+                }
+
+                step_acc += p_sound.m_speed;
+                if (int count = std::floor(step_acc)) {
+                    step_acc -= count;
+                    std::advance(iter, speed_step * m_channels);
                 }
             }
         }
