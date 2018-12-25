@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import ktx.actors.onChange
 import ktx.actors.onChangeEvent
 import ktx.scene2d.*
+import kotlin.math.pow
 import com.badlogic.gdx.utils.Array as GdxArray
 
 class AppUi(
@@ -18,7 +19,11 @@ class AppUi(
 ) : Stage(ExtendViewport(480f, 700f)) {
     private lateinit var loopCheckBox: CheckBox
     private lateinit var volumeSlider: Slider
+    private lateinit var panSlider: Slider
+    private lateinit var pitchSlider: Slider
     private val volume: Float get() = volumeSlider.value
+    private val pan: Float get() = panSlider.value
+    private val pitch: Float get() = 2f.pow(pitchSlider.value)
     private val isLooping: Boolean get() = loopCheckBox.isChecked
 
     private var selectedSound: Sound = sounds.first().get(assetManager)
@@ -44,7 +49,8 @@ class AppUi(
                 horizontalGroup {
                     space(10f)
                     textButton("Play").onChange {
-                        if(isLooping) selectedSound.loop(volume) else selectedSound.play(volume)
+                        if (isLooping) selectedSound.loop(volume, pitch, pan)
+                        else selectedSound.play(volume, pitch, pan)
                     }
                     textButton("Resume").onChange { selectedSound.resume() }
                     textButton("Pause").onChange { selectedSound.pause() }
@@ -52,12 +58,16 @@ class AppUi(
                 }
                 row()
                 label("Volume: ")
-                horizontalGroup {
-                    volumeSlider = slider { value = 1.0f }
-                }
+                volumeSlider = slider { value = 1.0f }
                 row()
                 label("Loop: ")
                 loopCheckBox = checkBox("is looping")
+                row()
+                label("Pan: ")
+                panSlider = slider(-1f) { value = 0.0f }
+                row()
+                label("Pitch: ")
+                pitchSlider = slider(-1f) { value = 0.0f }
             }
         }.cell(grow = true)
     }.let(::addActor)
