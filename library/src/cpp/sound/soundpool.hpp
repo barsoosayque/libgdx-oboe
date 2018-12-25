@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <list>
+#include "../audio/pan_effect.hpp"
 #include "../audio/renderableaudio.hpp"
 #include <functional>
 
@@ -22,17 +23,19 @@ class soundpool: public renderable_audio {
         void resume();
         void resume(long p_id);
 
+        void pan(long p_id, float p_pan);
         void speed(long p_id, float p_speed);
         void volume(long p_id, float p_volume);
         void looping(long p_id, bool p_loop);
     private:
         struct sound {
-            float m_volume;
-            float m_speed;
-            long m_id;
-            bool m_paused;
-            bool m_looping;
             int32_t m_cur_frame;
+            bool m_paused;
+            long m_id;
+            float m_speed;
+            float m_volume;
+            bool m_looping;
+            pan_effect m_pan;
         };
         sound gen_sound(float p_volume = 1.0f, bool p_loop = false);
         void do_by_id(long, std::function<void(soundpool::sound&)>);
