@@ -11,6 +11,10 @@ set (FMT_DIR dependencies/fmt)
 add_subdirectory (${FMT_DIR} ./fmt)
 include_directories (${FMT_DIR}/include)
 
+set (SAMPLERATE dependencies/libsamplerate)
+add_subdirectory (${SAMPLERATE} ./samplerate)
+include_directories (${SAMPLERATE}/include)
+
 set (SRC_DIR src/cpp)
 add_library(libgdx-oboe SHARED
             ${SRC_DIR}/mediacodec/audio_decoder.cpp
@@ -22,4 +26,4 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/native/oboemusic.cpp
             ${SRC_DIR}/native/oboeaudio.cpp)
 
-target_link_libraries(libgdx-oboe android log oboe fmt OpenSLES)
+target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES)

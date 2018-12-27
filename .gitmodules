@@ -7,3 +7,6 @@
 [submodule "library/dependencies/frozen_string"]
 	path = library/dependencies/frozen_string
 	url = https://github.com/rhysd/FrozenString.git
+[submodule "library/dependencies/libsamplerate"]
+	path = library/dependencies/libsamplerate
+	url = https://github.com/erikd/libsamplerate.git
