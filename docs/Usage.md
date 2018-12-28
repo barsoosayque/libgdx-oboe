@@ -2,11 +2,22 @@
 
 ### Package
 
-- TODO: Maven packages
+You can use *jcenter* repository to find this library and use it as a dependency:
 
-Build the library and include aar in your project
+```groovy
+ext {
+    libgdxoboe_version = "0.1.0"    
+}
 
-Right now, you can only build aar, and then manually add it to your project.
+repositories {
+    jcenter()
+    ...
+}
+
+dependencies {
+    implementation "com.gitlab.barsoosayque:libgdxoboe:$libgdxoboe_version"
+}
+```
 
 ### Launcher
 
