@@ -9,7 +9,7 @@
 class soundpool: public renderable_audio {
     public:
         using data = std::vector<int16_t>;
-        soundpool(const data&& p_pcm, int8_t p_channels);
+        soundpool(const data& p_pcm, int8_t p_channels);
         void render(int16_t* p_stream, int32_t p_frames);
         bool is_done() const;
 
@@ -48,5 +48,5 @@ class soundpool: public renderable_audio {
 
         int32_t m_frames;
         int8_t m_channels;
-        std::vector<int16_t> m_pcm;
+        std::vector<float> m_pcm;
 };

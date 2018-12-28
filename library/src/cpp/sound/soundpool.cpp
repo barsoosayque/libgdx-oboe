@@ -1,12 +1,13 @@
 #include "soundpool.hpp"
 #include <iterator>
 #include <algorithm>
+#include "../samplerate/pcmtypes.hpp"
 #include "../utility/log.hpp"
 
-soundpool::soundpool(const data&& p_pcm, int8_t p_channels)
+soundpool::soundpool(const data& p_pcm, int8_t p_channels)
     : m_channels(p_channels)
     , m_frames(p_pcm.size() / p_channels)
-    , m_pcm(std::move(p_pcm))
+    , m_pcm(std::move(to_float(p_pcm)))
     , m_last_id(0) { }
 
 void soundpool::do_by_id(long p_id, std::function<void(soundpool::sound&)> p_callback) {

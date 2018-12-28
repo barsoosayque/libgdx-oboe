@@ -21,8 +21,8 @@ class resampler {
         void ratio(float p_ratio);
         float ratio();
 
-        std::vector<int16_t> process(std::vector<int16_t>::iterator p_begin,
-                                     std::vector<int16_t>::iterator p_end,
+        std::vector<int16_t> process(std::vector<float>::iterator p_begin,
+                                     std::vector<float>::iterator p_end,
                                      bool p_last = false);
 
     private:
@@ -34,5 +34,5 @@ class resampler {
         converter m_converter;
         int8_t m_channels;
 
-        std::vector<float> float_buf, float_out;
+        std::vector<float> float_out;
 };
