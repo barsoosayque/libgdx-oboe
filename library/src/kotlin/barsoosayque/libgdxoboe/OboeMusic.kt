@@ -1,7 +1,9 @@
 package barsoosayque.libgdxoboe
 
+import android.media.MediaCodec
 import com.badlogic.gdx.audio.Music
 
+/** [Music] implementation using [MediaCodec] and oboe stream. */
 class OboeMusic(private val music: NativeMusic) : Music {
     private var onComplete: NativeCallback = NativeCallback(0)
     private external fun setCompletionCallback(callback: () -> Unit)

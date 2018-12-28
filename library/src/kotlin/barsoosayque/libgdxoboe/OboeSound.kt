@@ -2,6 +2,7 @@ package barsoosayque.libgdxoboe
 
 import com.badlogic.gdx.audio.Sound
 
+/** [Sound] implementation using native soundpool and oboe stream. */
 class OboeSound(private val soundpool: NativeSoundpool) : Sound {
     external override fun pause()
     external override fun pause(soundId: Long)

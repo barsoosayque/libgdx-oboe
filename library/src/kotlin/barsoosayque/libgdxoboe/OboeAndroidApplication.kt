@@ -5,6 +5,8 @@ import com.badlogic.gdx.Audio
 import com.badlogic.gdx.LifecycleListener
 import com.badlogic.gdx.backends.android.AndroidApplication
 
+/** Utility class which mimics behaviour of default [audio] in [AndroidApplication],
+ * but does this with a custom [OboeAudio]. */
 open class OboeAndroidApplication : AndroidApplication() {
     private var focusWasChanged: Boolean = true
     private var resumeAudio: Boolean = true
