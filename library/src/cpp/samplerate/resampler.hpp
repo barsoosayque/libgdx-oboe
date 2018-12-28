@@ -33,4 +33,6 @@ class resampler {
         int m_error;
         converter m_converter;
         int8_t m_channels;
+
+        std::vector<float> float_buf, float_out;
 };

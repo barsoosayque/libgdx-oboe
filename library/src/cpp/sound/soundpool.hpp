@@ -3,6 +3,7 @@
 #include <list>
 #include "../audio/pan_effect.hpp"
 #include "../audio/renderableaudio.hpp"
+#include "../samplerate/resampler.hpp"
 #include <functional>
 
 class soundpool: public renderable_audio {
@@ -35,10 +36,10 @@ class soundpool: public renderable_audio {
             int32_t m_cur_frame;
             bool m_paused;
             long m_id;
-            float m_speed;
             float m_volume;
             bool m_looping;
             pan_effect m_pan;
+            resampler m_resampler;
         };
         sound gen_sound(float p_volume, float p_pan, float p_speed, bool p_loop);
         void do_by_id(long, std::function<void(soundpool::sound&)>);

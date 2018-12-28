@@ -24,14 +24,14 @@ soundpool::sound soundpool::gen_sound(float p_volume, float p_pan, float p_speed
         .m_id = ++m_last_id,
         .m_paused = false,
         .m_looping = p_loop,
-        .m_speed = p_speed,
         .m_cur_frame = 0,
-        .m_pan = pan_effect(p_pan)
+        .m_pan = pan_effect(p_pan),
+        .m_resampler = resampler(resampler::converter::sinc_low, m_channels, 1.f / std::max(std::min(p_speed, 2.0f), 0.5f))
     };
 }
 
 long soundpool::play(float p_volume, float p_pan, float p_speed, bool p_loop) {
-    m_sounds.push_front(gen_sound(p_volume, p_pan, p_speed, p_loop));
+    m_sounds.insert(m_sounds.begin(), std::move(gen_sound(p_volume, p_pan, p_speed, p_loop)));
     return m_sounds.front().m_id;
 }
 
@@ -74,7 +74,10 @@ void soundpool::looping(long p_id, bool p_loop) {
 }
 
 void soundpool::speed(long p_id, float p_speed) {
-    do_by_id(p_id, [p_speed](sound& p_sound) { p_sound.m_speed = std::max(std::min(p_speed, 2.0f), 0.5f); });
+    do_by_id(p_id, [p_speed](sound& p_sound) {
+        auto speed = std::max(std::min(p_speed, 2.0f), 0.5f);
+        p_sound.m_resampler.ratio(1.f / speed);
+    });
 }
 
 void soundpool::pan(long p_id, float p_pan) {
@@ -86,22 +89,17 @@ void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) {
         if(!p_sound.m_paused) {
             auto iter = std::next(m_pcm.begin(), p_sound.m_cur_frame * m_channels);
             const int size = std::min(p_num_frames, m_frames - p_sound.m_cur_frame);
-            p_sound.m_cur_frame += size * p_sound.m_speed;
+            const int source_frames = std::ceil(size / p_sound.m_resampler.ratio()) * m_channels;
 
-            float speed_step = std::log2(p_sound.m_speed),
-                  step_acc = 0.0f;
+            auto converted = p_sound.m_resampler.process(iter, std::next(iter, source_frames), size < p_num_frames);
 
-            for(int frame = 0; frame < size; ++frame) {
-                for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
-                    p_audio_data[frame * m_channels + sample] += *iter * p_sound.m_volume * p_sound.m_pan.modulation(sample);
-                }
-
-                step_acc += p_sound.m_speed;
-                if (int count = std::floor(step_acc)) {
-                    step_acc -= count;
-                    std::advance(iter, speed_step * m_channels);
-                }
+            int i = 0;
+            for (const int16_t& pcm : converted) {
+                p_audio_data[i] += pcm * p_sound.m_volume * p_sound.m_pan.modulation(i % m_channels);
+                i++;
             }
+
+            p_sound.m_cur_frame += source_frames / m_channels;
         }
 
         if(p_sound.m_cur_frame >= m_frames && p_sound.m_looping) {

@@ -52,8 +52,8 @@ std::vector<int16_t> resampler::process(std::vector<int16_t>::iterator p_begin,
                                         std::vector<int16_t>::iterator p_end,
                                         bool p_last) {
     int len = std::distance(p_begin, p_end);
-    std::vector<float> float_buf(len),
-                       float_out(std::ceil(len * m_data->src_ratio));
+    float_buf.reserve(len);
+    float_out.reserve(std::ceil(len * m_data->src_ratio));
 
     src_short_to_float_array(&(*p_begin), float_buf.data(), len);
 
@@ -68,7 +68,7 @@ std::vector<int16_t> resampler::process(std::vector<int16_t>::iterator p_begin,
 
     std::vector<int16_t> out(m_data->output_frames_gen * m_channels);
     src_float_to_short_array(float_out.data(), out.data(), out.capacity());
-
     out.resize(out.capacity());
+
     return out;
 }
