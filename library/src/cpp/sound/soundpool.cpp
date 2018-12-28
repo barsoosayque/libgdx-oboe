@@ -27,7 +27,7 @@ soundpool::sound soundpool::gen_sound(float p_volume, float p_pan, float p_speed
         .m_looping = p_loop,
         .m_cur_frame = 0,
         .m_pan = pan_effect(p_pan),
-        .m_resampler = resampler(resampler::converter::sinc_low, m_channels, 1.f / std::max(std::min(p_speed, 2.0f), 0.5f))
+        .m_resampler = resampler(resampler::converter::zero_order_hold, m_channels, 1.f / std::max(std::min(p_speed, 2.0f), 0.5f))
     };
 }
 
