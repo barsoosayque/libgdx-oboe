@@ -1,5 +1,43 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath 'org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.17'
+    }
+}
+
+ext {
+    bintrayRepo = 'gitlab'
+    bintrayName = 'libgdx-oboe'
+
+    publishedGroupId = 'com.gitlab.barsoosayque'
+    libraryName = 'Libgdx Oboe'
+    artifact = 'libgdxoboe'
+
+    libraryDescription = 'Libgdx audio replacement for Android (API 16+) built on top of Oboe.'
+
+    siteUrl = 'https://gitlab.com/barsoosayque/libgdx-oboe'
+    gitUrl = 'https://gitlab.com/barsoosayque/libgdx-oboe.git'
+
+    libraryVersion = '0.0.0'
+
+    developerId = 'barsoosayque'
+    developerName = 'barsoosayque'
+    developerEmail = 'shtoshich@gmail.com'
+
+    licenseName = 'The MIT License'
+    licenseUrl = 'https://opensource.org/licenses/MIT'
+    allLicenses = ["MIT"]
+}
+
 apply plugin: "com.android.library"
+apply plugin: "com.github.dcendents.android-maven"
+apply plugin: "com.jfrog.bintray"
 apply plugin: "kotlin-android"
+apply plugin: 'org.jetbrains.dokka-android'
 
 configurations { natives }
 sourceCompatibility = 1.6
@@ -9,7 +47,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 }
 
-//noinspection GroovyAssignabilityCheck
 android {
     buildToolsVersion "28.0.3"
     compileSdkVersion 28
@@ -42,4 +79,10 @@ android {
             version "3.7.1"
         }
     }
+    dokka {
+        outputFormat = 'javadoc'
+        outputDirectory = "$buildDir/javadoc"
+    }
 }
+
+apply from: 'bintray.gradle'
