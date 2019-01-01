@@ -12,10 +12,6 @@ void mixer::play_audio(renderable_audio* p_track) {
     m_tracks.emplace_back(p_track);
 }
 
-bool mixer::is_done() const {
-    return m_tracks.empty();
-}
-
 void mixer::render(int16_t* p_audio_data, int32_t p_num_frames) {
     for (int j = 0; j < p_num_frames * m_channels; ++j) {
             p_audio_data[j] = 0;

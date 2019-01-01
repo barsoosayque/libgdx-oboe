@@ -11,7 +11,6 @@ class soundpool: public renderable_audio {
         using data = std::vector<int16_t>;
         soundpool(const data& p_pcm, int8_t p_channels);
         void render(int16_t* p_stream, int32_t p_frames);
-        bool is_done() const;
 
         long play(float p_volume = 1.0f,
                   float p_pan = 0.0f,

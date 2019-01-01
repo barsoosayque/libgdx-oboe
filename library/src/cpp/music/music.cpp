@@ -138,8 +138,3 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
         m_on_complete();
     }
 }
-
-bool music::is_done() const {
-    // TODO seems like a hack
-    return false;
-}

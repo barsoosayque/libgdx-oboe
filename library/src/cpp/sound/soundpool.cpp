@@ -110,8 +110,3 @@ void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) {
     });
 }
 
-bool soundpool::is_done() const {
-    // TODO is this super wrong ?
-    return false;
-}
-

@@ -9,7 +9,6 @@ class music: public renderable_audio {
         music(audio_decoder&& p_decoder, int8_t p_channels);
 
         void render(int16_t* p_stream, int32_t p_frames);
-        bool is_done() const;
 
         void play();
         void pause();

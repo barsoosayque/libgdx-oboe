@@ -13,7 +13,6 @@ class mixer: renderable_audio {
         void play_audio(renderable_audio&);
         void play_audio(renderable_audio*);
         void render(int16_t*, int32_t);
-        bool is_done() const;
 
     private:
         const int8_t m_channels;
