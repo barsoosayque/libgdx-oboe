@@ -11,21 +11,23 @@ OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
 
 OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jobject fd) {
     auto decoder = audio_decoder(env, AssetFileDescriptor { fd });
-    auto music = new class music(std::move(decoder), 2);
+    auto ptr = new std::shared_ptr<music>();
+    *ptr = std::make_shared<music>(std::move(decoder), 2);
 
-    get_var_as<audio_engine>(env, self, "audioEngine")->play(music);
+    get_var_as<audio_engine>(env, self, "audioEngine")->play(*ptr);
 
-    return reinterpret_cast<jlong>(music);
+    return reinterpret_cast<jlong>(ptr);
 }
 
 OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd) {
     auto decoder = audio_decoder(env, AssetFileDescriptor { fd });
     auto pcm = decoder.decode();
-    auto soundpool = new class soundpool(std::move(pcm), 2);
+    auto ptr = new std::shared_ptr<soundpool>();
+    *ptr = std::make_shared<soundpool>(std::move(pcm), 2);
 
-    get_var_as<audio_engine>(env, self, "audioEngine")->play(soundpool);
+    get_var_as<audio_engine>(env, self, "audioEngine")->play(*ptr);
 
-    return reinterpret_cast<jlong>(soundpool);
+    return reinterpret_cast<jlong>(ptr);
 }
 
 OBOEAUDIO_METHOD(void, dispose) (JNIEnv* env, jobject self) {

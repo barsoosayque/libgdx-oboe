@@ -24,5 +24,5 @@ class audio_engine : protected oboe::AudioStreamCallback {
         /// Request audio stream to stop streaming audio data
         void stop();
 
-        void play(renderable_audio* p_audio);
+        void play(std::shared_ptr<renderable_audio> p_audio);
 };

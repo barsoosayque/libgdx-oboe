@@ -52,6 +52,6 @@ void audio_engine::stop() {
     check(m_stream->requestStop(), "Error stopping stream: %s");
 }
 
-void audio_engine::play(renderable_audio* p_audio) {
+void audio_engine::play(std::shared_ptr<renderable_audio> p_audio) {
     m_mixer->play_audio(p_audio);
 }
