@@ -46,8 +46,12 @@ class AppUi(val assetManager: AssetManager) : Stage(ExtendViewport(480f, 700f)) 
                 container {
                     width(100f).height(50f)
                     textButton("Unload").onChange {
-                        SoundAsset.values().forEach { asset -> assetManager.unload(asset.path) }
-                        MusicAsset.values().forEach { asset -> assetManager.unload(asset.path) }
+                        SoundAsset.values().forEach { asset ->
+                            if (assetManager.isLoaded(asset.path)) assetManager.unload(asset.path)
+                        }
+                        MusicAsset.values().forEach { asset ->
+                            if (assetManager.isLoaded(asset.path)) assetManager.unload(asset.path)
+                        }
                         recacheList = true
                     }
                 }
