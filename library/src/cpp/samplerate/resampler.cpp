@@ -28,6 +28,11 @@ resampler::resampler(const resampler& p_instance)
     ratio(p_instance.m_data->src_ratio);
 }
 
+resampler::~resampler() {
+    src_delete(m_state);
+    delete m_data;
+}
+
 float resampler::ratio() {
     return static_cast<float>(m_data->src_ratio);
 }
@@ -41,11 +46,6 @@ void resampler::check_error() {
 
 void resampler::ratio(float p_ratio) {
     m_data->src_ratio = p_ratio;
-}
-
-resampler::~resampler() {
-    src_delete(m_state);
-    delete m_data;
 }
 
 std::vector<int16_t> resampler::process(std::vector<float>::iterator p_begin,

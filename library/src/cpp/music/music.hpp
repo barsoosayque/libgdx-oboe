@@ -6,7 +6,7 @@
 
 class music: public renderable_audio {
     public:
-        music(audio_decoder&& p_decoder, int8_t p_channels);
+        music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels);
 
         void render(int16_t* p_stream, int32_t p_frames);
 
@@ -40,10 +40,11 @@ class music: public renderable_audio {
               m_volume;
         std::function<void()> m_on_complete;
         int8_t m_channels;
-        audio_decoder m_decoder;
-        std::thread m_decoder_thread;
+        std::shared_ptr<audio_decoder> m_decoder;
 
         int32_t m_current_frame;
         std::vector<int16_t> m_main_pcm;
         std::vector<int16_t> m_second_pcm;
+
+        std::thread m_decoder_thread;
 };

@@ -51,7 +51,7 @@ OBOESOUND_METHOD(void, setVolume) (JNIEnv* env, jobject self, jlong id, jfloat v
 }
 
 OBOESOUND_METHOD(void, dispose) (JNIEnv* env, jobject self) {
-    shared_ptr_var<soundpool>(env, self, "soundpool").reset();
+    delete get_var_as<std::shared_ptr<soundpool>>(env, self, "soundpool");
 }
 
 OBOESOUND_METHOD(void, setPitch) (JNIEnv* env, jobject self, jlong id, jfloat pitch) {

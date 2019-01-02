@@ -2,9 +2,12 @@
 
 audio_decoder::audio_decoder(jni_context p_context, AssetFileDescriptor p_asset_fd)
     : m_context(p_context)
-    , m_decoder_class(m_context, "barsoosayque/libgdxoboe/AudioDecoder")
-    , m_decoder_object(m_context, m_decoder_class.construct(p_asset_fd),
-                        [=](auto p_obj) { m_decoder_class.execute_method<void()>(p_obj, "dispose"); }) { }
+    , m_decoder_class(p_context, "barsoosayque/libgdxoboe/AudioDecoder")
+    , m_decoder_object(p_context, m_decoder_class.construct(p_asset_fd)) { }
+
+audio_decoder::~audio_decoder() {
+    m_decoder_class.execute_method<void()>(m_decoder_object, "dispose");
+}
 
 std::vector<int16_t> as_vector(const jni_context& p_context, const jbyteArray p_array) {
     int length = p_context->GetArrayLength(p_array);
@@ -14,6 +17,7 @@ std::vector<int16_t> as_vector(const jni_context& p_context, const jbyteArray p_
         v.insert(v.end(), std::make_move_iterator(pointer), std::make_move_iterator(pointer + length / 2)) ;
     }
     p_context->ReleaseByteArrayElements(p_array, reinterpret_cast<jbyte*>(pointer), JNI_ABORT);
+    p_context->DeleteLocalRef(p_array);
     return v;
 }
 

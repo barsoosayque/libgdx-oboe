@@ -73,7 +73,7 @@ OBOEMUSIC_METHOD(void, setPosition) (JNIEnv* env, jobject self, jfloat position)
 }
 
 OBOEMUSIC_METHOD(void, dispose) (JNIEnv* env, jobject self) {
-    shared_ptr_var<music>(env, self, "music").reset();
+    delete get_var_as<std::shared_ptr<music>>(env, self, "music");
     delete get_var_as<jobject>(env, self, "onComplete");
 }
 

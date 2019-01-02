@@ -1,5 +1,4 @@
 #include "oboeaudio.hpp"
-#include "../utility/log.hpp"
 #include "../audio/audioengine.hpp"
 #include "../utility/var.hpp"
 #include "../mediacodec/audio_decoder.hpp"
@@ -10,9 +9,9 @@ OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
 }
 
 OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jobject fd) {
-    auto decoder = audio_decoder(env, AssetFileDescriptor { fd });
+    auto decoder = std::make_shared<audio_decoder>(jni_context(env), AssetFileDescriptor { fd });
     auto ptr = new std::shared_ptr<music>();
-    *ptr = std::make_shared<music>(std::move(decoder), 2);
+    *ptr = std::make_shared<music>(decoder, 2);
 
     get_var_as<audio_engine>(env, self, "audioEngine")->play(*ptr);
 
@@ -20,7 +19,7 @@ OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jobject fd) {
 }
 
 OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd) {
-    auto decoder = audio_decoder(env, AssetFileDescriptor { fd });
+    auto decoder = audio_decoder(jni_context(env), AssetFileDescriptor { fd });
     auto pcm = decoder.decode();
     auto ptr = new std::shared_ptr<soundpool>();
     *ptr = std::make_shared<soundpool>(std::move(pcm), 2);

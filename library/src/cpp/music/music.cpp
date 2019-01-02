@@ -1,10 +1,9 @@
 #include "music.hpp"
-#include "../utility/log.hpp"
 #include <iterator>
 #include <cmath>
 
-music::music(audio_decoder&& p_decoder, int8_t p_channels)
-    : m_decoder(std::move(p_decoder))
+music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
+    : m_decoder(p_decoder)
     , m_looping(false)
     , m_pan(0.0f)
     , m_volume(1.0f)
@@ -17,7 +16,7 @@ music::music(audio_decoder&& p_decoder, int8_t p_channels)
 }
 
 void music::fill_second_buffer() {
-    auto pcm = m_decoder.decode(m_cache_size);
+    auto pcm = m_decoder->decode(m_cache_size);
     pcm.swap(m_second_pcm);
 }
 
@@ -49,7 +48,7 @@ bool music::is_playing() {
 void music::position(float p_position) {
     if(m_decoder_thread.joinable()) m_decoder_thread.join();
     m_position = p_position;
-    m_decoder.seek(p_position);
+    m_decoder->seek(p_position);
     fill_second_buffer();
     swap_buffers();
     fill_second_buffer();
@@ -95,7 +94,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
         if(m_second_pcm.size() < m_cache_size) {
             last_buffer = true;
             if(m_looping) {
-                m_decoder.seek(0.0f);
+                m_decoder->seek(0.0f);
             }
         }
         perform_swap = true;

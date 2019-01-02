@@ -9,11 +9,11 @@
 
 class jvm_class {
     public:
-        jvm_class(jni_context p_context, std::string_view p_class_name)
+        jvm_class(jni_context& p_context, std::string_view p_class_name)
             : m_context(p_context)
             , m_class(m_context, p_context->FindClass(p_class_name.data())) {}
 
-        jvm_class(jni_context p_context, jclass p_class)
+        jvm_class(jni_context& p_context, jclass p_class)
             : m_context(p_context)
             , m_class(m_context, p_class) {}
 
