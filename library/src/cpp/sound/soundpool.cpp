@@ -5,10 +5,10 @@
 #include "../utility/log.hpp"
 
 soundpool::soundpool(const data& p_pcm, int8_t p_channels)
-    : m_channels(p_channels)
+    : m_last_id(0)
     , m_frames(p_pcm.size() / p_channels)
-    , m_pcm(std::move(to_float(p_pcm)))
-    , m_last_id(0) { }
+    , m_channels(p_channels)
+    , m_pcm(to_float(p_pcm)) { }
 
 void soundpool::do_by_id(long p_id, std::function<void(soundpool::sound&)> p_callback) {
     auto iter = std::find_if(m_sounds.begin(), m_sounds.end(), [p_id](const soundpool::sound& p_sound) {
@@ -32,7 +32,7 @@ soundpool::sound soundpool::gen_sound(float p_volume, float p_pan, float p_speed
 }
 
 long soundpool::play(float p_volume, float p_pan, float p_speed, bool p_loop) {
-    m_sounds.insert(m_sounds.begin(), std::move(gen_sound(p_volume, p_pan, p_speed, p_loop)));
+    m_sounds.insert(m_sounds.begin(), gen_sound(p_volume, p_pan, p_speed, p_loop));
     return m_sounds.front().m_id;
 }
 

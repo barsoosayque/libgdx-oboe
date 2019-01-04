@@ -3,12 +3,12 @@
 #include <cmath>
 
 music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
-    : m_decoder(p_decoder)
+    : m_pan(0.0f)
     , m_looping(false)
-    , m_pan(0.0f)
+    , m_cache_size(16 * 1024 * p_channels)
     , m_volume(1.0f)
     , m_channels(p_channels)
-    , m_cache_size(16 * 1024 * p_channels)
+    , m_decoder(p_decoder)
     , m_current_frame(0) {
     m_second_pcm.reserve(m_cache_size);
     m_main_pcm.reserve(m_cache_size);

@@ -2,8 +2,8 @@
 #include <algorithm>
 
 mixer::mixer(int32_t p_buffer_size, int8_t p_channels)
-    : m_buffer(p_buffer_size)
-    , m_channels(p_channels) { }
+    : m_channels(p_channels)
+    , m_buffer(p_buffer_size) { }
 
 void mixer::play_audio(std::shared_ptr<renderable_audio> p_track) {
     m_tracks.emplace_back(p_track);
