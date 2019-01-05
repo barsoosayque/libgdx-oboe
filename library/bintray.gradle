@@ -40,7 +40,7 @@ task javadocJar(type: Jar, dependsOn: dokka) {
 }
 
 artifacts {
-    "$buildDir/outputs/aar/${project.name}-release.aar"
+    "$buildDir/outputs/aar/${project.name}-debug.aar"
     archives javadocJar
 }
 
