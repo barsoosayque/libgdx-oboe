@@ -15,6 +15,12 @@ music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
     stop();
 }
 
+music::~music() {
+    if(m_decoder_thread.joinable()) {
+        m_decoder_thread.join();
+    }
+}
+
 void music::fill_second_buffer() {
     auto pcm = m_decoder->decode(m_cache_size);
     pcm.swap(m_second_pcm);

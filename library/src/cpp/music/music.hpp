@@ -7,6 +7,7 @@
 class music: public renderable_audio {
     public:
         music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels);
+        ~music();
 
         void render(int16_t* p_stream, int32_t p_frames);
 
