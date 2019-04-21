@@ -4,6 +4,7 @@ import android.content.res.AssetFileDescriptor
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import com.badlogic.gdx.utils.GdxRuntimeException
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import kotlin.math.min
@@ -17,7 +18,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
         fd.close()
     }
     private val decoder = let {
-        if (extractor.trackCount > 1) throw IllegalArgumentException("Wrong track count in $fd")
+        if (extractor.trackCount > 1) throw GdxRuntimeException("Wrong track count in $fd")
         val mediaFormat = extractor.getTrackFormat(0)
         val mime = mediaFormat.getString(MediaFormat.KEY_MIME)
         if (mime.startsWith("audio/")) {
@@ -27,7 +28,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
                 start()
             }
         } else null
-    } ?: throw IllegalArgumentException("Can't extract audio from \"$fd\".")
+    } ?: throw GdxRuntimeException("Can't extract audio from \"$fd\".")
     private var info = MediaCodec.BufferInfo()
     private var cachedBuffer: ByteBuffer? = null
 
