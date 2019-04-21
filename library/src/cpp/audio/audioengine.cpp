@@ -59,3 +59,7 @@ void audio_engine::play(std::shared_ptr<renderable_audio> p_audio) {
 bool audio_engine::is_mono() {
     return m_channels == 1;
 }
+
+void audio_engine::volume(float p_volume) {
+    m_mixer->m_volume = std::max(std::min(p_volume, 1.0f), 0.0f);
+}

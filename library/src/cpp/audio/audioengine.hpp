@@ -28,4 +28,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
 
         /// Return if this stream has 1 channel
         bool is_mono();
+
+        /// Set volume of the mixer
+        void volume(float);
 };

@@ -6,8 +6,8 @@ OBOEAUDIODEVICE_METHOD(jint, getLatency) (JNIEnv* env, jobject self) {
 
 }
 
-OBOEAUDIODEVICE_METHOD(void, setVolume) (JNIEnv* env, jobject self, jfloat) {
-
+OBOEAUDIODEVICE_METHOD(void, setVolume) (JNIEnv* env, jobject self, jfloat volume) {
+    shared_ptr_var<audio_engine>(env, self, "audioEngine")->volume(volume);
 }
 
 OBOEAUDIODEVICE_METHOD(void, writeSamples) (JNIEnv* env, jobject self, jshortArray, jint, jint) {

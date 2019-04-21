@@ -13,6 +13,7 @@ class mixer: renderable_audio {
         void play_audio(std::shared_ptr<renderable_audio>);
         void render(int16_t*, int32_t);
 
+        float m_volume;
     private:
         const int8_t m_channels;
         mutable std::vector<int16_t> m_buffer;
