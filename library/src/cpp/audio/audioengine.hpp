@@ -12,8 +12,8 @@ class audio_engine : protected oboe::AudioStreamCallback {
 
         oboe::DataCallbackResult onAudioReady(oboe::AudioStream*, void*, int32_t);
     public:
-        /// Opening audio stream with specified number of channels
-        audio_engine(int8_t);
+        /// Opening audio stream with specified number of channels and sample rate
+        audio_engine(int8_t = 2, int16_t = 44100);
 
         /// Closing audio stream
         ~audio_engine();

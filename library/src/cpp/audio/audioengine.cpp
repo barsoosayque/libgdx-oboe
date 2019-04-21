@@ -6,14 +6,14 @@
 
 using namespace oboe;
 
-audio_engine::audio_engine(int8_t p_channels)
+audio_engine::audio_engine(int8_t p_channels, int16_t p_sample_rate)
     : AudioStreamCallback()
     , m_channels(p_channels) {
 
     // initialize Oboe audio stream
     AudioStreamBuilder builder;
     builder.setChannelCount(m_channels);
-    builder.setSampleRate(44100);
+    builder.setSampleRate(p_sample_rate);
     builder.setCallback(this);
     builder.setFormat(AudioFormat::I16);
     builder.setPerformanceMode(PerformanceMode::LowLatency);

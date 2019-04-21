@@ -4,7 +4,7 @@
 #include "../mediacodec/audio_decoder.hpp"
 
 OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
-    // set audioEngine in OboeAudio class
+    // set default audioEngine in OboeAudio class
     set_var_as(env, self, "audioEngine", new audio_engine(2));
 }
 
@@ -29,8 +29,11 @@ OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd)
     return reinterpret_cast<jlong>(ptr);
 }
 
-OBOEAUDIO_METHOD(jlong, createAudioDevice) (JNIEnv*, jobject, jint, bool) {
+OBOEAUDIO_METHOD(jlong, createAudioDevice) (JNIEnv* env, jobject self, jint sample_rate, bool mono) {
+    auto ptr = new std::shared_ptr<audio_engine>();
+    *ptr = std::make_shared<audio_engine>(mono ? 1 : 2, sample_rate);
 
+    return reinterpret_cast<jlong>(ptr);
 }
 
 OBOEAUDIO_METHOD(void, dispose) (JNIEnv* env, jobject self) {
