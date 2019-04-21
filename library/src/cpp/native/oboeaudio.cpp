@@ -29,6 +29,10 @@ OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd)
     return reinterpret_cast<jlong>(ptr);
 }
 
+OBOEAUDIO_METHOD(jlong, createAudioDevice) (JNIEnv*, jobject, jint, bool) {
+
+}
+
 OBOEAUDIO_METHOD(void, dispose) (JNIEnv* env, jobject self) {
     delete get_var_as<audio_engine>(env, self, "audioEngine");
 }
