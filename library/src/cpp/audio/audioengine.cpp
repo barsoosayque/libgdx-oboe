@@ -6,7 +6,7 @@
 
 using namespace oboe;
 
-audio_engine::audio_engine(int8_t p_channels, int16_t p_sample_rate)
+audio_engine::audio_engine(int8_t p_channels, int32_t p_sample_rate)
     : AudioStreamCallback()
     , m_channels(p_channels) {
 
@@ -54,4 +54,8 @@ void audio_engine::stop() {
 
 void audio_engine::play(std::shared_ptr<renderable_audio> p_audio) {
     m_mixer->play_audio(p_audio);
+}
+
+bool audio_engine::is_mono() {
+    return m_channels == 1;
 }

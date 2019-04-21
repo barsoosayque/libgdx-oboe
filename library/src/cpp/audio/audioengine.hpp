@@ -13,7 +13,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
         oboe::DataCallbackResult onAudioReady(oboe::AudioStream*, void*, int32_t);
     public:
         /// Opening audio stream with specified number of channels and sample rate
-        audio_engine(int8_t = 2, int16_t = 44100);
+        audio_engine(int8_t = 2, int32_t = 44100);
 
         /// Closing audio stream
         ~audio_engine();
@@ -25,4 +25,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
         void stop();
 
         void play(std::shared_ptr<renderable_audio> p_audio);
+
+        /// Return if this stream has 1 channel
+        bool is_mono();
 };
