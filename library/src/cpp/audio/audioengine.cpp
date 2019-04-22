@@ -12,7 +12,7 @@ using namespace oboe;
 audio_engine::audio_engine(int8_t p_channels, int32_t p_sample_rate)
     : AudioStreamCallback()
     , m_channels(p_channels)
-    , m_mode(mode::stream)
+    , m_mode(mode::mix)
     , m_volume(1) {
 
     // initialize Oboe audio stream
@@ -48,11 +48,21 @@ DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_d
             m_mixer->render(stream, p_num_frames);
         break;
         case mode::stream:
-            int32_t size = std::min(p_num_frames * m_channels, static_cast<int32_t>(m_pcm_buffer.size()));
-            for (int i = 0; i < size; ++i) {
-                stream[i] = m_pcm_buffer[i] * m_volume;
+            int32_t num_samples = p_num_frames * m_channels;
+            if(!m_pcm_buffer.empty()) {
+                int32_t size = std::min(num_samples, static_cast<int32_t>(m_pcm_buffer.size()));
+                for (int i = 0; i < size; ++i) {
+                    stream[i] = m_pcm_buffer[i] * m_volume;
+                }
+                for (int i = 0; i < (num_samples - size); ++i) {
+                    stream[size + i] = 0;
+                }
+                m_pcm_buffer.erase(m_pcm_buffer.begin(), m_pcm_buffer.begin() + size);
+            } else {
+                for (int i = 0; i < num_samples; ++i) {
+                    stream[i] = 0;
+                }
             }
-            m_pcm_buffer.erase(m_pcm_buffer.begin(), std::next(m_pcm_buffer.begin(), size));
         break;
     }
 
@@ -74,12 +84,12 @@ void audio_engine::play(std::shared_ptr<renderable_audio> p_audio) {
 
 void audio_engine::play(const std::vector<int16_t>& p_pcm) {
     m_mode = mode::stream;
-    std::move(p_pcm.cbegin(), p_pcm.cend(), m_pcm_buffer.end());
+    std::move(p_pcm.cbegin(), p_pcm.cend(), std::back_inserter(m_pcm_buffer));
 }
 
 void audio_engine::play(const std::vector<float>& p_pcm) {
     m_mode = mode::stream;
-    std::transform(p_pcm.cbegin(), p_pcm.cend(), m_pcm_buffer.end(),
+    std::transform(p_pcm.cbegin(), p_pcm.cend(), std::back_inserter(m_pcm_buffer),
                    [](float p_sample) {
                        auto converted = p_sample * std::numeric_limits<int16_t>::max();
                        return static_cast<int16_t>(converted);

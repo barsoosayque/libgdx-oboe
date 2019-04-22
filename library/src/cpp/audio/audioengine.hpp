@@ -4,6 +4,7 @@
 #include "../sound/soundpool.hpp"
 #include "../music/music.hpp"
 #include <vector>
+#include <deque>
 
 class audio_engine : protected oboe::AudioStreamCallback {
     private:
@@ -13,7 +14,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
         std::unique_ptr<mixer> m_mixer;
         int8_t m_channels;
         int32_t m_payload_size;
-        std::vector<int16_t> m_pcm_buffer;
+        std::deque<int16_t> m_pcm_buffer;
         float m_volume;
         mode m_mode;
 
