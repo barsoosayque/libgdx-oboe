@@ -37,6 +37,9 @@ class audio_engine : protected oboe::AudioStreamCallback {
         /// Queue pcm for streaming. Automatically set mode to stream
         void play(const std::vector<int16_t>& p_pcm);
 
+        /// Queue pcm for streaming. Automatically set mode to stream
+        void play(const std::vector<float>& p_pcm);
+
         /// Return if this stream has 1 channel
         bool is_mono();
 

@@ -5,6 +5,7 @@
 #include <array>
 #include <algorithm>
 #include <iterator>
+#include <limits>
 
 using namespace oboe;
 
@@ -74,6 +75,15 @@ void audio_engine::play(std::shared_ptr<renderable_audio> p_audio) {
 void audio_engine::play(const std::vector<int16_t>& p_pcm) {
     m_mode = mode::stream;
     std::move(p_pcm.cbegin(), p_pcm.cend(), m_pcm_buffer.end());
+}
+
+void audio_engine::play(const std::vector<float>& p_pcm) {
+    m_mode = mode::stream;
+    std::transform(p_pcm.cbegin(), p_pcm.cend(), m_pcm_buffer.end(),
+                   [](float p_sample) {
+                       auto converted = p_sample * std::numeric_limits<int16_t>::max();
+                       return static_cast<int16_t>(converted);
+                   });
 }
 
 bool audio_engine::is_mono() {
