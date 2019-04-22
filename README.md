@@ -40,7 +40,7 @@ You better ask amazing people behind [Oboe library][oboe]. In two words, Oboe us
 
 - [x] `newSound` method (With *OboeSound*);
 - [x] `newMusic` method (With *OboeMusic*);
-- [ ] `newAudioDevice` method;
+- [x] `newAudioDevice` method (With *OboeAudioDevice*);
 - [ ] `newAudioRecorder` method.
 
 *WARN: not marked methods will result in undefined behaviour. (probably, hard crash)*
