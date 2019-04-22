@@ -5,6 +5,7 @@
 #include "../music/music.hpp"
 #include <vector>
 #include <deque>
+#include <mutex>
 
 class audio_engine : protected oboe::AudioStreamCallback {
     private:
@@ -17,6 +18,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
         std::deque<int16_t> m_pcm_buffer;
         float m_volume;
         mode m_mode;
+        std::mutex m_stream_mutex;
 
         oboe::DataCallbackResult onAudioReady(oboe::AudioStream*, void*, int32_t);
     public:
