@@ -33,7 +33,7 @@ class AppUi(
         pad(30f)
         top()
 
-        label("Libgdx Oboe: Sounds").cell(row = true, padBottom = 60f)
+        label("libGDX Oboe: Sounds").cell(row = true, padBottom = 60f)
         verticalGroup {
             center()
             space(30f)

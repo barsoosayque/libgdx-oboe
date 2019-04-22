@@ -34,7 +34,7 @@ class AppUi(
         pad(30f)
         center()
 
-        label("Libgdx Oboe: Music").cell(row = true, padBottom = 60f)
+        label("libGDX Oboe: Music").cell(row = true, padBottom = 60f)
         table {
             label("Songs:")
             label("Controls")

@@ -21,7 +21,7 @@ dependencies {
 
 ### Launcher
 
-Since **Libgdx** does not allow you to inherit from an *AndroidAudio* (and this is the only class that can be overloaded in your Android Launcher) class, the only workaround to it is just to mimic defualt *audio* behaviour.
+Since **libGDX** does not allow you to inherit from an *AndroidAudio* (and this is the only class that can be overloaded in your Android Launcher) class, the only workaround to it is just to mimic defualt *audio* behaviour.
 
 But you don't have to do that. If your intentions to just utilize the library, then you can use special *OboeAndroidApplication* class instead of the default one:
 
@@ -52,4 +52,4 @@ class AndroidLauncher : OboeAndroidApplication() {
 }
 ```
 
-And that's basically it. All *Sound* and *Music* instances are "patched" with **Libgdx Oboe** now.
+And that's basically it. All *Sound* and *Music* instances are "patched" with **libGDX Oboe** now.

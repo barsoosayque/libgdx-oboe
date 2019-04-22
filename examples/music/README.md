@@ -1,6 +1,6 @@
 ## Music
 
-Simple music player which utilize Libgdx streaming *Music* interface. This interface implemented in library by *OboeMusic*.
+Simple music player which utilize libGDX streaming *Music* interface. This interface implemented in library by *OboeMusic*.
 
 ![screenshot](./screenshot.png)
 

@@ -24,7 +24,7 @@ class AppUi(val assetManager: AssetManager) : Stage(ExtendViewport(480f, 700f)) 
         pad(30f)
         top()
 
-        label("Libgdx Oboe: Async").cell(row = true, padBottom = 60f)
+        label("libGDX Oboe: Async").cell(row = true, padBottom = 60f)
         verticalGroup {
             center()
             space(60f)
