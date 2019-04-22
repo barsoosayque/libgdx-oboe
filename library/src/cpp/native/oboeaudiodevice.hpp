@@ -9,8 +9,8 @@ extern "C" {
 
 OBOEAUDIODEVICE_METHOD(jint, getLatency) (JNIEnv*, jobject);
 OBOEAUDIODEVICE_METHOD(void, setVolume) (JNIEnv*, jobject, jfloat);
-OBOEAUDIODEVICE_METHOD(void, writeSamples__3SII) (JNIEnv*, jobject, jshortArray, jint, jint);
-OBOEAUDIODEVICE_METHOD(void, writeSamples__3FII) (JNIEnv*, jobject, jfloatArray, jint, jint);
+OBOEAUDIODEVICE_METHOD(void, writeSamples___3SII) (JNIEnv*, jobject, jshortArray, jint, jint);
+OBOEAUDIODEVICE_METHOD(void, writeSamples___3FII) (JNIEnv*, jobject, jfloatArray, jint, jint);
 OBOEAUDIODEVICE_METHOD(void, dispose) (JNIEnv*, jobject);
 OBOEAUDIODEVICE_METHOD(bool, isMono) (JNIEnv*, jobject);
 

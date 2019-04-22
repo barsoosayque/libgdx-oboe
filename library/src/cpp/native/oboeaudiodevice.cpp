@@ -10,7 +10,7 @@ OBOEAUDIODEVICE_METHOD(void, setVolume) (JNIEnv* env, jobject self, jfloat volum
     shared_ptr_var<audio_engine>(env, self, "audioEngine")->volume(volume);
 }
 
-OBOEAUDIODEVICE_METHOD(void, writeSamples) (JNIEnv* env, jobject self, jshortArray data, jint offset, jint samples) {
+OBOEAUDIODEVICE_METHOD(void, writeSamples___3SII) (JNIEnv* env, jobject self, jshortArray data, jint offset, jint samples) {
     auto engine = shared_ptr_var<audio_engine>(env, self, "audioEngine");
 
     std::vector<int16_t> pcm(samples);
@@ -18,7 +18,7 @@ OBOEAUDIODEVICE_METHOD(void, writeSamples) (JNIEnv* env, jobject self, jshortArr
     engine->play(pcm);
 }
 
-OBOEAUDIODEVICE_METHOD(void, writeSamples) (JNIEnv* env, jobject self, jfloatArray data, jint offset, jint samples) {
+OBOEAUDIODEVICE_METHOD(void, writeSamples___3FII) (JNIEnv* env, jobject self, jfloatArray data, jint offset, jint samples) {
     auto engine = shared_ptr_var<audio_engine>(env, self, "audioEngine");
 
     std::vector<float> pcm(samples);

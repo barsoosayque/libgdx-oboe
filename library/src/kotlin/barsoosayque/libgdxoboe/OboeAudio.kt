@@ -28,7 +28,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
     private external fun init()
     private external fun createSoundpool(fd: AssetFileDescriptor): NativeSoundpool
     private external fun createMusic(fd: AssetFileDescriptor): NativeMusic
-    private external fun createMusic(samplingRate: Int, isMono: Boolean): NativeAudioEngine
+    private external fun createAudioEngine(samplingRate: Int, isMono: Boolean): NativeAudioEngine
 
     external fun resume()
     external fun stop()
@@ -47,7 +47,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
                     .let(::OboeSound)
 
     override fun newAudioDevice(samplingRate: Int, isMono: Boolean): AudioDevice =
-            createMusic(samplingRate, isMono)
+            createAudioEngine(samplingRate, isMono)
                     .let(::OboeAudioDevice)
 
     override fun newAudioRecorder(samplingRate: Int, isMono: Boolean): AudioRecorder {

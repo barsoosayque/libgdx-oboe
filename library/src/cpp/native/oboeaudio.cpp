@@ -29,7 +29,7 @@ OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd)
     return reinterpret_cast<jlong>(ptr);
 }
 
-OBOEAUDIO_METHOD(jlong, createAudioDevice) (JNIEnv* env, jobject self, jint sample_rate, bool mono) {
+OBOEAUDIO_METHOD(jlong, createAudioEngine) (JNIEnv* env, jobject self, jint sample_rate, bool mono) {
     auto ptr = new std::shared_ptr<audio_engine>();
     *ptr = std::make_shared<audio_engine>(mono ? 1 : 2, sample_rate);
 
