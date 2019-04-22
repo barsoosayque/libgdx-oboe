@@ -3,12 +3,19 @@
 #include "mixer.hpp"
 #include "../sound/soundpool.hpp"
 #include "../music/music.hpp"
+#include <vector>
 
 class audio_engine : protected oboe::AudioStreamCallback {
     private:
+        enum class mode { mix, stream };
+
         std::unique_ptr<oboe::AudioStream> m_stream;
         std::unique_ptr<mixer> m_mixer;
         int8_t m_channels;
+        int32_t m_payload_size;
+        std::vector<int16_t> m_pcm_buffer;
+        float m_volume;
+        mode m_mode;
 
         oboe::DataCallbackResult onAudioReady(oboe::AudioStream*, void*, int32_t);
     public:
@@ -24,11 +31,18 @@ class audio_engine : protected oboe::AudioStreamCallback {
         /// Request audio stream to stop streaming audio data
         void stop();
 
+        /// Play sound or music. Automatically set mode to mix
         void play(std::shared_ptr<renderable_audio> p_audio);
+
+        /// Queue pcm for streaming. Automatically set mode to stream
+        void play(const std::vector<int16_t>& p_pcm);
 
         /// Return if this stream has 1 channel
         bool is_mono();
 
         /// Set volume of the mixer
         void volume(float);
+
+        /// Get size of buffer in samples
+        int32_t payload_size();
 };
