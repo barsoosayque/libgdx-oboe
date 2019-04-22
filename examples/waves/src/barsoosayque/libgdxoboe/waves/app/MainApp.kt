@@ -16,7 +16,7 @@ class MainApp : ApplicationAdapter() {
     override fun create() {
         loadAssets()
         Scene2DSkin.defaultSkin = assetManager["uiskin.json"]
-        ui = AppUi(assetManager)
+        ui = AppUi()
         Gdx.input.inputProcessor = ui
     }
 

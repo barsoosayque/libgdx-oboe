@@ -3,17 +3,16 @@ package barsoosayque.libgdxoboe.waves.app
 import barsoosayque.libgdxoboe.waves.content.SinGenerator
 import barsoosayque.libgdxoboe.waves.content.SoundGenerator
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import ktx.actors.onChange
 import ktx.actors.onChangeEvent
+import ktx.actors.txt
 import ktx.scene2d.*
 import kotlin.math.roundToInt
 import com.badlogic.gdx.utils.Array as GdxArray
 
-class AppUi(val assetManager: AssetManager) : Stage(ExtendViewport(480f, 700f)) {
+class AppUi : Stage(ExtendViewport(480f, 700f)) {
     private val audioDevice = Gdx.audio.newAudioDevice(DEVICE_HZ, true)
     private val sin = SinGenerator(500f)
 
@@ -27,10 +26,14 @@ class AppUi(val assetManager: AssetManager) : Stage(ExtendViewport(480f, 700f)) 
             center()
             space(60f)
 
+            label("Device latency: ${audioDevice.latency}")
+            label("Device isMono: ${audioDevice.isMono}")
+
             verticalGroup {
-                label("Wave frequency:")
+                val lbl = label("Wave frequency: 500 Hz")
                 slider().onChangeEvent { _, actor ->
                     sin.frequency = 500f + actor.value * 21500f
+                    lbl.txt = "Wave frequency: ${sin.frequency.toInt()} Hz"
                 }
             }
 
