@@ -50,7 +50,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
             createAudioEngine(samplingRate, isMono)
                     .let(::OboeAudioDevice)
 
-    override fun newAudioRecorder(samplingRate: Int, isMono: Boolean): AudioRecorder {
-        TODO()
-    }
+    override fun newAudioRecorder(samplingRate: Int, isMono: Boolean): AudioRecorder =
+            createAudioEngine(samplingRate, isMono)
+                    .let(::OboeAudioRecorder)
 }
