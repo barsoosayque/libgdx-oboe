@@ -5,7 +5,7 @@
 
 An audio component replacement for the **libGDX** framework, which allows music to flow without any delay or another unpleasant Android-related distortion. 
 
-And if you ever asked yourself *"Why is my libGDX app music is so broken ?"*, then you came to the right place.
+And if you ever asked yourself *"Why is my libGDX app music is so broken ?"*, then you've come to the right place.
 
 </td></tr></table>
 
