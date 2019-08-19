@@ -4,7 +4,6 @@ import android.content.res.AssetFileDescriptor
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
-import android.util.Log
 import com.badlogic.gdx.utils.GdxRuntimeException
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
@@ -133,7 +132,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
             }
         }
 
-        return stream?.let { ByteBuffer.wrap(it.toByteArray()) }?.let { Pcm(it, it.limit()) }
+        return stream?.let { ByteBuffer.allocateDirect(it.size()).put(it.toByteArray()) }?.let { Pcm(it, it.limit()) }
                 ?: Pcm(outputBuffer, outputBuffer.position())
     }
 

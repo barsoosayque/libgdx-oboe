@@ -64,7 +64,6 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17"
-                arguments "-DCMAKE_BUILD_TYPE=Debug"
             }
         }
     }
