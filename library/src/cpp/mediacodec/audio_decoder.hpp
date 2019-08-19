@@ -20,5 +20,6 @@ class audio_decoder {
     private:
         jni_context m_context;
         jvm_class m_decoder_class;
+        jvm_class m_pcm_class;
         jvm_object<jobject> m_decoder_object;
 };
