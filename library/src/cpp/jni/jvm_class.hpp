@@ -7,6 +7,7 @@
 #include <string_view>
 #include <type_traits>
 
+// TODO: cache fieldID and methodID
 class jvm_class {
     public:
         jvm_class(jni_context& p_context, std::string_view p_class_name)
@@ -26,6 +27,25 @@ class jvm_class {
         template <class F>
         jmethodID find_method(std::string_view p_name) {
             return m_context->GetMethodID(m_class, p_name.data(), jvm_signature<F>());
+        }
+
+        template <class F>
+        jfieldID find_field(std::string_view p_name) {
+            return m_context->GetFieldID(m_class, p_name.data(), jvm_signature<F>());
+        }
+
+        template <class F>
+        auto get_field(jobject p_obj, std::string_view p_name) {
+            auto field = find_field<F>(p_name);
+
+            if constexpr (std::is_same<F, int>::value) return m_context->GetIntField(p_obj, field);
+            else if constexpr (std::is_same<F, bool>::value) return m_context->GetBooleanField(p_obj, field);
+            else if constexpr (std::is_same<F, char>::value) return m_context->GetCharField(p_obj, field);
+            else if constexpr (std::is_same<F, short>::value) return m_context->GetShortField(p_obj, field);
+            else if constexpr (std::is_same<F, long>::value) return m_context->GetLongField(p_obj, field);
+            else if constexpr (std::is_same<F, float>::value) return m_context->GetFloatField(p_obj, field);
+            else if constexpr (std::is_same<F, double>::value) return m_context->GetDoubleField(p_obj, field);
+            else return static_cast<F>(m_context->GetObjectField(p_obj, field));
         }
 
         template <class F, class... Args>
