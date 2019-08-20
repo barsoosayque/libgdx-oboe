@@ -11,6 +11,8 @@ set (FMT_DIR dependencies/fmt)
 add_subdirectory (${FMT_DIR} ./fmt)
 include_directories (${FMT_DIR}/include)
 
+set (LIBSAMPLERATE_TESTS OFF)
+set (LIBSAMPLERATE_EXAMPLES OFF)
 set (SAMPLERATE dependencies/libsamplerate)
 add_subdirectory (${SAMPLERATE} ./samplerate)
 include_directories (${SAMPLERATE}/include)
