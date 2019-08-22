@@ -5,7 +5,6 @@ buildscript {
     dependencies {
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.17'
     }
 }
 
@@ -34,10 +33,7 @@ ext {
 }
 
 apply plugin: "com.android.library"
-apply plugin: "com.github.dcendents.android-maven"
-apply plugin: "com.jfrog.bintray"
 apply plugin: "kotlin-android"
-apply plugin: 'org.jetbrains.dokka-android'
 
 configurations { natives }
 sourceCompatibility = 1.6
@@ -50,12 +46,10 @@ dependencies {
 android {
     buildToolsVersion "29.0.2"
     compileSdkVersion 29
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src/kotlin']
-            jni.srcDirs = ['src/cpp']
-        }
+    sourceSets.main {
+        manifest.srcFile 'AndroidManifest.xml'
+        java.srcDirs = ['src/kotlin']
+        jni.srcDirs = ['src/cpp']
     }
     defaultConfig {
         minSdkVersion 16
@@ -72,10 +66,6 @@ android {
         cmake {
             path "CMakeLists.txt"
         }
-    }
-    dokka {
-        outputFormat = 'javadoc'
-        outputDirectory = "$buildDir/javadoc"
     }
 }
 
