@@ -5,23 +5,20 @@
 #include "../jni/jvm_class.hpp"
 
 OBOEMUSIC_METHOD(void, setCompletionCallback) (JNIEnv* env, jobject self, jobject callback) {
-    JavaVM* jvm;
-    env->GetJavaVM(&jvm);
-
+    auto context = jni_context::acquire_thread();
     auto old_callback = get_var_as<_jobject>(env, self, "onComplete");
     if (old_callback != NULL) {
-        env->DeleteGlobalRef(old_callback) ;
+        context->DeleteGlobalRef(old_callback) ;
     }
 
-    auto new_callback = env->NewGlobalRef(callback);
+    auto new_callback = context->NewGlobalRef(callback);
     set_var_as(env, self, "onComplete", new_callback);
 
     auto instance = shared_ptr_var<music>(env, self, "music");
-    instance->on_complete([new_callback, jvm] {
-        auto context = jni_context(jvm);
-        auto scoped_env = context.acquire_thread();
 
-        auto callback_class = jvm_class(context, scoped_env->GetObjectClass(new_callback));
+    instance->on_complete([new_callback] {
+        auto context = jni_context::acquire_thread();
+        auto callback_class = jvm_class(context->GetObjectClass(new_callback));
         callback_class.execute_method<void()>(new_callback, "invoke");
     });
 }

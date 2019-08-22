@@ -25,9 +25,11 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/audio/mixer.cpp
             ${SRC_DIR}/sound/soundpool.cpp
             ${SRC_DIR}/music/music.cpp
+            ${SRC_DIR}/native/init.cpp
             ${SRC_DIR}/native/oboesound.cpp
             ${SRC_DIR}/native/oboemusic.cpp
             ${SRC_DIR}/native/oboeaudio.cpp
             ${SRC_DIR}/native/oboeaudiodevice.cpp)
 
 target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES)
+target_compile_options(libgdx-oboe PRIVATE -Wall -Werror "$<$<CONFIG:RELEASE>:-Ofast>")

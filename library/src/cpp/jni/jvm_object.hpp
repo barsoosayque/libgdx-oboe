@@ -6,9 +6,10 @@
 template <class T = jobject>
 class jvm_object {
     public:
+        jvm_object() : m_wrapper(nullptr) {}
+
         // wrap some object
-        jvm_object(jni_context& p_context, T p_obj)
-            : m_wrapper(std::make_shared<wrapper>(p_context, p_obj)) {}
+        jvm_object(T p_obj) : m_wrapper(std::make_shared<wrapper>(p_obj)) { }
 
         operator T() const { return m_wrapper->m_obj; }
         T operator->() const { return m_wrapper->m_obj; }
@@ -18,15 +19,16 @@ class jvm_object {
     private:
         class wrapper {
             public:
-                wrapper(jni_context& p_context, T p_obj)
-                    : m_context(p_context)
-                    , m_obj(static_cast<T>(p_context->NewGlobalRef(p_obj))) {}
+                wrapper(T p_obj) {
+                        auto context = jni_context::acquire_thread();
+                        m_obj = static_cast<T>(context->NewGlobalRef(p_obj));
+                    }
 
                 ~wrapper() {
-                    m_context->DeleteGlobalRef(m_obj);
+                    auto context = jni_context::acquire_thread();
+                    context->DeleteGlobalRef(m_obj);
                 }
 
-                jni_context m_context;
                 T m_obj;
         };
 

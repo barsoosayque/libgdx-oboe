@@ -1,12 +1,17 @@
 #pragma once
 #include <jni.h>
 
+/// Have to initialize this like this:
+/// ```
+/// JavaVM* jni_context::s_jvm = 0;
+/// JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* jvm, void *reserved) {
+///    jni_context::init(jvm);
+///    return JNI_VERSION_1_6;
+/// }
+/// ```
 class jni_context {
     public:
-        jni_context(JNIEnv* p_env) { p_env->GetJavaVM(&m_jvm); }
-        jni_context(JavaVM* p_jvm) : m_jvm(p_jvm) { }
-
-        // RAII JNIEnv* for multi-threading
+        // RAII JNIEnv* for thread-safe operations
         class scoped_env {
             public:
                 scoped_env(JavaVM* p_jvm) : m_jvm(p_jvm) {
@@ -33,12 +38,11 @@ class jni_context {
                 JavaVM* m_jvm;
         };
 
-        JNIEnv* const operator->() const {
-            JNIEnv* env = 0;
-            assert(JNI_OK == m_jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6));
-            return env;
+        static scoped_env acquire_thread() { return scoped_env(s_jvm); }
+
+        static void init(JavaVM* p_jvm) {
+            s_jvm = p_jvm;
         }
-        scoped_env acquire_thread() const { return scoped_env(m_jvm); }
     private:
-        JavaVM* m_jvm;
+        static JavaVM* s_jvm;
 };

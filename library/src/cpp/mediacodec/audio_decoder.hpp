@@ -8,7 +8,7 @@
 
 class audio_decoder {
     public:
-        audio_decoder(jni_context p_context, AssetFileDescriptor p_asset_fd);
+        audio_decoder(AssetFileDescriptor p_asset_fd);
         audio_decoder(audio_decoder&) = delete;
         audio_decoder(audio_decoder&&) = delete;
         ~audio_decoder();
@@ -18,7 +18,6 @@ class audio_decoder {
 
         void seek(float p_seconds);
     private:
-        jni_context m_context;
         jvm_class m_decoder_class;
         jvm_class m_pcm_class;
         jvm_object<jobject> m_decoder_object;
