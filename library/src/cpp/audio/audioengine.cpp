@@ -12,8 +12,8 @@ using namespace oboe;
 audio_engine::audio_engine(int8_t p_channels, int32_t p_sample_rate)
     : AudioStreamCallback()
     , m_channels(p_channels)
-    , m_mode(mode::mix)
-    , m_volume(1) {
+    , m_volume(1)
+    , m_mode(mode::mix) {
 
     // initialize Oboe audio stream
     AudioStreamBuilder builder;
