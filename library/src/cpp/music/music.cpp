@@ -120,7 +120,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
             m_current_frame = 0;
             iter = m_second_pcm.begin();
             if(last_buffer) {
-                m_position = -frame;
+                m_position = 0;
             }
         }
         for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
