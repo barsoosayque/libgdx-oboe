@@ -4,24 +4,27 @@ import android.content.res.AssetFileDescriptor
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import android.media.MediaFormat.KEY_CHANNEL_COUNT
 import com.badlogic.gdx.utils.GdxRuntimeException
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
-import kotlin.math.min
 
 /** Decoder class which can process audio files to PCM.
  * Uses 16-bit Little-Endian samples.
- * @throws IllegalArgumentException If given [fd] can't be processed */
+ * @throws IllegalArgumentException If given fd can't be processed */
+@Suppress("UNUSED", "DEPRECATION")
 class AudioDecoder(fd: AssetFileDescriptor) {
     private val extractor = MediaExtractor().apply {
         setDataSource(fd.fileDescriptor, fd.startOffset, fd.declaredLength)
         fd.close()
     }
+    private var isMono = false
     private val decoder = let {
         if (extractor.trackCount > 1) throw GdxRuntimeException("Wrong track count in $fd")
         val mediaFormat = extractor.getTrackFormat(0)
         val mime = mediaFormat.getString(MediaFormat.KEY_MIME)
-        if (mime.startsWith("audio/")) {
+        if (mime?.startsWith("audio/") == true) {
+            isMono = mediaFormat.getInteger(KEY_CHANNEL_COUNT) == 1
             extractor.selectTrack(0)
             MediaCodec.createDecoderByType(mime).apply {
                 configure(mediaFormat, null, null, 0)
@@ -48,13 +51,49 @@ class AudioDecoder(fd: AssetFileDescriptor) {
                 }
             }
 
+    private fun processSamples(from: ByteBuffer, requestedBytes: Int? = null, processSamples: (Byte) -> Unit): Int =
+            if (requestedBytes == null || requestedBytes > 0) {
+                when {
+                    isMono && (requestedBytes == null || requestedBytes >= 4) -> {
+                        val monoFrameSize = (requestedBytes?.let { minOf(from.remaining(), it / 2) }
+                                ?: from.remaining()) / 2
+                        repeat(monoFrameSize) {
+                            val pcmPart1 = from.get()
+                            val pcmPart2 = from.get()
+
+                            repeat(2) {
+                                processSamples(pcmPart1)
+                                processSamples(pcmPart2)
+                            }
+                        }
+                        monoFrameSize * 4
+                    }
+                    isMono && requestedBytes == 2 -> {
+                        if (from.remaining() >= 1) {
+                            val pcm = from.get()
+                            processSamples(pcm)
+                            processSamples(pcm)
+                            requestedBytes
+                        } else 0
+                    }
+                    else -> {
+                        val size = requestedBytes?.let { minOf(it, from.remaining()) } ?: from.remaining()
+                        repeat(size) {
+                            val pcm = from.get()
+                            processSamples(pcm)
+                        }
+                        size
+                    }
+                }
+            } else 0
+
     private fun writeSamples(destination: ByteArrayOutputStream) {
         decoder.dequeueOutputBuffer(info, 100).takeIf { it >= 0 }?.also { bufferIndex ->
             decoder.outputBuffers[bufferIndex].also { buffer ->
                 buffer.position(info.offset)
                 buffer.limit(info.offset + info.size)
-                for (i in 0 until buffer.remaining()) {
-                    destination.write(buffer.get().toInt())
+                processSamples(buffer) {
+                    destination.write(it.toInt())
                 }
             }
             decoder.releaseOutputBuffer(bufferIndex, false)
@@ -66,10 +105,8 @@ class AudioDecoder(fd: AssetFileDescriptor) {
 
         val cache = cachedBuffer
         if (cache != null) {
-            bytesProcessed = min(cache.remaining(), maximumBytes)
-
-            for (i in 0 until bytesProcessed) {
-                destination.put(cache.get())
+            bytesProcessed = processSamples(cache, maximumBytes) {
+                destination.put(it)
             }
 
             if (cache.remaining() == 0) {
@@ -81,11 +118,10 @@ class AudioDecoder(fd: AssetFileDescriptor) {
                 decoder.outputBuffers[bufferIndex].also { buffer ->
                     buffer.position(info.offset)
                     buffer.limit(info.offset + info.size)
-                    bytesProcessed = min(info.size, maximumBytes)
-                    for (i in 0 until bytesProcessed) {
-                        destination.put(buffer.get())
+                    bytesProcessed = processSamples(buffer, maximumBytes) {
+                        destination.put(it)
                     }
-                    if (bytesProcessed < info.size) {
+                    if (buffer.remaining() > 0) {
                         cachedBuffer = buffer
                         cachedIndex = bufferIndex
                     } else {
