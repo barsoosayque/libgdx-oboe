@@ -11,14 +11,25 @@ using namespace oboe;
 
 audio_engine::audio_engine(int8_t p_channels, int32_t p_sample_rate)
     : AudioStreamCallback()
+    , m_mixer(std::make_unique<mixer>(1024, p_channels))
     , m_channels(p_channels)
+    , m_sample_rate(p_sample_rate)
     , m_volume(1)
-    , m_mode(mode::mix) {
+    , m_mode(mode::mix)
+    , m_is_playing(false) {
+    connect_to_device();
+}
 
+audio_engine::~audio_engine() {
+    stop();
+    check(m_stream->close(), "Error closing stream: %s");
+}
+
+void audio_engine::connect_to_device() {
     // initialize Oboe audio stream
     AudioStreamBuilder builder;
     builder.setChannelCount(m_channels);
-    builder.setSampleRate(p_sample_rate);
+    builder.setSampleRate(m_sample_rate);
     builder.setCallback(this);
     builder.setFormat(AudioFormat::I16);
     builder.setPerformanceMode(PerformanceMode::LowLatency);
@@ -27,17 +38,18 @@ audio_engine::audio_engine(int8_t p_channels, int32_t p_sample_rate)
     check(builder.openStream(ptrptr(m_stream)), "Error opening stream: %s");
 
     m_payload_size = m_stream->getFramesPerBurst() * 2;
-    auto result = m_stream->setBufferSizeInFrames(m_payload_size);
-    m_mixer = std::make_unique<mixer>(m_payload_size * p_channels, p_channels);
-
-    if (result) {
-        debug("New buffer size is %d frame", result.value());
-    }
+    m_stream->setBufferSizeInFrames(m_payload_size);
+    m_mixer->resize_buffer(m_payload_size * m_channels);
 }
 
-audio_engine::~audio_engine() {
-    stop();
-    check(m_stream->close(), "Error closing stream: %s");
+void audio_engine::onErrorAfterClose(AudioStream* self, Result p_error) {
+    if (p_error == Result::ErrorDisconnected) {
+        info("Previous device disconnected. Trying to connect to a new one...");
+        connect_to_device();
+        if(m_is_playing) {
+            resume();
+        }
+    }
 }
 
 DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_data, int32_t p_num_frames) {
@@ -72,11 +84,15 @@ DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_d
 }
 
 void audio_engine::resume() {
-    check(m_stream->requestStart(), "Error starting stream: %s");
+    if(check(m_stream->requestStart(), "Error starting stream: %s")) {
+        m_is_playing = true;
+    }
 }
 
 void audio_engine::stop() {
-    check(m_stream->requestStop(), "Error stopping stream: %s");
+    if(check(m_stream->requestStop(), "Error stopping stream: %s")) {
+        m_is_playing = false;
+    }
 }
 
 void audio_engine::play(std::shared_ptr<renderable_audio> p_audio) {

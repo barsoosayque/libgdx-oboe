@@ -9,18 +9,22 @@
 
 class audio_engine : protected oboe::AudioStreamCallback {
     private:
+        void connect_to_device();
         enum class mode { mix, stream };
 
         std::unique_ptr<oboe::AudioStream> m_stream;
         std::unique_ptr<mixer> m_mixer;
         int8_t m_channels;
+        int32_t m_sample_rate;
         int32_t m_payload_size;
         std::deque<int16_t> m_pcm_buffer;
         float m_volume;
         mode m_mode;
         std::mutex m_stream_mutex;
+        bool m_is_playing;
 
         oboe::DataCallbackResult onAudioReady(oboe::AudioStream*, void*, int32_t);
+        void onErrorAfterClose(oboe::AudioStream*, oboe::Result);
     public:
         /// Opening audio stream with specified number of channels and sample rate
         audio_engine(int8_t = 2, int32_t = 44100);

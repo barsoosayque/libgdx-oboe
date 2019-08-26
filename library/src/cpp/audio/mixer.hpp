@@ -10,6 +10,7 @@ class mixer: renderable_audio {
         /// Initialize mixer with specified buffer size and channel size
         mixer(int32_t, int8_t);
 
+        void resize_buffer(int32_t);
         void play_audio(std::shared_ptr<renderable_audio>);
         void render(int16_t*, int32_t);
 
