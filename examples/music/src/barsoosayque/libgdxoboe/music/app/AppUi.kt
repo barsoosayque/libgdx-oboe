@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import ktx.actors.onChange
 import ktx.actors.onChangeEvent
+import ktx.actors.onClick
 import ktx.actors.txt
 import ktx.scene2d.*
 import kotlin.math.floor
@@ -26,6 +27,12 @@ class AppUi(
     private lateinit var positionProgressBar: ProgressBar
     private lateinit var positionLabel: Label
     private lateinit var loopingCheck: CheckBox
+    private var seekDelta: Float = 0f
+    private var newSeek: Float? = null
+        set(value) {
+            seekDelta = 0f
+            field = value
+        }
     private var selectedAsset: MusicAsset = music.first()
     private var selectedMusic: Music = selectedAsset.get(assetManager)
 
@@ -87,7 +94,13 @@ class AppUi(
             horizontalGroup {
                 container {
                     width(600f)
-                    positionProgressBar = progressBar()
+                    positionProgressBar = slider {
+                        onClick {
+                            val sec = value * selectedAsset.duration
+                            Gdx.app.log("Music", "Change sound position to ${sec.time()} seconds")
+                            newSeek = sec
+                        }
+                    }
                 }
                 positionLabel = label("0:00 / 0:00")
             }.cell(colspan = 2)
@@ -96,13 +109,26 @@ class AppUi(
 
     override fun act(delta: Float) {
         super.act(delta)
-        positionProgressBar.value = selectedMusic.position / selectedAsset.duration
+        newSeek?.let {
+            seekDelta += delta
+            if (seekDelta >= SEEK_TIME) {
+                selectedMusic.position = it
+                newSeek = null
+            }
+        }
+
+        positionProgressBar.value = newSeek ?: selectedMusic.position / selectedAsset.duration
         positionLabel.txt = "${selectedMusic.position.time()} / ${selectedAsset.duration.time()}"
     }
 
     private fun Float.time(): String {
         val minutes = floor(this / 60)
         val seconds = this - minutes * 60
-        return "${minutes.toInt()}:${seconds.toInt()}"
+        return "${minutes.toInt().toString().padStart(2, '0')}:" +
+                seconds.toInt().toString().padStart(2, '0')
+    }
+
+    companion object {
+        private const val SEEK_TIME = 0.5f
     }
 }
