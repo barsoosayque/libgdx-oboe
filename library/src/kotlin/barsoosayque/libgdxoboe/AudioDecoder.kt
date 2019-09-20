@@ -5,6 +5,7 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaFormat.KEY_CHANNEL_COUNT
+import android.util.Log
 import com.badlogic.gdx.utils.GdxRuntimeException
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
@@ -178,7 +179,9 @@ class AudioDecoder(fd: AssetFileDescriptor) {
     /** Move head of the decoder to the [position] (in seconds) */
     fun seek(position: Float) {
         cachedBuffer = null
-        extractor.seekTo((position * 1000).toLong(), MediaExtractor.SEEK_TO_CLOSEST_SYNC)
+        cachedIndex = 0
+        extractor.seekTo((position * 1000000).toLong(), MediaExtractor.SEEK_TO_CLOSEST_SYNC)
+        extractor.advance()
         info = MediaCodec.BufferInfo()
         decoder.flush()
     }

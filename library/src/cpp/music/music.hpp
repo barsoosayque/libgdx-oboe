@@ -2,12 +2,12 @@
 #include "../mediacodec/audio_decoder.hpp"
 #include "../audio/renderableaudio.hpp"
 #include "../audio/pan_effect.hpp"
-#include <thread>
+#include "../utility/executor.hpp"
+#include <mutex>
 
 class music: public renderable_audio {
     public:
         music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels);
-        ~music();
 
         void render(int16_t* p_stream, int32_t p_frames);
 
@@ -33,12 +33,9 @@ class music: public renderable_audio {
         void swap_buffers();
 
         pan_effect m_pan;
-        bool m_playing,
-             m_looping,
-             m_eof;
+        bool m_playing, m_looping, m_eof;
         int m_cache_size;
-        float m_position,
-              m_volume;
+        float m_position, m_volume;
         std::function<void()> m_on_complete;
         int8_t m_channels;
         std::shared_ptr<audio_decoder> m_decoder;
@@ -47,5 +44,6 @@ class music: public renderable_audio {
         std::vector<int16_t> m_main_pcm;
         std::vector<int16_t> m_second_pcm;
 
-        std::thread m_decoder_thread;
+        std::mutex m_render_guard;
+        executor m_executor;
 };

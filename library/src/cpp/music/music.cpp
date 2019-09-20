@@ -5,20 +5,15 @@
 music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
     : m_pan(0.0f)
     , m_looping(false)
-    , m_cache_size(16 * 1024 * p_channels)
+    , m_cache_size(8 * 1024 * p_channels)
     , m_volume(1.0f)
     , m_channels(p_channels)
     , m_decoder(p_decoder)
-    , m_current_frame(0) {
+    , m_current_frame(0)
+    , m_executor(std::bind(&music::fill_second_buffer, this)) {
     m_second_pcm.reserve(m_cache_size);
     m_main_pcm.reserve(m_cache_size);
     stop();
-}
-
-music::~music() {
-    if(m_decoder_thread.joinable()) {
-        m_decoder_thread.join();
-    }
 }
 
 void music::fill_second_buffer() {
@@ -52,7 +47,8 @@ bool music::is_playing() {
 }
 
 void music::position(float p_position) {
-    if(m_decoder_thread.joinable()) m_decoder_thread.join();
+    std::scoped_lock<std::mutex> lock(m_render_guard);
+    m_executor.stop();
     m_position = p_position;
     m_decoder->seek(p_position);
     fill_second_buffer();
@@ -90,13 +86,14 @@ void music::pan(float p_pan) {
 
 void music::render(int16_t* p_stream, int32_t p_frames) {
     if(!m_playing) return;
+    std::scoped_lock<std::mutex> lock(m_render_guard);
 
     int32_t frames_in_pcm = m_main_pcm.size() / m_channels;
     bool perform_swap = false;
     bool last_buffer = false;
 
     if((m_current_frame + p_frames) >= frames_in_pcm) {
-        if(m_decoder_thread.joinable()) m_decoder_thread.join();
+        m_executor.wait();
         if(m_second_pcm.size() < m_cache_size) {
             last_buffer = true;
             if(m_looping) {
@@ -133,7 +130,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
         if(m_current_frame >= frames_in_pcm) {
             m_current_frame -= frames_in_pcm;
         }
-        m_decoder_thread = std::thread(&music::fill_second_buffer, this);
+        m_executor.queue();
     }
 
     // TODO remove hard-coded stuff
