@@ -16,6 +16,7 @@ import ktx.actors.onClick
 import ktx.actors.txt
 import ktx.scene2d.*
 import kotlin.math.floor
+import kotlin.random.Random
 import com.badlogic.gdx.utils.Array as GdxArray
 
 class AppUi(
@@ -54,8 +55,9 @@ class AppUi(
                 panSlider.value = 0.0f
                 loopingCheck.isChecked = selectedMusic.isLooping
 
+                val rnd = Random.nextInt()
                 selectedMusic.setOnCompletionListener {
-                    Gdx.app.log("Music", "Is done")
+                    Gdx.app.log("Music", "$selectedAsset is done ($rnd)")
                 }
             }
             verticalGroup {

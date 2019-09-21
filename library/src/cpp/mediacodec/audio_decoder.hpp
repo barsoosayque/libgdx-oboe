@@ -8,13 +8,18 @@
 
 class audio_decoder {
     public:
+        struct result {
+            std::vector<int16_t> m_data;
+            bool m_eof;
+        };
+
         audio_decoder(AssetFileDescriptor p_asset_fd);
         audio_decoder(audio_decoder&) = delete;
         audio_decoder(audio_decoder&&) = delete;
         ~audio_decoder();
 
-        std::vector<int16_t> decode(int p_samples);
-        std::vector<int16_t> decode();
+        result decode(int p_samples);
+        result decode();
 
         void seek(float p_seconds);
     private:

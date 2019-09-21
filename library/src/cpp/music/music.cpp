@@ -5,25 +5,25 @@
 music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
     : m_pan(0.0f)
     , m_looping(false)
-    , m_cache_size(8 * 1024 * p_channels)
+    , m_cache_size(16 * 1024 * p_channels)
     , m_volume(1.0f)
     , m_channels(p_channels)
     , m_decoder(p_decoder)
     , m_current_frame(0)
+    , m_decode_result(m_decoder->decode(m_cache_size))
     , m_executor(std::bind(&music::fill_second_buffer, this)) {
-    m_second_pcm.reserve(m_cache_size);
     m_main_pcm.reserve(m_cache_size);
     stop();
 }
 
 void music::fill_second_buffer() {
-    auto pcm = m_decoder->decode(m_cache_size);
-    pcm.swap(m_second_pcm);
+    m_decode_result = m_decoder->decode(m_cache_size);
 }
 
 void music::swap_buffers() {
-    m_main_pcm.swap(m_second_pcm);
-    m_second_pcm.clear();
+    std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
+    m_main_pcm.swap(m_decode_result.m_data);
+    m_eof = m_decode_result.m_eof;
 }
 
 void music::play() {
@@ -36,6 +36,7 @@ void music::pause() {
 }
 
 void music::stop() {
+    std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
     m_playing = false;
     m_eof = false;
     m_current_frame = 0;
@@ -47,13 +48,14 @@ bool music::is_playing() {
 }
 
 void music::position(float p_position) {
-    std::scoped_lock<std::mutex> lock(m_render_guard);
+    std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
     m_executor.stop();
     m_position = p_position;
+    m_current_frame = 0;
     m_decoder->seek(p_position);
     fill_second_buffer();
     swap_buffers();
-    fill_second_buffer();
+    m_executor.queue();
 }
 
 float music::position() {
@@ -86,57 +88,39 @@ void music::pan(float p_pan) {
 
 void music::render(int16_t* p_stream, int32_t p_frames) {
     if(!m_playing) return;
-    std::scoped_lock<std::mutex> lock(m_render_guard);
+    std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
 
     int32_t frames_in_pcm = m_main_pcm.size() / m_channels;
-    bool perform_swap = false;
-    bool last_buffer = false;
-
-    if((m_current_frame + p_frames) >= frames_in_pcm) {
-        m_executor.wait();
-        if(m_second_pcm.size() < m_cache_size) {
-            last_buffer = true;
-            if(m_looping) {
-                m_decoder->seek(0.0f);
-            }
-        }
-        perform_swap = true;
-    }
-
-    int32_t max_frames = p_frames;
-    if(!m_looping && last_buffer) {
-        max_frames = std::min(max_frames, frames_in_pcm - m_current_frame);
-        m_playing = max_frames >= p_frames;
-        m_eof = !m_playing;
-    }
+    int32_t frames_to_process = std::min(p_frames, frames_in_pcm - m_current_frame);
 
     auto iter = std::next(m_main_pcm.begin(), m_current_frame * m_channels);
-
-    for(int frame = 0; frame < max_frames; ++frame, ++m_current_frame) {
-        if(m_current_frame >= frames_in_pcm) {
-            m_current_frame = 0;
-            iter = m_second_pcm.begin();
-            if(last_buffer) {
-                m_position = 0;
-            }
-        }
+    for(int frame = 0; frame < frames_to_process; ++frame, ++m_current_frame) {
         for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
             p_stream[frame * m_channels + sample] += *iter * m_volume * m_pan.modulation(sample);
         }
     }
+    // TODO remove hard-coded stuff
+    m_position += frames_to_process / 44100.0f;
 
-    if(perform_swap) {
-        swap_buffers();
-        if(m_current_frame >= frames_in_pcm) {
-            m_current_frame -= frames_in_pcm;
-        }
-        m_executor.queue();
+    if (m_eof && frames_to_process == 0) {
+        if (m_on_complete && !m_looping) m_on_complete();
+        m_playing = m_looping;
     }
 
-    // TODO remove hard-coded stuff
-    m_position += max_frames / 44100.0f;
+    if (frames_to_process < p_frames) {
+        m_executor.wait();
+        swap_buffers();
+        m_current_frame = 0;
+        if(m_playing) {
+            if (m_looping && m_decode_result.m_eof) {
+                m_position = 0;
+                m_decoder->seek(0);
+            }
+            m_executor.queue();
+        }
 
-    if (!m_playing && m_on_complete) {
-        m_on_complete();
+        if(int16_t remain = p_frames - frames_to_process) {
+            render(p_stream + frames_to_process * m_channels, remain);
+        }
     }
 }

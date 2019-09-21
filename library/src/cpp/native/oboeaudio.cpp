@@ -20,7 +20,7 @@ OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jobject fd) {
 
 OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd) {
     auto decoder = audio_decoder(AssetFileDescriptor { fd });
-    auto pcm = decoder.decode();
+    auto pcm = decoder.decode().m_data;
     auto ptr = new std::shared_ptr<soundpool>();
     *ptr = std::make_shared<soundpool>(std::move(pcm), 2);
 

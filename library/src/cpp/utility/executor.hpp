@@ -16,6 +16,7 @@ class executor {
         }
 
         void queue(int count = 1) {
+            std::scoped_lock<std::mutex> l(m_mutex);
             m_queue_size += count;
         }
         void wait() {

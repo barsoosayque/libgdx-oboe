@@ -169,8 +169,9 @@ class AudioDecoder(fd: AssetFileDescriptor) {
             }
         }
 
-        return stream?.let { ByteBuffer.allocateDirect(it.size()).put(it.toByteArray()) }?.let { Pcm(it, it.limit()) }
-                ?: Pcm(outputBuffer, outputBuffer.position())
+        val isLast = eofDecoder && eofExtractor
+        return stream?.let { ByteBuffer.allocateDirect(it.size()).put(it.toByteArray()) }?.let { Pcm(it, it.limit(), isLast) }
+                ?: Pcm(outputBuffer, outputBuffer.position(), isLast)
     }
 
     /** Read file to EOF and decode it all. */
@@ -193,5 +194,5 @@ class AudioDecoder(fd: AssetFileDescriptor) {
         extractor.release()
     }
 
-    class Pcm(val data: ByteBuffer, val size: Int)
+    class Pcm(val data: ByteBuffer, val size: Int, val isLast: Boolean)
 }

@@ -42,8 +42,8 @@ class music: public renderable_audio {
 
         int32_t m_current_frame;
         std::vector<int16_t> m_main_pcm;
-        std::vector<int16_t> m_second_pcm;
+        audio_decoder::result m_decode_result;
 
-        std::mutex m_render_guard;
+        std::recursive_mutex m_render_guard;
         executor m_executor;
 };
