@@ -3,6 +3,7 @@
 #include "../audio/renderableaudio.hpp"
 #include "../audio/pan_effect.hpp"
 #include "../utility/executor.hpp"
+#include <atomic>
 
 class music: public renderable_audio {
     public:
@@ -31,10 +32,12 @@ class music: public renderable_audio {
         void fill_second_buffer();
         void swap_buffers();
 
+        inline void raw_render(int16_t* p_stream, int32_t p_frames);
+
         pan_effect m_pan;
         bool m_playing, m_looping, m_eof;
         int m_cache_size;
-        float m_position, m_new_position, m_volume;
+        float m_position, m_volume;
         std::function<void()> m_on_complete;
         int8_t m_channels;
         std::shared_ptr<audio_decoder> m_decoder;
@@ -42,5 +45,6 @@ class music: public renderable_audio {
         int32_t m_current_frame;
         std::vector<int16_t> m_main_pcm;
 
+        std::atomic_flag m_buffer_swap;
         executor m_executor;
 };
