@@ -14,7 +14,9 @@ music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
     m_main_pcm.reserve(m_cache_size);
     fill_second_buffer();
     swap_buffers();
-    stop();
+    m_playing = false;
+    m_eof = false;
+    m_current_frame = 0;
 }
 
 void music::fill_second_buffer() {
@@ -51,7 +53,7 @@ void music::position(float p_position) {
 }
 
 float music::position() {
-    return m_position;
+    return m_new_position >= 0 ? m_new_position : m_position;
 }
 
 void music::volume(float p_volume) {
@@ -112,7 +114,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
     if (frames_to_process < p_frames) {
         m_executor.wait();
         swap_buffers();
-        m_current_frame = 0;
+        m_current_frame -= frames_in_pcm;
         if(m_playing) {
             if (m_looping && m_decoder->m_eof) {
                 m_position = 0;
