@@ -12,6 +12,8 @@ music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
     , m_current_frame(0)
     , m_executor(std::bind(&music::fill_second_buffer, this)) {
     m_main_pcm.reserve(m_cache_size);
+    fill_second_buffer();
+    swap_buffers();
     stop();
 }
 
@@ -20,7 +22,6 @@ void music::fill_second_buffer() {
 }
 
 void music::swap_buffers() {
-    std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
     m_main_pcm.swap(m_decoder->m_buffer);
     m_eof = m_decoder->m_eof;
 }
@@ -35,7 +36,6 @@ void music::pause() {
 }
 
 void music::stop() {
-    std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
     m_playing = false;
     m_eof = false;
     m_current_frame = 0;
@@ -47,14 +47,7 @@ bool music::is_playing() {
 }
 
 void music::position(float p_position) {
-    std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
-    m_executor.stop();
-    m_position = p_position;
-    m_current_frame = 0;
-    m_decoder->seek(p_position);
-    fill_second_buffer();
-    swap_buffers();
-    m_executor.queue();
+    m_new_position = p_position;
 }
 
 float music::position() {
@@ -87,7 +80,17 @@ void music::pan(float p_pan) {
 
 void music::render(int16_t* p_stream, int32_t p_frames) {
     if(!m_playing) return;
-    std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
+
+    if (m_new_position >= 0) {
+        m_executor.wait();
+        m_decoder->seek(m_new_position);
+        m_position = m_new_position;
+        m_current_frame = 0;
+        fill_second_buffer();
+        swap_buffers();
+        m_executor.queue();
+        m_new_position = -1;
+    }
 
     int32_t frames_in_pcm = m_main_pcm.size() / m_channels;
     int32_t frames_to_process = std::min(p_frames, frames_in_pcm - m_current_frame);
