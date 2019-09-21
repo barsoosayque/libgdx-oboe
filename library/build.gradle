@@ -21,7 +21,7 @@ ext {
     siteUrl = 'https://gitlab.com/barsoosayque/libgdx-oboe'
     gitUrl = 'https://gitlab.com/barsoosayque/libgdx-oboe.git'
 
-    libraryVersion = '0.1.3'
+    libraryVersion = '0.1.4'
 
     developerId = 'barsoosayque'
     developerName = 'barsoosayque'
