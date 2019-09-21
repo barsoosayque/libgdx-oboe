@@ -3,10 +3,10 @@
 #include <cmath>
 
 music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
-    : m_pan(0.0f)
+    : m_pan(0)
     , m_looping(false)
     , m_cache_size(16 * 1024 * p_channels)
-    , m_volume(1.0f)
+    , m_volume(1)
     , m_channels(p_channels)
     , m_decoder(p_decoder)
     , m_current_frame(0)
@@ -39,7 +39,7 @@ void music::stop() {
     m_playing = false;
     m_eof = false;
     m_current_frame = 0;
-    position(0.0f);
+    position(0);
 }
 
 bool music::is_playing() {

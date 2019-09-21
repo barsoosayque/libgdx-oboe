@@ -16,21 +16,22 @@ class executor {
         }
 
         void queue(int count = 1) {
-            std::scoped_lock<std::mutex> l(m_mutex);
+            std::scoped_lock<std::recursive_mutex> l(m_mutex);
             m_queue_size += count;
         }
         void wait() {
-            std::scoped_lock<std::mutex> l(m_mutex);
+            std::scoped_lock<std::recursive_mutex> l(m_mutex);
         }
         void stop() {
+            std::scoped_lock<std::recursive_mutex> l(m_mutex);
             m_queue_size = 0;
             wait();
         }
     private:
         void job_watcher(std::function<void()> job) {
             while(!m_is_shutdown) {
+                std::scoped_lock<std::recursive_mutex> l(m_mutex);
                 if(m_queue_size > 0) {
-                    std::scoped_lock<std::mutex> l(m_mutex);
                     job();
                     --m_queue_size;
                 }
@@ -39,7 +40,6 @@ class executor {
 
         bool m_is_shutdown;
         int m_queue_size;
-        std::mutex m_mutex;
-        std::condition_variable m_cond;
+        std::recursive_mutex m_mutex;
         std::thread m_thread;
 };
