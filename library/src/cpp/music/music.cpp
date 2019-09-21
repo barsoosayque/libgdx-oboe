@@ -10,20 +10,19 @@ music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
     , m_channels(p_channels)
     , m_decoder(p_decoder)
     , m_current_frame(0)
-    , m_decode_result(m_decoder->decode(m_cache_size))
     , m_executor(std::bind(&music::fill_second_buffer, this)) {
     m_main_pcm.reserve(m_cache_size);
     stop();
 }
 
 void music::fill_second_buffer() {
-    m_decode_result = m_decoder->decode(m_cache_size);
+    m_decoder->decode(m_cache_size);
 }
 
 void music::swap_buffers() {
     std::scoped_lock<std::recursive_mutex> lock(m_render_guard);
-    m_main_pcm.swap(m_decode_result.m_data);
-    m_eof = m_decode_result.m_eof;
+    m_main_pcm.swap(m_decoder->m_buffer);
+    m_eof = m_decoder->m_eof;
 }
 
 void music::play() {
@@ -112,7 +111,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
         swap_buffers();
         m_current_frame = 0;
         if(m_playing) {
-            if (m_looping && m_decode_result.m_eof) {
+            if (m_looping && m_decoder->m_eof) {
                 m_position = 0;
                 m_decoder->seek(0);
             }

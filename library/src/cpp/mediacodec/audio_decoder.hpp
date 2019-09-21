@@ -8,21 +8,19 @@
 
 class audio_decoder {
     public:
-        struct result {
-            std::vector<int16_t> m_data;
-            bool m_eof;
-        };
-
         audio_decoder(AssetFileDescriptor p_asset_fd);
         audio_decoder(audio_decoder&) = delete;
         audio_decoder(audio_decoder&&) = delete;
         ~audio_decoder();
 
-        result decode(int p_samples);
-        result decode();
+        void decode(int p_samples);
+        void decode();
 
         void seek(float p_seconds);
+        std::vector<int16_t> m_buffer;
+        bool m_eof;
     private:
+        void process_result(Pcm p_pcm);
         jvm_class m_decoder_class;
         jvm_class m_pcm_class;
         jvm_object<jobject> m_decoder_object;
