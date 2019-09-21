@@ -28,12 +28,6 @@ class AppUi(
     private lateinit var positionProgressBar: ProgressBar
     private lateinit var positionLabel: Label
     private lateinit var loopingCheck: CheckBox
-    private var seekDelta: Float = 0f
-    private var newSeek: Float? = null
-        set(value) {
-            seekDelta = 0f
-            field = value
-        }
     private var selectedAsset: MusicAsset = music.first()
     private var selectedMusic: Music = selectedAsset.get(assetManager)
 
@@ -100,7 +94,7 @@ class AppUi(
                         onClick {
                             val sec = value * selectedAsset.duration
                             Gdx.app.log("Music", "Change sound position to ${sec.time()} seconds")
-                            newSeek = sec
+                            selectedMusic.position = sec
                         }
                     }
                 }
@@ -111,15 +105,8 @@ class AppUi(
 
     override fun act(delta: Float) {
         super.act(delta)
-        newSeek?.let {
-            seekDelta += delta
-            if (seekDelta >= SEEK_TIME) {
-                selectedMusic.position = it
-                newSeek = null
-            }
-        }
 
-        positionProgressBar.value = newSeek ?: selectedMusic.position / selectedAsset.duration
+        positionProgressBar.value = selectedMusic.position / selectedAsset.duration
         positionLabel.txt = "${selectedMusic.position.time()} / ${selectedAsset.duration.time()}"
     }
 
@@ -128,9 +115,5 @@ class AppUi(
         val seconds = this - minutes * 60
         return "${minutes.toInt().toString().padStart(2, '0')}:" +
                 seconds.toInt().toString().padStart(2, '0')
-    }
-
-    companion object {
-        private const val SEEK_TIME = 0.5f
     }
 }
