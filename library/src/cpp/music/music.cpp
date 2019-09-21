@@ -113,11 +113,11 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
 
     if (frames_to_process < p_frames) {
         m_executor.wait();
+        if (m_eof) { m_position = 0; }
         swap_buffers();
         m_current_frame -= frames_in_pcm;
         if(m_playing) {
             if (m_looping && m_decoder->m_eof) {
-                m_position = 0;
                 m_decoder->seek(0);
             }
             m_executor.queue();
