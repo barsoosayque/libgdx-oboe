@@ -5,10 +5,11 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaFormat.KEY_CHANNEL_COUNT
-import android.util.Log
 import com.badlogic.gdx.utils.GdxRuntimeException
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /** Decoder class which can process audio files to PCM.
  * Uses 16-bit Little-Endian samples.
@@ -37,6 +38,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
     private var cachedBuffer: ByteBuffer? = null
     private var cachedIndex: Int = 0
     private var outputBuffer = ByteBuffer.allocateDirect(65536)
+    private val lock = ReentrantLock()
 
     private fun readSampleData(): Boolean? =
             decoder.dequeueInputBuffer(100).takeIf { it >= 0 }?.let { bufferIndex ->
@@ -141,7 +143,7 @@ class AudioDecoder(fd: AssetFileDescriptor) {
     /** Read more data and decode it.
      * @param samples Amount of new samples to be decoded
      * (negative value to read and decode to eof) */
-    fun decode(samples: Int): Pcm {
+    fun decode(samples: Int): Pcm = lock.withLock {
         var stream: ByteArrayOutputStream? = null
         var bytesLeft = samples * 2
 
@@ -178,11 +180,10 @@ class AudioDecoder(fd: AssetFileDescriptor) {
     fun decode(): Pcm = decode(-1)
 
     /** Move head of the decoder to the [position] (in seconds) */
-    fun seek(position: Float) {
+    fun seek(position: Float) = lock.withLock {
         cachedBuffer = null
         cachedIndex = 0
         extractor.seekTo((position * 1000000).toLong(), MediaExtractor.SEEK_TO_CLOSEST_SYNC)
-        extractor.advance()
         info = MediaCodec.BufferInfo()
         decoder.flush()
     }
