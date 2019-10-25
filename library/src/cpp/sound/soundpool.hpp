@@ -1,10 +1,10 @@
 #pragma once
 #include <vector>
-#include <list>
 #include "../audio/pan_effect.hpp"
 #include "../audio/renderableaudio.hpp"
 #include "../samplerate/resampler.hpp"
 #include <functional>
+#include <atomic>
 
 class soundpool: public renderable_audio {
     public:
@@ -42,10 +42,12 @@ class soundpool: public renderable_audio {
         };
         sound gen_sound(float p_volume, float p_pan, float p_speed, bool p_loop);
         void do_by_id(long, std::function<void(soundpool::sound&)>);
-        std::list<sound> m_sounds;
+        std::vector<sound> m_sounds;
         long m_last_id;
 
         int32_t m_frames;
         int8_t m_channels;
         std::vector<float> m_pcm;
+
+        std::atomic_flag m_rendering_flag;
 };

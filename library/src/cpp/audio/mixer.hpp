@@ -2,8 +2,8 @@
 
 #include "renderableaudio.hpp"
 #include <memory>
-#include <list>
 #include <vector>
+#include <atomic>
 
 class mixer: renderable_audio {
     public:
@@ -18,5 +18,6 @@ class mixer: renderable_audio {
     private:
         const int8_t m_channels;
         mutable std::vector<int16_t> m_buffer;
-        mutable std::list<std::weak_ptr<renderable_audio>> m_tracks;
+        mutable std::vector<std::weak_ptr<renderable_audio>> m_tracks;
+        std::atomic_flag m_rendering_flag;
 };
