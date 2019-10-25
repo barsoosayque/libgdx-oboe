@@ -22,7 +22,7 @@ audio_engine::audio_engine(int8_t p_channels, int32_t p_sample_rate)
 
 audio_engine::~audio_engine() {
     stop();
-    check(m_stream->close(), "Error closing stream: %s");
+    check(m_stream->close(), "Error closing stream: {}");
 }
 
 void audio_engine::connect_to_device() {
@@ -35,7 +35,7 @@ void audio_engine::connect_to_device() {
     builder.setPerformanceMode(PerformanceMode::LowLatency);
     builder.setSharingMode(SharingMode::Exclusive);
 
-    check(builder.openStream(ptrptr(m_stream)), "Error opening stream: %s");
+    check(builder.openStream(ptrptr(m_stream)), "Error opening stream: {}");
 
     m_payload_size = m_stream->getFramesPerBurst() * 2;
     m_stream->setBufferSizeInFrames(m_payload_size);
@@ -84,13 +84,13 @@ DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_d
 }
 
 void audio_engine::resume() {
-    if(check(m_stream->requestStart(), "Error starting stream: %s")) {
+    if(check(m_stream->requestStart(), "Error starting stream: {}")) {
         m_is_playing = true;
     }
 }
 
 void audio_engine::stop() {
-    if(check(m_stream->requestStop(), "Error stopping stream: %s")) {
+    if(check(m_stream->requestStop(), "Error stopping stream: {}")) {
         m_is_playing = false;
     }
 }
