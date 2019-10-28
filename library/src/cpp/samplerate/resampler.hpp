@@ -27,7 +27,10 @@ class resampler {
 
         void reset();
 
-        const std::vector<float>& process(std::vector<float>::const_iterator p_begin, int p_num_frames, bool p_last = false);
+        int process(std::vector<float>::const_iterator p_begin,
+                    std::vector<float>::const_iterator p_end,
+                    std::vector<float>::iterator p_output,
+                    int p_requested_frames);
 
     private:
         SRC_STATE* m_state;
@@ -35,8 +38,5 @@ class resampler {
         int8_t m_channels;
 
         // internal variables
-        int out_len;
-
-        // cache vector to avoid runtime allocation
-        std::vector<float> m_float_out;
+        int len;
 };

@@ -18,7 +18,6 @@ resampler::resampler(resampler&& p_other)
     m_state = p_other.m_state;
     p_other.m_state = nullptr;
     m_data = p_other.m_data;
-    m_float_out.swap(p_other.m_float_out);
 }
 
 resampler& resampler::operator=(resampler&& p_other) {
@@ -26,7 +25,6 @@ resampler& resampler::operator=(resampler&& p_other) {
     p_other.m_state = nullptr;
     m_data = p_other.m_data;
     m_channels = p_other.m_channels;
-    m_float_out.swap(p_other.m_float_out);
     return *this;
 }
 
@@ -48,24 +46,26 @@ void resampler::reset() {
     src_reset(m_state);
 }
 
-const std::vector<float>& resampler::process(std::vector<float>::const_iterator p_begin, int p_num_frames, bool p_last) {
+int resampler::process(std::vector<float>::const_iterator p_begin, std::vector<float>::const_iterator p_end,
+                      std::vector<float>::iterator p_output, int p_requested_frames) {
     if(m_state == nullptr) {
-        m_float_out.assign(p_begin, std::next(p_begin, p_num_frames * m_channels));
+        len = std::distance(p_begin, p_end);
+        len = len < p_requested_frames*m_channels ? len : p_requested_frames*m_channels;
+        std::copy(p_begin, std::next(p_begin, len), p_output);
+        return len;
     } else {
-        out_len = std::ceil(p_num_frames * m_data.src_ratio);
-        m_float_out.reserve(out_len * m_channels);
+        len = std::distance(p_begin, p_end);
 
         m_data.data_in = &(*p_begin);
-        m_data.data_out = m_float_out.data();
-        m_data.input_frames = p_num_frames;
-        m_data.output_frames = out_len;
-        m_data.end_of_input = p_last;
+        m_data.data_out = &(*p_output);
+        m_data.input_frames = len;
+        m_data.output_frames = p_requested_frames;
+        m_data.end_of_input = p_requested_frames <= len;
 
         if (int err = src_process(m_state, &m_data)) {
             error("resampler::process error: {}", src_strerror(err));
         }
 
-        m_float_out.resize(m_data.output_frames_gen * m_channels);
+        return m_data.input_frames_used;
     }
-    return m_float_out;
 }

@@ -47,7 +47,7 @@ class soundpool: public renderable_audio {
 
         int32_t m_frames;
         int8_t m_channels;
-        std::vector<float> m_pcm;
+        std::vector<float> m_pcm, m_sample_buffer;
 
         std::atomic_flag m_rendering_flag;
 };

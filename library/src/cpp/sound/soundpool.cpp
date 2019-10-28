@@ -29,7 +29,7 @@ soundpool::sound soundpool::gen_sound(float p_volume, float p_pan, float p_speed
         .m_looping = p_loop,
         .m_cur_frame = 0,
         .m_pan = pan_effect(p_pan),
-        .m_resampler = resampler(resampler::converter::zero_order_hold, m_channels, 1.f / std::max(std::min(p_speed, 2.0f), 0.5f))
+        .m_resampler = resampler(resampler::converter::zero_order_hold, m_channels, 1.f / std::clamp(p_speed, 0.5f, 2.0f))
     };
 }
 
@@ -87,7 +87,7 @@ void soundpool::looping(long p_id, bool p_loop) {
 
 void soundpool::speed(long p_id, float p_speed) {
     do_by_id(p_id, [p_speed](sound& p_sound) {
-        auto speed = std::max(std::min(p_speed, 2.0f), 0.5f);
+        auto speed = std::clamp(p_speed, 0.5f, 2.0f);
         p_sound.m_resampler.ratio(1.f / speed);
     });
 }
@@ -106,21 +106,18 @@ void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) {
         if(!it->m_paused) {
             auto iter = std::next(m_pcm.cbegin(), it->m_cur_frame * m_channels);
             const int size = std::min(p_num_frames, m_frames - it->m_cur_frame);
-            const int source_frames = std::ceil(size / it->m_resampler.ratio());
 
-            const std::vector<float>& converted = it->m_resampler.process(iter, source_frames, size < p_num_frames);
-            if(converted.size() != size * m_channels) {
-                error("wrong converted size {} (expected {} of {})", converted.size(), size * m_channels, p_num_frames * m_channels);
-            }
+            m_sample_buffer.reserve(size * m_channels);
+            int converted_frames = it->m_resampler.process(iter, m_pcm.cend(), m_sample_buffer.begin(), size);
 
-            iter = converted.begin();
+            iter = m_sample_buffer.begin();
             auto end = std::next(iter, size * m_channels);
             for (int i = 0; iter != end; ++iter, ++i) {
                 prevaluated = static_cast<int>(p_audio_data[i]) + static_cast<int>(*iter * limit_up * it->m_volume * it->m_pan.modulation(i % m_channels));
                 p_audio_data[i] = static_cast<int16_t>(std::clamp(prevaluated, limit_down, limit_up));
             }
 
-            it->m_cur_frame += source_frames;
+            it->m_cur_frame += converted_frames;
         }
 
         if(it->m_cur_frame >= m_frames) {
