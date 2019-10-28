@@ -2,71 +2,70 @@
 #include "../utility/log.hpp"
 
 resampler::resampler(resampler::converter p_converter, int8_t p_channels, float p_ratio)
-    : m_state(src_new(static_cast<int>(p_converter), p_channels, &m_error))
-    , m_converter(p_converter)
-    , m_channels(p_channels) {
-
-    m_data = new SRC_DATA {
-        .data_in = nullptr,
-        .data_out = nullptr,
-        .input_frames = 0,
-        .output_frames = 0,
-        .input_frames_used = 0,
-        .output_frames_gen = 0,
-        .end_of_input = 1,
-        .src_ratio = 1.0
-    };
-
-    ratio(p_ratio);
+    : m_channels(p_channels) {
+    int err = 0;
+    m_state = src_new(static_cast<int>(p_converter), p_channels, &err);
+    if(err) {
+        error("resampler::resampler error: {}", src_strerror(err));
+        m_state = nullptr;
+    }
+    m_data = SRC_DATA { .src_ratio = p_ratio };
 }
 
-resampler::resampler(const resampler& p_instance)
-    : m_state(src_new(static_cast<int>(p_instance.m_converter), p_instance.m_channels, &m_error))
-    , m_channels(p_instance.m_channels) {
-    m_data = new SRC_DATA;
-    *m_data = *p_instance.m_data;
-    ratio(p_instance.m_data->src_ratio);
+resampler::resampler(resampler&& p_other)
+    : m_channels(p_other.m_channels)
+{
+    m_state = p_other.m_state;
+    p_other.m_state = nullptr;
+    m_data = p_other.m_data;
+    m_float_out.swap(p_other.m_float_out);
+}
+
+resampler& resampler::operator=(resampler&& p_other) {
+    m_state = p_other.m_state;
+    p_other.m_state = nullptr;
+    m_data = p_other.m_data;
+    m_channels = p_other.m_channels;
+    m_float_out.swap(p_other.m_float_out);
+    return *this;
 }
 
 resampler::~resampler() {
-    src_delete(m_state);
-    delete m_data;
-}
-
-float resampler::ratio() {
-    return static_cast<float>(m_data->src_ratio);
-}
-
-void resampler::check_error() {
-    if (m_error != 0) {
-        error("resampler error: {}", src_strerror(m_error));
-        m_error = 0;
+    if(m_state != nullptr) {
+        src_delete(m_state);
     }
 }
 
-void resampler::ratio(float p_ratio) {
-    m_data->src_ratio = p_ratio;
+float resampler::ratio() const {
+    return static_cast<float>(m_data.src_ratio);
 }
 
-std::vector<int16_t> resampler::process(std::vector<float>::iterator p_begin,
-                                        std::vector<float>::iterator p_end,
-                                        bool p_last) {
-    int len = std::distance(p_begin, p_end),
-        out_len = std::ceil(len * m_data->src_ratio);
-    float_out.reserve(out_len);
+void resampler::ratio(float p_ratio) {
+    m_data.src_ratio = p_ratio;
+}
 
-    m_data->data_in = &(*p_begin);
-    m_data->data_out = float_out.data();
-    m_data->input_frames = len / m_channels;
-    m_data->output_frames = out_len / m_channels;
-    m_data->end_of_input = p_last;
+void resampler::reset() {
+    src_reset(m_state);
+}
 
-    src_process(m_state, m_data);
-    check_error();
+const std::vector<float>& resampler::process(std::vector<float>::const_iterator p_begin, int p_num_frames, bool p_last) {
+    if(m_state == nullptr) {
+        m_float_out.assign(p_begin, std::next(p_begin, p_num_frames * m_channels));
+    } else {
+        out_len = std::ceil(p_num_frames * m_data.src_ratio);
+        m_float_out.reserve(out_len * m_channels);
 
-    std::vector<int16_t> out(m_data->output_frames_gen * m_channels);
-    src_float_to_short_array(float_out.data(), out.data(), out.capacity());
-    out.resize(out.capacity());
+        m_data.data_in = &(*p_begin);
+        m_data.data_out = m_float_out.data();
+        m_data.input_frames = p_num_frames;
+        m_data.output_frames = out_len;
+        m_data.end_of_input = p_last;
 
-    return out;
+        if (int err = src_process(m_state, &m_data)) {
+            error("resampler::process error: {}", src_strerror(err));
+        }
+
+        m_float_out.resize(m_data.output_frames_gen * m_channels);
+    }
+    return m_float_out;
 }

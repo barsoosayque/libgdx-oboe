@@ -15,24 +15,28 @@ class resampler {
         };
 
         resampler(resampler::converter p_converter, int8_t p_channels, float p_ratio);
-        resampler(const resampler&);
+        // no copy (todo: copy constructor)
+        resampler(const resampler&) = delete;
+        resampler& operator=(const resampler&) = delete;
+        resampler(resampler&&);
+        resampler& operator=(resampler&&);
         ~resampler();
 
         void ratio(float p_ratio);
-        float ratio();
+        float ratio() const;
 
-        std::vector<int16_t> process(std::vector<float>::iterator p_begin,
-                                     std::vector<float>::iterator p_end,
-                                     bool p_last = false);
+        void reset();
+
+        const std::vector<float>& process(std::vector<float>::const_iterator p_begin, int p_num_frames, bool p_last = false);
 
     private:
-        void check_error();
-
         SRC_STATE* m_state;
-        SRC_DATA* m_data;
-        int m_error;
-        converter m_converter;
+        SRC_DATA m_data;
         int8_t m_channels;
 
-        std::vector<float> float_out;
+        // internal variables
+        int out_len;
+
+        // cache vector to avoid runtime allocation
+        std::vector<float> m_float_out;
 };

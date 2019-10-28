@@ -30,7 +30,7 @@ void mixer::render(int16_t* p_audio_data, int32_t p_num_frames) {
     while(!m_rendering_flag.test_and_set(std::memory_order_acquire));
     for(const auto& track : m_tracks) {
         if(auto ptr = track.lock()) {
-            std::fill(m_buffer.begin(), m_buffer.begin() + m_buffer.capacity(), 0);
+            std::fill(m_buffer.begin(), m_buffer.begin() + p_num_frames * m_channels, 0);
             ptr->render(m_buffer.data(), p_num_frames);
 
             for(int i = 0; i < p_num_frames * m_channels; ++i) {
@@ -39,7 +39,7 @@ void mixer::render(int16_t* p_audio_data, int32_t p_num_frames) {
             }
         }
     }
-    m_tracks.erase(std::remove_if(m_tracks.begin(), m_tracks.end(), [](std::weak_ptr<renderable_audio> track) {
+    m_tracks.erase(std::remove_if(m_tracks.begin(), m_tracks.end(), [](const std::weak_ptr<renderable_audio>& track) {
         return track.expired();
     }), m_tracks.end());
     m_rendering_flag.clear();

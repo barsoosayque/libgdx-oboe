@@ -35,7 +35,7 @@ soundpool::sound soundpool::gen_sound(float p_volume, float p_pan, float p_speed
 
 long soundpool::play(float p_volume, float p_pan, float p_speed, bool p_loop) {
     while(!m_rendering_flag.test_and_set(std::memory_order_acquire));
-    m_sounds.push_back(gen_sound(p_volume, p_pan, p_speed, p_loop));
+    m_sounds.emplace_back(gen_sound(p_volume, p_pan, p_speed, p_loop));
     long id = m_sounds.back().m_id;
     m_rendering_flag.clear();
     return id;
@@ -66,8 +66,8 @@ void soundpool::stop() {
     for(auto& sound : m_sounds) {
         sound.m_cur_frame = 0;
         sound.m_paused = true;
-    m_rendering_flag.clear();
     }
+    m_rendering_flag.clear();
 }
 
 void soundpool::stop(long p_id) {
@@ -102,31 +102,38 @@ void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) {
 
     while(!m_rendering_flag.test_and_set(std::memory_order_acquire));
     int prevaluated = 0;
-    for(sound& p_sound : m_sounds) {
-        if(!p_sound.m_paused) {
-            auto iter = std::next(m_pcm.begin(), p_sound.m_cur_frame * m_channels);
-            const int size = std::min(p_num_frames, m_frames - p_sound.m_cur_frame);
-            const int source_frames = std::ceil(size / p_sound.m_resampler.ratio()) * m_channels;
+    for(auto it = m_sounds.begin(); it != m_sounds.end();) {
+        if(!it->m_paused) {
+            auto iter = std::next(m_pcm.cbegin(), it->m_cur_frame * m_channels);
+            const int size = std::min(p_num_frames, m_frames - it->m_cur_frame);
+            const int source_frames = std::ceil(size / it->m_resampler.ratio());
 
-            auto converted = p_sound.m_resampler.process(iter, std::next(iter, source_frames), size < p_num_frames);
-
-            int i = 0;
-            for (int16_t pcm : converted) {
-                prevaluated = static_cast<int>(p_audio_data[i]) + static_cast<int>(pcm * p_sound.m_volume * p_sound.m_pan.modulation(i % m_channels));
-                p_audio_data[i] = static_cast<int16_t>(std::clamp(prevaluated, limit_down, limit_up));
-                i++;
+            const std::vector<float>& converted = it->m_resampler.process(iter, source_frames, size < p_num_frames);
+            if(converted.size() != size * m_channels) {
+                error("wrong converted size {} (expected {} of {})", converted.size(), size * m_channels, p_num_frames * m_channels);
             }
 
-            p_sound.m_cur_frame += source_frames / m_channels;
+            iter = converted.begin();
+            auto end = std::next(iter, size * m_channels);
+            for (int i = 0; iter != end; ++iter, ++i) {
+                prevaluated = static_cast<int>(p_audio_data[i]) + static_cast<int>(*iter * limit_up * it->m_volume * it->m_pan.modulation(i % m_channels));
+                p_audio_data[i] = static_cast<int16_t>(std::clamp(prevaluated, limit_down, limit_up));
+            }
+
+            it->m_cur_frame += source_frames;
         }
 
-        if(p_sound.m_cur_frame >= m_frames && p_sound.m_looping) {
-            p_sound.m_cur_frame = 0;
+        if(it->m_cur_frame >= m_frames) {
+            if(it->m_looping) {
+                it->m_cur_frame = 0;
+                it->m_resampler.reset();
+            } else {
+                it = m_sounds.erase(it);
+            }
+        } else {
+            it++;
         }
     }
-    m_sounds.erase(std::remove_if(m_sounds.begin(), m_sounds.end(), [&](const sound& p_sound) {
-        return p_sound.m_cur_frame >= m_frames;
-    }), m_sounds.end());
     m_rendering_flag.clear();
 }
 
