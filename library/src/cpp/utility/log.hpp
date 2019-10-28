@@ -25,7 +25,7 @@ void log(log_level p_level, std::string_view p_template, Params... p_params) {
         case log_level::error: level = ANDROID_LOG_ERROR; break;
     }
 
-    __android_log_print(level, "[libGDX Oboe]", "%s", message.c_str());
+    __android_log_print(level, "libGDX-Oboe", "%s", message.c_str());
 }
 
 // <><><><><><><><><><><><><><><><><><><><>
