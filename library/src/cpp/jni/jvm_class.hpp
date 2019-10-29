@@ -3,19 +3,38 @@
 #include "jvm_signature.hpp"
 #include "jni_context.hpp"
 #include "jvm_object.hpp"
+#include "../utility/log.hpp"
 #include <memory>
 #include <string_view>
 #include <type_traits>
+#include <unordered_map>
 
-// TODO: cache fieldID and methodID
 class jvm_class {
     public:
-        jvm_class(std::string_view p_class_name) {
-            auto context = jni_context::acquire_thread();
-            m_class = jvm_object(context->FindClass(p_class_name.data()));
+        jvm_class(std::string_view p_class_name)
+            : m_class_name(p_class_name)
+            , m_class_name_hash(std::hash<std::string_view>()(p_class_name))
+        {
+            auto it = g_class_cache.find(m_class_name_hash);
+            if(it != g_class_cache.end()) {
+                m_class = it->second;
+            } else {
+#ifdef REPORT_UNCACHED_JNI
+                warn("jvm_class: usage of uncached jclass \"{}\"", p_class_name);
+#endif
+                auto context = jni_context::acquire_thread();
+                m_class = jvm_object(context->FindClass(p_class_name.data()));
+            }
         }
 
-        jvm_class(jclass p_class) : m_class(p_class) {}
+        jvm_class(jclass p_class) : m_class(p_class) {
+            auto context = jni_context::acquire_thread();
+            jmethodID get_name = context->GetMethodID(m_class, "getName", "()Ljava/lang/String;");
+            jstring name = static_cast<jstring>(context->CallObjectMethod(m_class, get_name));
+            m_class_name = std::string{context->GetStringUTFChars(name, NULL)};
+            m_class_name_hash = std::hash<std::string>()(m_class_name);
+            context->DeleteLocalRef(name);
+        }
 
         template <class... Args>
         jobject construct(Args... p_args) {
@@ -26,12 +45,32 @@ class jvm_class {
 
         template <class F>
         jmethodID find_method(std::string_view p_name) {
+            auto method_map = g_method_cache.find(m_class_name_hash);
+            if(method_map != g_method_cache.end()) {
+                auto it = method_map->second.find(std::hash<std::string_view>()(p_name));
+                if(it != method_map->second.end()) {
+                    return it->second;
+                }
+            }
+#ifdef REPORT_UNCACHED_JNI
+            warn("jvm_class: usage of uncached jmethodID \"{}\" (class: \"{}\")", p_name, m_class_name);
+#endif
             auto context = jni_context::acquire_thread();
             return context->GetMethodID(m_class, p_name.data(), jvm_signature<F>());
         }
 
         template <class F>
         jfieldID find_field(std::string_view p_name) {
+            auto field_map = g_field_cache.find(m_class_name_hash);
+            if(field_map != g_field_cache.end()) {
+                auto it = field_map->second.find(std::hash<std::string_view>()(p_name));
+                if(it != field_map->second.end()) {
+                    return it->second;
+                }
+            }
+#ifdef REPORT_UNCACHED_JNI
+            warn("jvm_class: usage of uncached jfieldID \"{}\" (class: \"{}\")", p_name, m_class_name);
+#endif
             auto context = jni_context::acquire_thread();
             return context->GetFieldID(m_class, p_name.data(), jvm_signature<F>());
         }
@@ -85,6 +124,22 @@ class jvm_class {
                 return static_cast<return_type>(context->CallObjectMethod(p_obj, method, p_args...));
             }
         }
+
+        static jclass cache_class(std::string_view p_class_name) {
+            return 0;
+        }
+        static jfieldID cache_field(std::string_view p_class_name, std::string_view p_field_name) {
+            return 0;
+        }
+        static jmethodID cache_method(std::string_view p_class_name, std::string_view p_method_name) {
+            return 0;
+        }
     private:
+        static std::unordered_map<std::size_t, jclass> g_class_cache;
+        static std::unordered_map<std::size_t, std::unordered_map<std::size_t, jfieldID>> g_field_cache;
+        static std::unordered_map<std::size_t, std::unordered_map<std::size_t, jmethodID>> g_method_cache;
+
         jvm_object<jclass> m_class;
+        std::string m_class_name;
+        std::size_t m_class_name_hash;
 };
