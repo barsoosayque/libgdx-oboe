@@ -30,7 +30,8 @@ class jvm_class {
 
         jvm_class(jclass p_class) : m_class(p_class) {
             auto context = jni_context::acquire_thread();
-            jmethodID get_name = context->GetMethodID(m_class, "getName", "()Ljava/lang/String;");
+            jclass cls_class = context->GetObjectClass(m_class);
+            jmethodID get_name = context->GetMethodID(cls_class, "getName", "()Ljava/lang/String;");
             jstring name = static_cast<jstring>(context->CallObjectMethod(m_class, get_name));
             m_class_name = std::string{context->GetStringUTFChars(name, NULL)};
             m_class_name_hash = std::hash<std::string>()(m_class_name);
