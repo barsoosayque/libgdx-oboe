@@ -16,6 +16,7 @@ audio_engine::audio_engine(int8_t p_channels, int32_t p_sample_rate)
     , m_sample_rate(p_sample_rate)
     , m_volume(1)
     , m_mode(mode::mix)
+    , m_rendering_flag(false)
     , m_is_playing(false) {
     connect_to_device();
 }
@@ -53,7 +54,7 @@ void audio_engine::onErrorAfterClose(AudioStream* self, Result p_error) {
 }
 
 DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_data, int32_t p_num_frames) {
-    std::scoped_lock lock(m_stream_mutex);
+    while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     auto stream = static_cast<int16_t*>(p_audio_data);
 
     switch(m_mode) {
@@ -79,6 +80,7 @@ DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_d
             }
         break;
     }
+    m_rendering_flag.clear(std::memory_order_release);
 
     return DataCallbackResult::Continue;
 }
@@ -101,19 +103,21 @@ void audio_engine::play(std::shared_ptr<renderable_audio> p_audio) {
 }
 
 void audio_engine::play(const std::vector<int16_t>& p_pcm) {
-    std::scoped_lock lock(m_stream_mutex);
+    while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     m_mode = mode::stream;
     std::move(p_pcm.cbegin(), p_pcm.cend(), std::back_inserter(m_pcm_buffer));
+    m_rendering_flag.clear(std::memory_order_release);
 }
 
 void audio_engine::play(const std::vector<float>& p_pcm) {
-    std::scoped_lock lock(m_stream_mutex);
+    while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     m_mode = mode::stream;
     std::transform(p_pcm.cbegin(), p_pcm.cend(), std::back_inserter(m_pcm_buffer),
                    [](const float& p_sample) {
                        auto converted = p_sample * std::numeric_limits<int16_t>::max();
                        return static_cast<int16_t>(converted);
                    });
+    m_rendering_flag.clear(std::memory_order_release);
 }
 
 bool audio_engine::is_mono() {
