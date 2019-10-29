@@ -46,13 +46,13 @@ bool music::is_playing() {
 }
 
 void music::position(float p_position) {
-    while(!m_buffer_swap.test_and_set(std::memory_order_acquire));
+    while(m_buffer_swap.test_and_set(std::memory_order_acquire));
     m_decoder->seek(p_position);
     m_position = p_position;
     fill_second_buffer();
     swap_buffers();
     m_executor.queue();
-    m_buffer_swap.clear();
+    m_buffer_swap.clear(std::memory_order_release);
 }
 
 float music::position() {
@@ -99,13 +99,13 @@ void music::raw_render(int16_t* p_stream, int32_t p_frames) {
 
 void music::render(int16_t* p_stream, int32_t p_frames) {
     if(!m_playing) return;
-    while(!m_buffer_swap.test_and_set(std::memory_order_acquire));
+    while(m_buffer_swap.test_and_set(std::memory_order_acquire));
 
     int32_t frames_in_pcm = m_main_pcm.size() / m_channels;
     int32_t frames_to_process = std::min(p_frames, frames_in_pcm - m_current_frame);
 
     raw_render(p_stream, frames_to_process);
-    m_buffer_swap.clear();
+    m_buffer_swap.clear(std::memory_order_release);
 
     if (frames_to_process < p_frames) {
         if (m_eof) {
@@ -125,9 +125,9 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
         }
 
         // render additional pcm to fill full stream
-        while(!m_buffer_swap.test_and_set(std::memory_order_acquire));
+        while(m_buffer_swap.test_and_set(std::memory_order_acquire));
         int16_t remain = p_frames - frames_to_process;
         raw_render(p_stream + frames_to_process * m_channels, remain);
-        m_buffer_swap.clear();
+        m_buffer_swap.clear(std::memory_order_release);
     }
 }
