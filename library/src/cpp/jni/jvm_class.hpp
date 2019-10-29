@@ -4,6 +4,7 @@
 #include "jni_context.hpp"
 #include "jvm_object.hpp"
 #include "../utility/log.hpp"
+#include "../utility/hash.hpp"
 #include <memory>
 #include <string_view>
 #include <type_traits>
@@ -45,34 +46,30 @@ class jvm_class {
 
         template <class F>
         jmethodID find_method(std::string_view p_name) {
-            auto method_map = g_method_cache.find(m_class_name_hash);
-            if(method_map != g_method_cache.end()) {
-                auto it = method_map->second.find(std::hash<std::string_view>()(p_name));
-                if(it != method_map->second.end()) {
-                    return it->second;
-                }
-            }
+            auto it = g_method_cache.find(gen_method_hash<F>(m_class_name, p_name));
+            if(it != g_method_cache.end()) {
+                return it->second;
+            } else {
 #ifdef REPORT_UNCACHED_JNI
-            warn("jvm_class: usage of uncached jmethodID \"{}\" (class: \"{}\")", p_name, m_class_name);
+                warn("jvm_class: usage of uncached jmethodID \"{}\" (class: \"{}\")", p_name, m_class_name);
 #endif
-            auto context = jni_context::acquire_thread();
-            return context->GetMethodID(m_class, p_name.data(), jvm_signature<F>());
+                auto context = jni_context::acquire_thread();
+                return context->GetMethodID(m_class, p_name.data(), jvm_signature<F>());
+            }
         }
 
         template <class F>
         jfieldID find_field(std::string_view p_name) {
-            auto field_map = g_field_cache.find(m_class_name_hash);
-            if(field_map != g_field_cache.end()) {
-                auto it = field_map->second.find(std::hash<std::string_view>()(p_name));
-                if(it != field_map->second.end()) {
-                    return it->second;
-                }
-            }
+            auto it = g_field_cache.find(gen_field_hash(m_class_name, p_name));
+            if(it != g_field_cache.end()) {
+                return it->second;
+            } else {
 #ifdef REPORT_UNCACHED_JNI
-            warn("jvm_class: usage of uncached jfieldID \"{}\" (class: \"{}\")", p_name, m_class_name);
+                warn("jvm_class: usage of uncached jfieldID \"{}\" (class: \"{}\")", p_name, m_class_name);
 #endif
-            auto context = jni_context::acquire_thread();
-            return context->GetFieldID(m_class, p_name.data(), jvm_signature<F>());
+                auto context = jni_context::acquire_thread();
+                return context->GetFieldID(m_class, p_name.data(), jvm_signature<F>());
+            }
         }
 
         template <class F>
@@ -125,19 +122,52 @@ class jvm_class {
             }
         }
 
-        static jclass cache_class(std::string_view p_class_name) {
-            return 0;
+        static void cache_class(std::string_view p_class_name) {
+            auto context = jni_context::acquire_thread();
+            g_class_cache[std::hash<std::string_view>()(p_class_name)] =
+                jvm_object(context->FindClass(p_class_name.data()));
         }
-        static jfieldID cache_field(std::string_view p_class_name, std::string_view p_field_name) {
-            return 0;
+        template <class F>
+        static void cache_field(std::string_view p_class_name, std::string_view p_field_name) {
+            auto context = jni_context::acquire_thread();
+            std::size_t class_hash = std::hash<std::string_view>()(p_class_name);
+            auto it = g_class_cache.find(class_hash);
+            if(it != g_class_cache.end()) {
+                g_field_cache[gen_field_hash(p_class_name, p_field_name)] =
+                    context->GetFieldID(it->second, p_field_name.data(), jvm_signature<F>());
+            } else {
+                warn("jvm_class: caching field \"{}\" with uncached class \"{}\". Skipping...", p_field_name, p_class_name);
+            }
         }
-        static jmethodID cache_method(std::string_view p_class_name, std::string_view p_method_name) {
-            return 0;
+        template <class F>
+        static void cache_method(std::string_view p_class_name, std::string_view p_method_name) {
+            auto context = jni_context::acquire_thread();
+            std::size_t class_hash = std::hash<std::string_view>()(p_class_name);
+            auto it = g_class_cache.find(class_hash);
+            if(it != g_class_cache.end()) {
+                g_method_cache[gen_method_hash<F>(p_class_name, p_method_name)] =
+                    context->GetMethodID(it->second, p_method_name.data(), jvm_signature<F>());
+            } else {
+                warn("jvm_class: caching method \"{}\" with uncached class \"{}\". Skipping...", p_method_name, p_class_name);
+            }
         }
+
+        using class_cache_map = std::unordered_map<std::size_t, jvm_object<jclass>>;
+        using field_cache_map = std::unordered_map<std::size_t, jfieldID>;
+        using method_cache_map = std::unordered_map<std::size_t, jmethodID>;
     private:
-        static std::unordered_map<std::size_t, jclass> g_class_cache;
-        static std::unordered_map<std::size_t, std::unordered_map<std::size_t, jfieldID>> g_field_cache;
-        static std::unordered_map<std::size_t, std::unordered_map<std::size_t, jmethodID>> g_method_cache;
+        static class_cache_map g_class_cache;
+        static field_cache_map g_field_cache;
+        static method_cache_map g_method_cache;
+
+        inline static std::size_t gen_field_hash(std::string_view p_class_name, std::string_view p_field_name) {
+            return merge_hash(p_class_name, p_field_name);
+        }
+
+        template <class F>
+        inline static std::size_t gen_method_hash(std::string_view p_class_name, std::string_view p_method_name) {
+            return merge_hash(p_class_name, p_method_name, jvm_signature<F>());
+        }
 
         jvm_object<jclass> m_class;
         std::string m_class_name;
