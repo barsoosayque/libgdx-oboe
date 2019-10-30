@@ -11,7 +11,7 @@ music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
     , m_decoder(p_decoder)
     , m_current_frame(0)
     , m_buffer_swap(false)
-    , m_executor([this]() { fill_second_buffer(); }) {
+    , m_executor([&]() { fill_second_buffer(); }) {
     m_main_pcm.reserve(m_cache_size);
     stop();
 }
@@ -87,14 +87,14 @@ void music::raw_render(int16_t* p_stream, int32_t p_frames) {
     if(!m_playing) return;
 
     auto iter = std::next(m_main_pcm.begin(), m_current_frame * m_channels);
-    for(int frame = 0; frame < p_frames; ++frame, ++m_current_frame) {
-        for(int sample = 0; sample < m_channels; ++sample, std::advance(iter, 1)) {
-            p_stream[frame * m_channels + sample] += *iter * m_volume * m_pan.modulation(sample);
-        }
+    int size = p_frames * m_channels;
+    for(int sample = 0; sample < size; ++sample, std::advance(iter, 1)) {
+        p_stream[sample] += *iter * m_volume * m_pan.modulation(sample % m_channels);
     }
 
     // TODO remove hard-coded stuff
     m_position += p_frames / 44100.0f;
+    m_current_frame += p_frames;
 }
 
 void music::render(int16_t* p_stream, int32_t p_frames) {
@@ -108,7 +108,8 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
     m_buffer_swap.clear(std::memory_order_release);
 
     if (frames_to_process < p_frames) {
-        if (m_eof) {
+        bool end = m_eof && m_current_frame >= frames_in_pcm;
+        if (end) {
             m_playing = m_looping;
             m_position = 0;
             if (m_on_complete && !m_looping) m_on_complete();
@@ -117,11 +118,11 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
         // wait for buffer in case there was no position reset
         m_executor.wait();
         swap_buffers();
-        m_executor.queue();
         if(m_playing) {
             if (m_looping && m_decoder->m_eof) {
                 m_decoder->seek(0);
             }
+            m_executor.queue();
         }
 
         // render additional pcm to fill full stream
