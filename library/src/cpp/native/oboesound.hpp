@@ -22,7 +22,7 @@ OBOESOUND_METHOD(void, setLooping) (JNIEnv*, jobject, jlong, bool);
 OBOESOUND_METHOD(void, dispose) (JNIEnv*, jobject);
 OBOESOUND_METHOD(void, setPitch) (JNIEnv*, jobject, jlong, jfloat);
 OBOESOUND_METHOD(void, setPan) (JNIEnv*, jobject, jlong, jfloat, jfloat);
-OBOESOUND_METHOD(void, play) (JNIEnv*, jobject, jfloat, jfloat, jfloat);
-OBOESOUND_METHOD(void, loop) (JNIEnv*, jobject, jfloat, jfloat, jfloat);
+OBOESOUND_METHOD(jlong, play) (JNIEnv*, jobject, jfloat, jfloat, jfloat);
+OBOESOUND_METHOD(jlong, loop) (JNIEnv*, jobject, jfloat, jfloat, jfloat);
 
 }
