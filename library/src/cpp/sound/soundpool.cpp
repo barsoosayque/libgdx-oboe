@@ -12,13 +12,13 @@ soundpool::soundpool(const data& p_pcm, int8_t p_channels)
     , m_rendering_flag(false)
 {}
 
-void soundpool::do_by_id(long p_id, std::function<void(soundpool::sound&)> p_callback) {
+void soundpool::do_by_id(long p_id, std::function<void(std::vector<soundpool::sound>::iterator)> p_callback) {
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     auto iter = std::find_if(m_sounds.begin(), m_sounds.end(), [p_id](const soundpool::sound& p_sound) {
         return p_sound.m_id == p_id;
     });
     if(iter != m_sounds.end()) {
-        p_callback(*iter);
+        p_callback(iter);
     }
     m_rendering_flag.clear(std::memory_order_release);
 }
@@ -50,7 +50,7 @@ void soundpool::pause() {
 }
 
 void soundpool::pause(long p_id) {
-    do_by_id(p_id, [](sound& p_sound) { p_sound.m_paused = true; });
+    do_by_id(p_id, [](auto p_sound) { p_sound->m_paused = true; });
 }
 
 void soundpool::resume() {
@@ -60,42 +60,38 @@ void soundpool::resume() {
 }
 
 void soundpool::resume(long p_id) {
-    do_by_id(p_id, [](sound& p_sound) { p_sound.m_paused = false; });
+    do_by_id(p_id, [](auto p_sound) { p_sound->m_paused = false; });
 }
 
 void soundpool::stop() {
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
-    for(auto& sound : m_sounds) {
-        sound.m_cur_frame = 0;
-        sound.m_paused = true;
-    }
+    m_sounds.clear();
     m_rendering_flag.clear(std::memory_order_release);
 }
 
 void soundpool::stop(long p_id) {
-    do_by_id(p_id, [](sound& p_sound) {
-        p_sound.m_cur_frame = 0;
-        p_sound.m_paused = true;
+    do_by_id(p_id, [&](auto p_sound) {
+        m_sounds.erase(p_sound);
     });
 }
 
 void soundpool::volume(long p_id, float p_volume) {
-    do_by_id(p_id, [p_volume](sound& p_sound) { p_sound.m_volume = p_volume; });
+    do_by_id(p_id, [p_volume](auto p_sound) { p_sound->m_volume = p_volume; });
 }
 
 void soundpool::looping(long p_id, bool p_loop) {
-    do_by_id(p_id, [p_loop](sound& p_sound) { p_sound.m_looping = p_loop; });
+    do_by_id(p_id, [p_loop](auto p_sound) { p_sound->m_looping = p_loop; });
 }
 
 void soundpool::speed(long p_id, float p_speed) {
-    do_by_id(p_id, [p_speed](sound& p_sound) {
+    do_by_id(p_id, [p_speed](auto p_sound) {
         auto speed = std::clamp(p_speed, 0.5f, 2.0f);
-        p_sound.m_resampler.ratio(1.f / speed);
+        p_sound->m_resampler.ratio(1.f / speed);
     });
 }
 
 void soundpool::pan(long p_id, float p_pan) {
-    do_by_id(p_id, [p_pan](sound& p_sound) { p_sound.m_pan.pan(p_pan); });
+    do_by_id(p_id, [p_pan](auto p_sound) { p_sound->m_pan.pan(p_pan); });
 }
 
 void soundpool::render(int16_t* p_audio_data, int32_t p_num_frames) {
