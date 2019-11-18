@@ -60,6 +60,7 @@ android {
                 cppFlags "-std=c++17 -O3 -DCMAKE_BUILD_TYPE=Release -DNDEBUG"
             }
         }
+        consumerProguardFiles 'proguard-rules.pro'
     }
     externalNativeBuild {
         cmake {
