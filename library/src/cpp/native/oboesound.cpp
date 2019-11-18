@@ -2,28 +2,20 @@
 #include "../sound/soundpool.hpp"
 #include "../utility/var.hpp"
 
+OBOESOUND_METHOD(jlong, play) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
+    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, pitch, pan, false);
+}
+
+OBOESOUND_METHOD(jlong, loop) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
+    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, pitch, pan, true);
+}
+
 OBOESOUND_METHOD(void, pause__) (JNIEnv* env, jobject self) {
     shared_ptr_var<soundpool>(env, self, "soundpool")->pause();
 }
 
 OBOESOUND_METHOD(void, pause__J) (JNIEnv* env, jobject self, jlong id) {
     shared_ptr_var<soundpool>(env, self, "soundpool")->pause(id);
-}
-
-OBOESOUND_METHOD(jlong, play__) (JNIEnv* env, jobject self) {
-    return shared_ptr_var<soundpool>(env, self, "soundpool")->play();
-}
-
-OBOESOUND_METHOD(jlong, play__F) (JNIEnv* env, jobject self, jfloat volume) {
-    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume);
-}
-
-OBOESOUND_METHOD(jlong, loop__) (JNIEnv* env, jobject self) {
-    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(1.0f, true);
-}
-
-OBOESOUND_METHOD(jlong, loop__F) (JNIEnv* env, jobject self, jfloat volume) {
-    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, true);
 }
 
 OBOESOUND_METHOD(void, stop__) (JNIEnv* env, jobject self) {
@@ -62,12 +54,4 @@ OBOESOUND_METHOD(void, setPan) (JNIEnv* env, jobject self, jlong id, jfloat pan,
     auto instance = shared_ptr_var<soundpool>(env, self, "soundpool");
     instance->pan(id, pan);
     instance->volume(id, volume);
-}
-
-OBOESOUND_METHOD(jlong, play) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
-    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, pan, pitch, false);
-}
-
-OBOESOUND_METHOD(jlong, loop) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
-    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, pan, pitch, true);
 }

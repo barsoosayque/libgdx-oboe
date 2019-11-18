@@ -35,7 +35,7 @@ soundpool::sound soundpool::gen_sound(float p_volume, float p_pan, float p_speed
     };
 }
 
-long soundpool::play(float p_volume, float p_pan, float p_speed, bool p_loop) {
+long soundpool::play(float p_volume, float p_speed, float p_pan, bool p_loop) {
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     m_sounds.emplace_back(gen_sound(p_volume, p_pan, p_speed, p_loop));
     long id = m_sounds.back().m_id;

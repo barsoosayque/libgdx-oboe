@@ -13,8 +13,8 @@ class soundpool: public renderable_audio {
         void render(int16_t* p_stream, int32_t p_frames);
 
         long play(float p_volume = 1.0f,
-                  float p_pan = 0.0f,
                   float p_speed = 1.0f,
+                  float p_pan = 0.0f,
                   bool p_loop = false);
 
         void pause();
