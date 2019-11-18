@@ -64,10 +64,10 @@ OBOESOUND_METHOD(void, setPan) (JNIEnv* env, jobject self, jlong id, jfloat pan,
     instance->volume(id, volume);
 }
 
-OBOESOUND_METHOD(void, play) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
-    shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, pan, pitch, false);
+OBOESOUND_METHOD(jlong, play) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
+    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, pan, pitch, false);
 }
 
-OBOESOUND_METHOD(void, loop) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
-    shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, pan, pitch, true);
+OBOESOUND_METHOD(jlong, loop) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
+    return shared_ptr_var<soundpool>(env, self, "soundpool")->play(volume, pan, pitch, true);
 }
