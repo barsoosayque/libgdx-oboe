@@ -5,7 +5,7 @@
 
 OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
     // set default audioEngine in OboeAudio class
-    set_var_as(env, self, "audioEngine", new audio_engine(2));
+    set_var_as(env, self, "audioEngine", new audio_engine(audio_engine::mode::async, 2));
 }
 
 OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jobject fd) {
@@ -31,7 +31,7 @@ OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd)
 
 OBOEAUDIO_METHOD(jlong, createAudioEngine) (JNIEnv* env, jobject self, jint sample_rate, bool mono) {
     auto ptr = new std::shared_ptr<audio_engine>();
-    *ptr = std::make_shared<audio_engine>(mono ? 1 : 2, sample_rate);
+    *ptr = std::make_shared<audio_engine>(audio_engine::mode::blocking, mono ? 1 : 2, sample_rate);
     (*ptr)->resume();
 
     return reinterpret_cast<jlong>(ptr);

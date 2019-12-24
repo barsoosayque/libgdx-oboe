@@ -29,6 +29,12 @@ void log(log_level p_level, std::string_view p_template, Params... p_params) {
     __android_log_print(level, "libGDX-Oboe", "%s", message.c_str());
 }
 
+inline void android_assert(bool p_cond, std::string_view p_msg) {
+    if(!p_cond) {
+        __android_log_assert(p_msg.data(), "libGDX-Oboe", nullptr);
+    }
+}
+
 // <><><><><><><><><><><><><><><><><><><><>
 //                User API
 // <><><><><><><><><><><><><><><><><><><><>

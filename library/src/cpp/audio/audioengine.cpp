@@ -1,3 +1,4 @@
+#include "assert.h"
 #include "audioengine.hpp"
 #include "../utility/ptrptr.hpp"
 #include "../utility/log.hpp"
@@ -9,15 +10,15 @@
 
 using namespace oboe;
 
-audio_engine::audio_engine(int8_t p_channels, int32_t p_sample_rate)
+audio_engine::audio_engine(mode p_mode, int8_t p_channels, int32_t p_sample_rate)
     : AudioStreamCallback()
     , m_mixer(std::make_unique<mixer>(1024, p_channels))
     , m_channels(p_channels)
     , m_sample_rate(p_sample_rate)
     , m_volume(1)
-    , m_mode(mode::mix)
     , m_rendering_flag(false)
-    , m_is_playing(false) {
+    , m_is_playing(false)
+    , m_mode(p_mode) {
     connect_to_device();
 }
 
@@ -31,7 +32,9 @@ void audio_engine::connect_to_device() {
     AudioStreamBuilder builder;
     builder.setChannelCount(m_channels);
     builder.setSampleRate(m_sample_rate);
-    builder.setCallback(this);
+    if(m_mode == mode::async) {
+        builder.setCallback(this);
+    }
     builder.setFormat(AudioFormat::I16);
     builder.setPerformanceMode(PerformanceMode::LowLatency);
     builder.setSharingMode(SharingMode::Exclusive);
@@ -56,30 +59,7 @@ void audio_engine::onErrorAfterClose(AudioStream* self, Result p_error) {
 DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_data, int32_t p_num_frames) {
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     auto stream = static_cast<int16_t*>(p_audio_data);
-
-    switch(m_mode) {
-        case mode::mix:
-            m_mixer->render(stream, p_num_frames);
-        break;
-        case mode::stream:
-            int32_t num_samples = p_num_frames * m_channels;
-            if(!m_pcm_buffer.empty()) {
-                int32_t size = std::min(num_samples, static_cast<int32_t>(m_pcm_buffer.size()));
-                auto it = m_pcm_buffer.begin();
-                for (int i = 0; i < size && it != m_pcm_buffer.end(); ++i) {
-                    stream[i] = *it * m_volume;
-                    it = m_pcm_buffer.erase(it);
-                }
-                for (int i = 0; i < (num_samples - size); ++i) {
-                    stream[size + i] = 0;
-                }
-            } else {
-                for (int i = 0; i < num_samples; ++i) {
-                    stream[i] = 0;
-                }
-            }
-        break;
-    }
+    m_mixer->render(stream, p_num_frames);
     m_rendering_flag.clear(std::memory_order_release);
 
     return DataCallbackResult::Continue;
@@ -98,26 +78,24 @@ void audio_engine::stop() {
 }
 
 void audio_engine::play(std::shared_ptr<renderable_audio> p_audio) {
-    m_mode = mode::mix;
+    android_assert(m_mode == mode::async, "playing sounds and music in blocking mode is not implemented.");
     m_mixer->play_audio(p_audio);
 }
 
 void audio_engine::play(const std::vector<int16_t>& p_pcm) {
-    while(m_rendering_flag.test_and_set(std::memory_order_acquire));
-    m_mode = mode::stream;
-    std::move(p_pcm.cbegin(), p_pcm.cend(), std::back_inserter(m_pcm_buffer));
-    m_rendering_flag.clear(std::memory_order_release);
+    android_assert(m_mode == mode::blocking, "playing raw pcm in async mode is not implemented.");
+    m_stream->write(p_pcm.data(), p_pcm.size() / m_channels, std::numeric_limits<int64_t>::max());
 }
 
 void audio_engine::play(const std::vector<float>& p_pcm) {
-    while(m_rendering_flag.test_and_set(std::memory_order_acquire));
-    m_mode = mode::stream;
+    android_assert(m_mode == mode::blocking, "playing raw pcm in async mode is not implemented.");
+    m_pcm_buffer.clear();
     std::transform(p_pcm.cbegin(), p_pcm.cend(), std::back_inserter(m_pcm_buffer),
                    [](const float& p_sample) {
                        auto converted = p_sample * std::numeric_limits<int16_t>::max();
                        return static_cast<int16_t>(converted);
                    });
-    m_rendering_flag.clear(std::memory_order_release);
+    m_stream->write(m_pcm_buffer.data(), m_pcm_buffer.size() / m_channels, std::numeric_limits<int64_t>::max());
 }
 
 bool audio_engine::is_mono() {

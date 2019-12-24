@@ -10,7 +10,6 @@ import ktx.actors.onChangeEvent
 import ktx.actors.txt
 import ktx.scene2d.*
 import kotlin.math.roundToInt
-import com.badlogic.gdx.utils.Array as GdxArray
 
 class AppUi : Stage(ExtendViewport(480f, 700f)) {
     private val audioDevice = Gdx.audio.newAudioDevice(DEVICE_HZ, true)
@@ -40,8 +39,10 @@ class AppUi : Stage(ExtendViewport(480f, 700f)) {
             container {
                 width(400f).height(100f)
                 textButton("Generate 1 second of sin").onChange {
-                    val payload = sin.generatePayload(1f)
-                    audioDevice.writeSamples(payload, 0, payload.size)
+                    repeat(4) {
+                        val payload = sin.generatePayload(0.25f)
+                        audioDevice.writeSamples(payload, 0, payload.size)
+                    }
                 }
             }
 
