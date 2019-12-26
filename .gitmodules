@@ -10,3 +10,7 @@
 [submodule "library/dependencies/libsamplerate"]
 	path = library/dependencies/libsamplerate
 	url = https://github.com/erikd/libsamplerate.git
+[submodule "library/dependencies/libav"]
+	shallow = true
+	path = library/dependencies/libav
+	url = git://git.libav.org/libav.git
