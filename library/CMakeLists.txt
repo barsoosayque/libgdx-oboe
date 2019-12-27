@@ -17,6 +17,14 @@ set (SAMPLERATE dependencies/libsamplerate)
 add_subdirectory (${SAMPLERATE} ./samplerate)
 include_directories (${SAMPLERATE}/include)
 
+set (LIBAV_DIR dependencies/libav)
+include_directories (${LIBAV_DIR})
+set (LIBAV_LIBS avformat avcodec avutil)
+foreach(LIB ${LIBAV_LIBS})
+    add_library( ${LIB} SHARED IMPORTED )
+    set_target_properties( ${LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so" )
+endforeach()
+
 set (SRC_DIR src/cpp)
 add_library(libgdx-oboe SHARED
             ${SRC_DIR}/samplerate/resampler.cpp
@@ -31,5 +39,5 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/native/oboeaudio.cpp
             ${SRC_DIR}/native/oboeaudiodevice.cpp)
 
-target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES)
+target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${LIBAV_LIBS})
 target_compile_options(libgdx-oboe PRIVATE -Wall -Werror "$<$<CONFIG:RELEASE>:-Ofast>")
