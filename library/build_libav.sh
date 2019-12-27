@@ -2,6 +2,9 @@
 
 # =============== Build definitions ===============
 
+CORES=4
+MAKE="make -j$CORES"
+
 HOST_NAME=$(uname -s | tr '[:upper:]' '[:lower:]')
 HOST_ARCH=$(uname -m)
 HOST_TAG="$HOST_NAME-$HOST_ARCH"
@@ -33,15 +36,22 @@ LIBAV_FLAGS="
 --disable-programs
 --disable-doc
 --disable-avdevice
---disable-avformat
 --disable-avfilter
 --disable-avresample
 --disable-network
 --disable-swscale
 --disable-everything
+--disable-encoders
+--enable-avformat
+--enable-avcodec
 --enable-libmp3lame
 --enable-libvorbis
 --enable-libwavpack
+--enable-pic
+--pkg-config-flags=--static
+--enable-runtime-cpudetect
+--disable-debug
+--enable-hardcoded-tables
 "
 
 # =============== Option handle ==============
@@ -60,13 +70,10 @@ while test $# -gt 0; do
             for ABI in $ABI_FILTERS; do
                 DIR="$(pwd)/libs/$ABI"
                 mkdir -p "$DIR"
-                cp -t "$DIR" \
+                cp -a -t "$DIR" \
                 $BUILD_ROOT/$ABI/lib/libavcodec.so \
                 $BUILD_ROOT/$ABI/lib/libavutil.so \
-                $BUILD_ROOT/$ABI/lib/libmp3lame.so \
-                $BUILD_ROOT/$ABI/lib/libogg.so \
-                $BUILD_ROOT/$ABI/lib/libvorbis.so \
-                $BUILD_ROOT/$ABI/lib/libwavpack.so
+                $BUILD_ROOT/$ABI/lib/libavformat.so
             done
             exit 0;
             ;;
@@ -110,7 +117,7 @@ echo "*************** Libav cross-compilation ***************"
 for ABI in $ABI_FILTERS; do
     echo "*************** $ABI ***************"
     CFLAGS=""
-    LDFLAGS=""
+    LDFLAGS="-Wl,-Bsymbolic"
     ABI_FLAGS=""
     case $ABI in
         x86)
@@ -157,24 +164,26 @@ for ABI in $ABI_FILTERS; do
     export LD=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-ld
     export RANLIB=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-ranlib
     export STRIP=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-strip
+
     AUTOCONF_CROSS_FLAGS="
     --quiet
     --with-pic
     --with-sysroot=$TOOLCHAIN/sysroot
     --host=$TOOLCHAIN_PREFIX
-    --enable-shared
-    --disable-static
+    --disable-shared
+    --enable-static
     --disable-frontend
     --disable-docs
     --disable-examples
+    --disable-encoder
     --prefix=$BUILD_ROOT/$ABI
     "
 
     echo "[1/5] Build $ABI libmp3lame..."
-    (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && make clean && make && make install)
+    (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
 
     echo "[2/5] Build $ABI libogg..."
-    (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && make clean && make && make install)
+    (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
 
     echo "[3/5] Build $ABI libvorbis..."
     LIBVORBIS_FLAGS="
@@ -182,7 +191,7 @@ for ABI in $ABI_FILTERS; do
     CFLAGS=-I$BUILD_ROOT/$ABI/include
     LDFLAGS=-L$BUILD_ROOT/$ABI/lib
     "
-    (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && make clean && make && make install)
+    (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
 
     echo "[4/5] Build $ABI libwavpack..."
     LIBWAVPACK_FLAGS="
@@ -191,18 +200,23 @@ for ABI in $ABI_FILTERS; do
     --disable-dsd
     --enable-legacy
     "
-    (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && make clean && make && make install)
+    (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && $MAKE clean && $MAKE && $MAKE install)
 
     echo "[5/5] Build $ABI libav..."
     ABI_FLAGS="
     $ABI_FLAGS
+    --pkg-config=pkgconf
     --cc=$CC
     --arch=$ARCH
     --sysroot=$TOOLCHAIN/sysroot
     --prefix=$BUILD_ROOT/$ABI
     --cross-prefix=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-
+     --env=PKG_CONFIG_PATH=$BUILD_ROOT/$ABI/lib/pkgconfig
     "
     CFLAGS="$CFLAGS -I$BUILD_ROOT/$ABI/include"
-    LDFLAGS="$LDFLAGS -L$BUILD_ROOT/$ABI/lib -Wl,-rpath -Wl,$BUILD_ROOT/$ABI/lib"
-    (cd "$LIBAV_ROOT" && ./configure --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS" $LIBAV_FLAGS $ABI_FLAGS && make clean && make && make install)
+    LDFLAGS="$LDFLAGS -L$BUILD_ROOT/$ABI/lib"
+    (cd "$LIBAV_ROOT" && \
+    ./configure --extra-libs="-lm" \
+        --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS" $LIBAV_FLAGS $ABI_FLAGS \
+    && $MAKE clean && $MAKE && $MAKE install)
 done
