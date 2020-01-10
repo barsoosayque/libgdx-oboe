@@ -14,7 +14,7 @@ LIBMP3LAME_ROOT="build/libmp3lame"
 LIBOGG_ROOT="build/libogg"
 LIBWAVPACK_ROOT="build/libwavpack"
 LIBVORBIS_ROOT="build/libvorbis"
-LIBAV_ROOT="dependencies/libav"
+FFMPEG_ROOT="dependencies/ffmpeg"
 BUILD_ROOT="$(pwd)/build/libs"
 NDK="$ANDROID_HOME/ndk-bundle"
 TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/$HOST_TAG"
@@ -26,7 +26,7 @@ ABI_FILTERS="x86 x86_64 armeabi-v7a arm64-v8a"
 MIN_SDK_VERSION="16"
 
 # Flags
-LIBAV_FLAGS="
+FFMPEG_FLAGS="
 --logfile=build.log
 --enable-cross-compile
 --target-os=android
@@ -42,6 +42,9 @@ LIBAV_FLAGS="
 --disable-swscale
 --disable-everything
 --disable-encoders
+--disable-zlib
+--disable-postproc
+--disable-swresample
 --enable-avformat
 --enable-avcodec
 --enable-libmp3lame
@@ -52,14 +55,22 @@ LIBAV_FLAGS="
 --enable-runtime-cpudetect
 --disable-debug
 --enable-hardcoded-tables
+--disable-protocols
+--enable-protocol=file
+--enable-protocol=pipe
+--enable-version3
+--disable-ffplay
+--disable-ffprobe
+--enable-gpl
+--enable-x86asm
 "
 
 # =============== Option handle ==============
 while test $# -gt 0; do
     case "$1" in
         --help|-h)
-            echo "build_libav.sh -- script to build libav for android with support for mp3, wav and ogg."
-            echo "usage: build_libav.sh (-h|--help) (--update) (--clear)"
+            echo "build_ffmpeg.sh -- script to build ffmpeg for android with support for mp3, wav and ogg."
+            echo "usage: build_ffmpeg.sh (-h|--help) (--update) (--clear)"
             echo "options:"
             echo "    -h, --help:  print this message and exit."
             echo "    --update:    copy built libraries to ./libs (this option assume that the library is built)."
@@ -124,7 +135,8 @@ for ABI in $ABI_FILTERS; do
             ARCH=x86
             TOOLCHAIN_DIR="$TOOLCHAIN/i686-linux-android"
             TOOLCHAIN_PREFIX="i686-linux-android"
-            ABI_FLAGS="--disable-asm"
+            ABI_FLAGS="--cpu=i686 --disable-asm"
+            CFLAGS="$CFLAGS -march=i686"
             ;;
         x86_64)
             ARCH=x86_64
@@ -179,30 +191,30 @@ for ABI in $ABI_FILTERS; do
     --prefix=$BUILD_ROOT/$ABI
     "
 
-    echo "[1/5] Build $ABI libmp3lame..."
-    (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+#    echo "[1/5] Build $ABI libmp3lame..."
+#    (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+#
+#    echo "[2/5] Build $ABI libogg..."
+#    (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+#
+#    echo "[3/5] Build $ABI libvorbis..."
+#    LIBVORBIS_FLAGS="
+#    --disable-oggtest
+#    CFLAGS=-I$BUILD_ROOT/$ABI/include
+#    LDFLAGS=-L$BUILD_ROOT/$ABI/lib
+#    "
+#    (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+#
+#    echo "[4/5] Build $ABI libwavpack..."
+#    LIBWAVPACK_FLAGS="
+#    --disable-asm
+#    --disable-apps
+#    --disable-dsd
+#    --enable-legacy
+#    "
+#    (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && $MAKE clean && $MAKE && $MAKE install)
 
-    echo "[2/5] Build $ABI libogg..."
-    (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
-
-    echo "[3/5] Build $ABI libvorbis..."
-    LIBVORBIS_FLAGS="
-    --disable-oggtest
-    CFLAGS=-I$BUILD_ROOT/$ABI/include
-    LDFLAGS=-L$BUILD_ROOT/$ABI/lib
-    "
-    (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
-
-    echo "[4/5] Build $ABI libwavpack..."
-    LIBWAVPACK_FLAGS="
-    --disable-asm
-    --disable-apps
-    --disable-dsd
-    --enable-legacy
-    "
-    (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && $MAKE clean && $MAKE && $MAKE install)
-
-    echo "[5/5] Build $ABI libav..."
+    echo "[5/5] Build $ABI ffmpeg..."
     ABI_FLAGS="
     $ABI_FLAGS
     --pkg-config=pkgconf
@@ -215,8 +227,8 @@ for ABI in $ABI_FILTERS; do
     "
     CFLAGS="$CFLAGS -I$BUILD_ROOT/$ABI/include"
     LDFLAGS="$LDFLAGS -L$BUILD_ROOT/$ABI/lib"
-    (cd "$LIBAV_ROOT" && \
+    (cd "$FFMPEG_ROOT" && \
     ./configure --extra-libs="-lm" \
-        --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS" $LIBAV_FLAGS $ABI_FLAGS \
+        --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS" $FFMPEG_FLAGS $ABI_FLAGS \
     && $MAKE clean && $MAKE && $MAKE install)
 done

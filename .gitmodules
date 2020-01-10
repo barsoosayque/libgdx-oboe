@@ -10,10 +10,9 @@
 [submodule "library/dependencies/libsamplerate"]
 	path = library/dependencies/libsamplerate
 	url = https://github.com/erikd/libsamplerate.git
-[submodule "library/dependencies/libav"]
-	shallow = true
-	path = library/dependencies/libav
-	url = git://git.libav.org/libav.git
 [submodule "library/dependencies/result"]
 	path = library/dependencies/result
 	url = git@github.com:oktal/result.git
+[submodule "library/dependencies/ffmpeg"]
+	path = library/dependencies/ffmpeg
+	url = git://source.ffmpeg.org/ffmpeg.git

@@ -18,16 +18,16 @@ $ ./gradlew :library:build
 
 And you got yourself two AAR-files in `library/build/outputs/aar`.
 
-## Libav
+## FFmpeg
 
-Shared library files for Libav are distributed prebuilt, so this section is mostly for the future development of the library.
+Shared library files for FFmpeg are distributed prebuilt, so this section is mostly for the future development of the library.
 
 Note, that building those \*.so files only works on Unix systems because of the *configure* scripts.
 There is no point to use some cross-platform tools to build the library, therefore you can just run shell script to build the library:
 
 ```bash
 $ cd library
-$ sh build_libav.sh
+$ sh build_ffmpeg.sh
 ```
 
 Hopefully, this will build you a bunch of new \*.so libs in `build/libs`.

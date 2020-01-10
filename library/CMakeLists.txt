@@ -11,16 +11,19 @@ set (FMT_DIR dependencies/fmt)
 add_subdirectory (${FMT_DIR} ./fmt)
 include_directories (${FMT_DIR}/include)
 
+set (RESULT_DIR dependencies/result)
+include_directories (${RESULT_DIR})
+
 set (LIBSAMPLERATE_TESTS OFF)
 set (LIBSAMPLERATE_EXAMPLES OFF)
 set (SAMPLERATE dependencies/libsamplerate)
 add_subdirectory (${SAMPLERATE} ./samplerate)
 include_directories (${SAMPLERATE}/include)
 
-set (LIBAV_DIR dependencies/libav)
-include_directories (${LIBAV_DIR})
-set (LIBAV_LIBS avformat avcodec avutil)
-foreach(LIB ${LIBAV_LIBS})
+set (FFMPEG_DIR dependencies/ffmpeg)
+include_directories (${FFMPEG_DIR})
+set (FFMPEG_LIBS avformat avcodec avutil)
+foreach(LIB ${FFMPEG_LIBS})
     add_library( ${LIB} SHARED IMPORTED )
     set_target_properties( ${LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so" )
 endforeach()
@@ -39,5 +42,5 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/native/oboeaudio.cpp
             ${SRC_DIR}/native/oboeaudiodevice.cpp)
 
-target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${LIBAV_LIBS})
+target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${FFMPEG_LIBS})
 target_compile_options(libgdx-oboe PRIVATE -Wall -Werror "$<$<CONFIG:RELEASE>:-Ofast>")
