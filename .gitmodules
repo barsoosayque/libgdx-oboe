@@ -14,3 +14,6 @@
 	shallow = true
 	path = library/dependencies/libav
 	url = git://git.libav.org/libav.git
+[submodule "library/dependencies/result"]
+	path = library/dependencies/result
+	url = git@github.com:oktal/result.git
