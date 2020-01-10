@@ -14,7 +14,7 @@ class jni_context {
         // RAII JNIEnv* for thread-safe operations
         class scoped_env {
             public:
-                scoped_env(JavaVM* p_jvm) : m_jvm(p_jvm) {
+                scoped_env(JavaVM* jvm) : m_jvm(jvm) {
                     if (m_jvm->GetEnv(reinterpret_cast<void**>(&m_env), JNI_VERSION_1_6) == JNI_EDETACHED) {
                         m_jvm->AttachCurrentThread(&m_env, NULL);
                         m_attached = true;
@@ -40,8 +40,8 @@ class jni_context {
 
         static scoped_env acquire_thread() { return scoped_env(s_jvm); }
 
-        static void init(JavaVM* p_jvm) {
-            s_jvm = p_jvm;
+        static void init(JavaVM* jvm) {
+            s_jvm = jvm;
         }
     private:
         static JavaVM* s_jvm;

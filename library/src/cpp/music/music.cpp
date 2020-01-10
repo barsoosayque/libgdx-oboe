@@ -2,13 +2,13 @@
 #include <iterator>
 #include <cmath>
 
-music::music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels)
+music::music(std::shared_ptr<audio_decoder> decoder, int8_t channels)
     : m_pan(0)
     , m_looping(false)
-    , m_cache_size(16 * 1024 * p_channels)
+    , m_cache_size(16 * 1024 * channels)
     , m_volume(1)
-    , m_channels(p_channels)
-    , m_decoder(p_decoder)
+    , m_channels(channels)
+    , m_decoder(decoder)
     , m_current_frame(0)
     , m_buffer_swap(false)
     , m_executor([&]() { fill_second_buffer(); }) {
@@ -20,7 +20,7 @@ void music::fill_second_buffer() {
     m_decoder->decode(m_cache_size);
 }
 
-void music::swap_buffers() {
+void music::swabuffers() {
     m_main_pcm.swap(m_decoder->m_buffer);
     m_eof = m_decoder->m_eof;
     m_current_frame = 0;
@@ -45,12 +45,12 @@ bool music::is_playing() {
     return m_playing;
 }
 
-void music::position(float p_position) {
+void music::position(float position) {
     while(m_buffer_swap.test_and_set(std::memory_order_acquire));
-    m_decoder->seek(p_position);
-    m_position = p_position;
+    m_decoder->seek(position);
+    m_position = position;
     fill_second_buffer();
-    swap_buffers();
+    swabuffers();
     m_executor.queue();
     m_buffer_swap.clear(std::memory_order_release);
 }
@@ -59,8 +59,8 @@ float music::position() {
     return m_position;
 }
 
-void music::volume(float p_volume) {
-    m_volume = std::min(std::max(0.0f, p_volume), 1.0f);
+void music::volume(float volume) {
+    m_volume = std::min(std::max(0.0f, volume), 1.0f);
 }
 
 float music::volume() {
@@ -71,43 +71,43 @@ bool music::is_looping() {
     return m_looping;
 }
 
-void music::is_looping(bool p_loop) {
-    m_looping = p_loop;
+void music::is_looping(bool loop) {
+    m_looping = loop;
 }
 
-void music::on_complete(std::function<void()> p_callback) {
-    m_on_complete = p_callback;
+void music::on_complete(std::function<void()> callback) {
+    m_on_complete = callback;
 }
 
-void music::pan(float p_pan) {
-    m_pan.pan(p_pan);
+void music::pan(float pan) {
+    m_pan.pan(pan);
 }
 
-void music::raw_render(int16_t* p_stream, int32_t p_frames) {
+void music::raw_render(int16_t* stream, int32_t frames) {
     if(!m_playing) return;
 
     auto iter = std::next(m_main_pcm.begin(), m_current_frame * m_channels);
-    int size = p_frames * m_channels;
+    int size = frames * m_channels;
     for(int sample = 0; sample < size; ++sample, std::advance(iter, 1)) {
-        p_stream[sample] += *iter * m_volume * m_pan.modulation(sample % m_channels);
+        stream[sample] += *iter * m_volume * m_pan.modulation(sample % m_channels);
     }
 
     // TODO remove hard-coded stuff
-    m_position += p_frames / 44100.0f;
-    m_current_frame += p_frames;
+    m_position += frames / 44100.0f;
+    m_current_frame += frames;
 }
 
-void music::render(int16_t* p_stream, int32_t p_frames) {
+void music::render(int16_t* stream, int32_t frames) {
     if(!m_playing) return;
     while(m_buffer_swap.test_and_set(std::memory_order_acquire));
 
     int32_t frames_in_pcm = m_main_pcm.size() / m_channels;
-    int32_t frames_to_process = std::min(p_frames, frames_in_pcm - m_current_frame);
+    int32_t frames_to_process = std::min(frames, frames_in_pcm - m_current_frame);
 
-    raw_render(p_stream, frames_to_process);
+    raw_render(stream, frames_to_process);
     m_buffer_swap.clear(std::memory_order_release);
 
-    if (frames_to_process < p_frames) {
+    if (frames_to_process < frames) {
         bool end = m_eof && m_current_frame >= frames_in_pcm;
         if (end) {
             m_playing = m_looping;
@@ -117,7 +117,7 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
 
         // wait for buffer in case there was no position reset
         m_executor.wait();
-        swap_buffers();
+        swabuffers();
         if(m_playing) {
             if (m_looping && m_decoder->m_eof) {
                 m_decoder->seek(0);
@@ -127,8 +127,8 @@ void music::render(int16_t* p_stream, int32_t p_frames) {
 
         // render additional pcm to fill full stream
         while(m_buffer_swap.test_and_set(std::memory_order_acquire));
-        int16_t remain = p_frames - frames_to_process;
-        raw_render(p_stream + frames_to_process * m_channels, remain);
+        int16_t remain = frames - frames_to_process;
+        raw_render(stream + frames_to_process * m_channels, remain);
         m_buffer_swap.clear(std::memory_order_release);
     }
 }

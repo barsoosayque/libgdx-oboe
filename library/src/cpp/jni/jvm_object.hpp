@@ -9,7 +9,7 @@ class jvm_object {
         jvm_object() : m_wrapper(nullptr) {}
 
         // wrap some object
-        jvm_object(T p_obj) : m_wrapper(std::make_shared<wrapper>(p_obj)) { }
+        jvm_object(T obj) : m_wrapper(std::make_shared<wrapper>(obj)) { }
 
         operator T() const { return m_wrapper->m_obj; }
         T operator->() const { return m_wrapper->m_obj; }
@@ -19,9 +19,9 @@ class jvm_object {
     private:
         class wrapper {
             public:
-                wrapper(T p_obj) {
+                wrapper(T obj) {
                         auto context = jni_context::acquire_thread();
-                        m_obj = static_cast<T>(context->NewGlobalRef(p_obj));
+                        m_obj = static_cast<T>(context->NewGlobalRef(obj));
                     }
 
                 ~wrapper() {

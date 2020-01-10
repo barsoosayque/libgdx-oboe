@@ -14,7 +14,7 @@ class resampler {
             linear = SRC_LINEAR
         };
 
-        resampler(resampler::converter p_converter, int8_t p_channels, float p_ratio);
+        resampler(resampler::converter converter, int8_t channels, float ratio);
         // no copy (todo: copy constructor)
         resampler(const resampler&) = delete;
         resampler& operator=(const resampler&) = delete;
@@ -22,15 +22,15 @@ class resampler {
         resampler& operator=(resampler&&);
         ~resampler();
 
-        void ratio(float p_ratio);
+        void ratio(float ratio);
         float ratio() const;
 
         void reset();
 
-        int process(std::vector<float>::const_iterator p_begin,
-                    std::vector<float>::const_iterator p_end,
-                    std::vector<float>::iterator p_output,
-                    int p_requested_frames);
+        int process(std::vector<float>::const_iterator begin,
+                    std::vector<float>::const_iterator end,
+                    std::vector<float>::iterator output,
+                    int requested_frames);
 
     private:
         SRC_STATE* m_state;

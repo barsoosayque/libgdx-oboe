@@ -1,6 +1,7 @@
 #include "oboeaudio.hpp"
 #include "../audio/audioengine.hpp"
 #include "../utility/var.hpp"
+#include "../utility/log.hpp"
 #include "../mediacodec/audio_decoder.hpp"
 
 OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
@@ -8,24 +9,38 @@ OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
     set_var_as(env, self, "audioEngine", new audio_engine(audio_engine::mode::async, 2));
 }
 
-OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jobject fd) {
-    auto decoder = std::make_shared<audio_decoder>(AssetFileDescriptor { fd });
+OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv* env, jobject self, jstring path) {
+    const char *native_path = env->GetStringUTFChars(path, 0);
+
+    auto decoder = std::make_shared<audio_decoder>();
+    auto result = decoder->init(native_path);
+    if(result.isErr()) {
+        error(result.unwrapErr().m_text);
+    }
+
     auto ptr = new std::shared_ptr<music>();
     *ptr = std::make_shared<music>(decoder, 2);
 
     get_var_as<audio_engine>(env, self, "audioEngine")->play(*ptr);
 
+    env->ReleaseStringUTFChars(path, native_path);
     return reinterpret_cast<jlong>(ptr);
 }
 
-OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jobject fd) {
-    auto decoder = audio_decoder(AssetFileDescriptor { fd });
+OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv* env, jobject self, jstring path) {
+    const char *native_path = env->GetStringUTFChars(path, 0);
+    auto decoder = audio_decoder();
+    auto result = decoder.init(native_path);
+    if(result.isErr()) {
+        error(result.unwrapErr().m_text);
+    }
     decoder.decode();
     auto ptr = new std::shared_ptr<soundpool>();
     *ptr = std::make_shared<soundpool>(std::move(decoder.m_buffer), 2);
 
     get_var_as<audio_engine>(env, self, "audioEngine")->play(*ptr);
 
+    env->ReleaseStringUTFChars(path, native_path);
     return reinterpret_cast<jlong>(ptr);
 }
 

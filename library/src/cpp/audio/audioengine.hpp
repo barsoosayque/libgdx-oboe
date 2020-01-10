@@ -28,7 +28,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
     public:
 
         /// Opening audio stream with specified number of channels and sample rate
-        audio_engine(mode p_mode, int8_t = 2, int32_t = 44100);
+        audio_engine(mode mode, int8_t = 2, int32_t = 44100);
 
         /// Closing audio stream
         ~audio_engine();
@@ -40,13 +40,13 @@ class audio_engine : protected oboe::AudioStreamCallback {
         void stop();
 
         /// Play sound or music. Automatically set mode to mix
-        void play(std::shared_ptr<renderable_audio> p_audio);
+        void play(std::shared_ptr<renderable_audio> audio);
 
         /// Queue pcm for streaming. Automatically set mode to stream
-        void play(const std::vector<int16_t>& p_pcm);
+        void play(const std::vector<int16_t>& pcm);
 
         /// Queue pcm for streaming. Automatically set mode to stream
-        void play(const std::vector<float>& p_pcm);
+        void play(const std::vector<float>& pcm);
 
         /// Return if this stream has 1 channel
         bool is_mono();

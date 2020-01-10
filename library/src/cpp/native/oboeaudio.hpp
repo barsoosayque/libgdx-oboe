@@ -11,10 +11,10 @@ extern "C" {
 OBOEAUDIO_METHOD(void, init) (JNIEnv*, jobject);
 
 // fun OboeAudio::createSoundpool(): NativeSoundpool
-OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv*, jobject, jobject);
+OBOEAUDIO_METHOD(jlong, createSoundpool) (JNIEnv*, jobject, jstring);
 
 // fun OboeAudio::createMusic(): NativeMusic
-OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv*, jobject, jobject);
+OBOEAUDIO_METHOD(jlong, createMusic) (JNIEnv*, jobject, jstring);
 
 // fun OboeAudio::createAudioEngine(): NativeAudioDevice
 OBOEAUDIO_METHOD(jlong, createAudioEngine) (JNIEnv*, jobject, jint, bool);

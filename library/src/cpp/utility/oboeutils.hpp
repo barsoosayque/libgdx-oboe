@@ -3,9 +3,9 @@
 #include <oboe/Oboe.h>
 
 /// @note: message should contain {}
-inline bool check(oboe::Result p_result, std::string_view p_msg) {
-    if (p_result != oboe::Result::OK) {
-        error(p_msg, oboe::convertToText(p_result));
+inline bool check(oboe::Result result, std::string_view msg) {
+    if (result != oboe::Result::OK) {
+        error(msg, oboe::convertToText(result));
         return false;
     }
     return true;

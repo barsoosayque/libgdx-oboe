@@ -2,38 +2,38 @@
 #include <algorithm>
 #include <limits>
 
-mixer::mixer(int32_t p_buffer_size, int8_t p_channels)
+mixer::mixer(int32_t buffer_size, int8_t channels)
     : m_volume(1)
-    , m_channels(p_channels)
-    , m_buffer(p_buffer_size)
+    , m_channels(channels)
+    , m_buffer(buffer_size)
     , m_rendering_flag(false)
     {}
 
-void mixer::resize_buffer(int32_t p_new_size) {
-    m_buffer.reserve(p_new_size);
+void mixer::resize_buffer(int32_t new_size) {
+    m_buffer.reserve(new_size);
 }
 
-void mixer::play_audio(std::shared_ptr<renderable_audio> p_track) {
+void mixer::play_audio(std::shared_ptr<renderable_audio> track) {
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
-    m_tracks.emplace_back(p_track);
+    m_tracks.emplace_back(track);
     m_rendering_flag.clear(std::memory_order_release);
 }
 
-void mixer::render(int16_t* p_audio_data, int32_t p_num_frames) {
+void mixer::render(int16_t* audio_data, int32_t num_frames) {
     static int limit_down = std::numeric_limits<int16_t>::min(),
                limit_up = std::numeric_limits<int16_t>::max();
 
-    std::fill(p_audio_data, p_audio_data + p_num_frames * m_channels, 0);
+    std::fill(audio_data, audio_data + num_frames * m_channels, 0);
     int prevaluated = 0;
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     for(const auto& track : m_tracks) {
         if(auto ptr = track.lock()) {
-            std::fill(m_buffer.begin(), m_buffer.begin() + p_num_frames * m_channels, 0);
-            ptr->render(m_buffer.data(), p_num_frames);
+            std::fill(m_buffer.begin(), m_buffer.begin() + num_frames * m_channels, 0);
+            ptr->render(m_buffer.data(), num_frames);
 
-            for(int i = 0; i < p_num_frames * m_channels; ++i) {
-                prevaluated = static_cast<int>(p_audio_data[i]) + static_cast<int>(m_buffer[i]);
-                p_audio_data[i] = static_cast<int16_t>(std::clamp(prevaluated, limit_down, limit_up));
+            for(int i = 0; i < num_frames * m_channels; ++i) {
+                prevaluated = static_cast<int>(audio_data[i]) + static_cast<int>(m_buffer[i]);
+                audio_data[i] = static_cast<int16_t>(std::clamp(prevaluated, limit_down, limit_up));
             }
         }
     }
@@ -42,7 +42,7 @@ void mixer::render(int16_t* p_audio_data, int32_t p_num_frames) {
     }), m_tracks.end());
     m_rendering_flag.clear(std::memory_order_release);
 
-    for (int j = 0; j < p_num_frames * m_channels; ++j) {
-            p_audio_data[j] *= m_volume;
+    for (int j = 0; j < num_frames * m_channels; ++j) {
+            audio_data[j] *= m_volume;
     }
 }

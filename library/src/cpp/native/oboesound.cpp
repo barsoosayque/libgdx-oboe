@@ -18,11 +18,11 @@ OBOESOUND_METHOD(void, pause__J) (JNIEnv* env, jobject self, jlong id) {
     shared_ptr_var<soundpool>(env, self, "soundpool")->pause(id);
 }
 
-OBOESOUND_METHOD(void, stop__) (JNIEnv* env, jobject self) {
+OBOESOUND_METHOD(void, sto_) (JNIEnv* env, jobject self) {
     shared_ptr_var<soundpool>(env, self, "soundpool")->stop();
 }
 
-OBOESOUND_METHOD(void, stop__J) (JNIEnv* env, jobject self, jlong id) {
+OBOESOUND_METHOD(void, sto_J) (JNIEnv* env, jobject self, jlong id) {
     shared_ptr_var<soundpool>(env, self, "soundpool")->stop(id);
 }
 

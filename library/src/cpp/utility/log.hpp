@@ -15,23 +15,23 @@
 enum class log_level { debug, info, error, warn };
 
 template<class ... Params>
-void log(log_level p_level, std::string_view p_template, Params... p_params) {
-    auto message = fmt::format(p_template, p_params...);
-    auto level = ANDROID_LOG_DEBUG;
+void log(log_level level, std::string_view format, Params... params) {
+    auto message = fmt::format(format, params...);
+    auto mapped_level = ANDROID_LOG_DEBUG;
 
-    switch(p_level) {
-        case log_level::debug: level = ANDROID_LOG_DEBUG; break;
-        case log_level::info: level = ANDROID_LOG_INFO; break;
-        case log_level::error: level = ANDROID_LOG_ERROR; break;
-        case log_level::warn: level = ANDROID_LOG_WARN; break;
+    switch(level) {
+        case log_level::debug: mapped_level = ANDROID_LOG_DEBUG; break;
+        case log_level::info: mapped_level = ANDROID_LOG_INFO; break;
+        case log_level::error: mapped_level = ANDROID_LOG_ERROR; break;
+        case log_level::warn: mapped_level = ANDROID_LOG_WARN; break;
     }
 
-    __android_log_print(level, "libGDX-Oboe", "%s", message.c_str());
+    __android_log_print(mapped_level, "libGDX-Oboe", "%s", message.c_str());
 }
 
-inline void android_assert(bool p_cond, std::string_view p_msg) {
-    if(!p_cond) {
-        __android_log_assert(p_msg.data(), "libGDX-Oboe", nullptr);
+inline void android_assert(bool cond, std::string_view msg) {
+    if(!cond) {
+        __android_log_assert(msg.data(), "libGDX-Oboe", nullptr);
     }
 }
 
@@ -40,21 +40,21 @@ inline void android_assert(bool p_cond, std::string_view p_msg) {
 // <><><><><><><><><><><><><><><><><><><><>
 
 template<class ... Params>
-inline void debug(std::string_view p_template, Params... p_params) {
-    log(log_level::debug, p_template, p_params...);
+inline void debug(std::string_view format, Params... params) {
+    log(log_level::debug, format, params...);
 }
 
 template<class ... Params>
-inline void info(std::string_view p_template, Params... p_params) {
-    log(log_level::info, p_template, p_params...);
+inline void info(std::string_view format, Params... params) {
+    log(log_level::info, format, params...);
 }
 
 template<class ... Params>
-inline void error(std::string_view p_template, Params... p_params) {
-    log(log_level::error, p_template, p_params...);
+inline void error(std::string_view format, Params... params) {
+    log(log_level::error, format, params...);
 }
 
 template<class ... Params>
-inline void warn(std::string_view p_template, Params... p_params) {
-    log(log_level::warn, p_template, p_params...);
+inline void warn(std::string_view format, Params... params) {
+    log(log_level::warn, format, params...);
 }

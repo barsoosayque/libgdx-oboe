@@ -9,27 +9,27 @@
 class soundpool: public renderable_audio {
     public:
         using data = std::vector<int16_t>;
-        soundpool(const data& p_pcm, int8_t p_channels);
-        void render(int16_t* p_stream, int32_t p_frames);
+        soundpool(const data& pcm, int8_t channels);
+        void render(int16_t* stream, int32_t frames);
 
-        long play(float p_volume = 1.0f,
-                  float p_speed = 1.0f,
-                  float p_pan = 0.0f,
-                  bool p_loop = false);
+        long play(float volume = 1.0f,
+                  float speed = 1.0f,
+                  float pan = 0.0f,
+                  bool loop = false);
 
         void pause();
-        void pause(long p_id);
+        void pause(long id);
 
         void stop();
-        void stop(long p_id);
+        void stop(long id);
 
         void resume();
-        void resume(long p_id);
+        void resume(long id);
 
-        void pan(long p_id, float p_pan);
-        void speed(long p_id, float p_speed);
-        void volume(long p_id, float p_volume);
-        void looping(long p_id, bool p_loop);
+        void pan(long id, float value);
+        void speed(long id, float value);
+        void volume(long id, float value);
+        void looping(long id, bool loop);
     private:
         struct sound {
             int32_t m_cur_frame;
@@ -40,7 +40,7 @@ class soundpool: public renderable_audio {
             pan_effect m_pan;
             resampler m_resampler;
         };
-        sound gen_sound(float p_volume, float p_pan, float p_speed, bool p_loop);
+        sound gen_sound(float volume, float pan, float speed, bool loop);
         void do_by_id(long, std::function<void(std::vector<sound>::iterator)>);
         std::vector<sound> m_sounds;
         long m_last_id;

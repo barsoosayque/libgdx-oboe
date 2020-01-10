@@ -7,32 +7,32 @@
 
 class music: public renderable_audio {
     public:
-        music(std::shared_ptr<audio_decoder> p_decoder, int8_t p_channels);
+        music(std::shared_ptr<audio_decoder> decoder, int8_t channels);
 
-        void render(int16_t* p_stream, int32_t p_frames);
+        void render(int16_t* stream, int32_t frames);
 
         void play();
         void pause();
         void stop();
 
-        void volume(float p_volume);
+        void volume(float volume);
         float volume();
 
-        void pan(float p_pan);
+        void pan(float pan);
 
-        void position(float p_position);
+        void position(float position);
         float position();
 
         bool is_looping();
-        void is_looping(bool p_loop);
+        void is_looping(bool loop);
         bool is_playing();
 
-        void on_complete(std::function<void()> p_callback);
+        void on_complete(std::function<void()> callback);
     private:
         void fill_second_buffer();
-        void swap_buffers();
+        void swabuffers();
 
-        inline void raw_render(int16_t* p_stream, int32_t p_frames);
+        inline void raw_render(int16_t* stream, int32_t frames);
 
         pan_effect m_pan;
         bool m_playing, m_looping, m_eof;
