@@ -8,10 +8,8 @@
 #include <iterator>
 #include <limits>
 
-using namespace oboe;
-
 audio_engine::audio_engine(mode p_mode, int8_t p_channels, int32_t p_sample_rate)
-    : AudioStreamCallback()
+    : oboe::AudioStreamCallback()
     , m_mixer(std::make_unique<mixer>(1024, p_channels))
     , m_channels(p_channels)
     , m_sample_rate(p_sample_rate)
@@ -29,15 +27,15 @@ audio_engine::~audio_engine() {
 
 void audio_engine::connect_to_device() {
     // initialize Oboe audio stream
-    AudioStreamBuilder builder;
+    oboe::AudioStreamBuilder builder;
     builder.setChannelCount(m_channels);
     builder.setSampleRate(m_sample_rate);
     if(m_mode == mode::async) {
         builder.setCallback(this);
     }
-    builder.setFormat(AudioFormat::I16);
-    builder.setPerformanceMode(PerformanceMode::LowLatency);
-    builder.setSharingMode(SharingMode::Exclusive);
+    builder.setFormat(oboe::AudioFormat::I16);
+    builder.setPerformanceMode(oboe::PerformanceMode::LowLatency);
+    builder.setSharingMode(oboe::SharingMode::Exclusive);
 
     check(builder.openStream(ptrptr(m_stream)), "Error opening stream: {}");
 
@@ -46,8 +44,8 @@ void audio_engine::connect_to_device() {
     m_mixer->resize_buffer(m_payload_size * m_channels);
 }
 
-void audio_engine::onErrorAfterClose(AudioStream* self, Result p_error) {
-    if (p_error == Result::ErrorDisconnected) {
+void audio_engine::onErrorAfterClose(oboe::AudioStream* self, oboe::Result p_error) {
+    if (p_error == oboe::Result::ErrorDisconnected) {
         info("Previous device disconnected. Trying to connect to a new one...");
         connect_to_device();
         if(m_is_playing) {
@@ -56,13 +54,13 @@ void audio_engine::onErrorAfterClose(AudioStream* self, Result p_error) {
     }
 }
 
-DataCallbackResult audio_engine::onAudioReady(AudioStream* self, void* p_audio_data, int32_t p_num_frames) {
+oboe::DataCallbackResult audio_engine::onAudioReady(oboe::AudioStream* self, void* p_audio_data, int32_t p_num_frames) {
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     auto stream = static_cast<int16_t*>(p_audio_data);
     m_mixer->render(stream, p_num_frames);
     m_rendering_flag.clear(std::memory_order_release);
 
-    return DataCallbackResult::Continue;
+    return oboe::DataCallbackResult::Continue;
 }
 
 void audio_engine::resume() {
