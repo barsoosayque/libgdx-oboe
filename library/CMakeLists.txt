@@ -22,7 +22,7 @@ include_directories (${SAMPLERATE}/include)
 
 set (FFMPEG_DIR dependencies/ffmpeg)
 include_directories (${FFMPEG_DIR})
-set (FFMPEG_LIBS avformat avcodec avutil)
+set (FFMPEG_LIBS avformat avcodec avutil swresample)
 foreach(LIB ${FFMPEG_LIBS})
     add_library( ${LIB} SHARED IMPORTED )
     set_target_properties( ${LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so" )
@@ -32,6 +32,7 @@ set (SRC_DIR src/cpp)
 add_library(libgdx-oboe SHARED
             ${SRC_DIR}/samplerate/resampler.cpp
             ${SRC_DIR}/mediacodec/audio_decoder.cpp
+            ${SRC_DIR}/mediacodec/internal_asset.cpp
             ${SRC_DIR}/audio/audioengine.cpp
             ${SRC_DIR}/audio/mixer.cpp
             ${SRC_DIR}/sound/soundpool.cpp

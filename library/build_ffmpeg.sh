@@ -27,43 +27,48 @@ MIN_SDK_VERSION="16"
 
 # Flags
 FFMPEG_FLAGS="
---logfile=build.log
 --enable-cross-compile
 --target-os=android
---enable-shared
+--pkg-config-flags=--static
 --disable-static
---disable-pthreads
---disable-programs
+--disable-postproc
+--disable-debug
+--enable-shared
+--enable-pic
+--enable-runtime-cpudetect
+--enable-hardcoded-tables
+--enable-version3
+--enable-x86asm
+--enable-nonfree
+
+--disable-everything
 --disable-doc
 --disable-avdevice
---disable-avfilter
 --disable-avresample
 --disable-network
 --disable-swscale
---disable-everything
---disable-encoders
+--disable-pthreads
+--disable-programs
 --disable-zlib
---disable-postproc
---disable-swresample
+--enable-swresample
 --enable-avformat
 --enable-avcodec
+
+--disable-protocols
+--enable-protocol=file
+
+--disable-encoders
 --enable-libmp3lame
 --enable-libvorbis
 --enable-libwavpack
---enable-pic
---pkg-config-flags=--static
---enable-runtime-cpudetect
---disable-debug
---enable-hardcoded-tables
---disable-protocols
---enable-protocol=file
---enable-protocol=pipe
---enable-version3
---disable-ffplay
---disable-ffprobe
---enable-gpl
---enable-x86asm
+--enable-demuxer=wav,ogg,pcm*,mp3
+--enable-decoder=vorbis,opus,wavpack,mp3*,pcm*
 "
+#--enable-avfilter
+#--enable-demuxer=wav,ogg,pcm*,mp3
+#--enable-decoder=vorbis,opus,wavpack,mp3*,pcm*
+#--enable-filter=aresample
+#--enable-parser=mpegaudio,vorbis
 
 # =============== Option handle ==============
 while test $# -gt 0; do
@@ -72,19 +77,21 @@ while test $# -gt 0; do
             echo "build_ffmpeg.sh -- script to build ffmpeg for android with support for mp3, wav and ogg."
             echo "usage: build_ffmpeg.sh (-h|--help) (--update) (--clear)"
             echo "options:"
-            echo "    -h, --help:  print this message and exit."
-            echo "    --update:    copy built libraries to ./libs (this option assume that the library is built)."
-            echo "    --clear:     clear build and temporary directories before any action."
+            echo "    -h, --help:     print this message and exit."
+            echo "    --update:       copy built libraries to ./libs (this option assume that the library is built)."
+            echo "    --clear:        clear build and temporary directories before any action."
+            echo "    --ffmpeg-only:  only build ffmpeg (assuming that dependencies already built)"
             exit 0;
             ;;
         --update)
             for ABI in $ABI_FILTERS; do
                 DIR="$(pwd)/libs/$ABI"
                 mkdir -p "$DIR"
-                cp -a -t "$DIR" \
+                cp -av -t "$DIR" \
                 $BUILD_ROOT/$ABI/lib/libavcodec.so \
                 $BUILD_ROOT/$ABI/lib/libavutil.so \
-                $BUILD_ROOT/$ABI/lib/libavformat.so
+                $BUILD_ROOT/$ABI/lib/libavformat.so \
+                $BUILD_ROOT/$ABI/lib/libswresample.so
             done
             exit 0;
             ;;
@@ -94,6 +101,9 @@ while test $# -gt 0; do
             rm -r "$LIBOGG_ROOT"
             rm -r "$LIBWAVPACK_ROOT"
             rm -r "$LIBVORBIS_ROOT"
+            ;;
+        --ffmpeg-only)
+            FFMPEG_ONLY=1
             ;;
     esac
     shift
@@ -124,7 +134,7 @@ if [ ! -e $LIBWAVPACK_ROOT ]; then
     mv wavpack-5.2.0 "$LIBWAVPACK_ROOT"
 fi
 
-echo "*************** Libav cross-compilation ***************"
+echo "*************** FFmpeg cross-compilation ***************"
 for ABI in $ABI_FILTERS; do
     echo "*************** $ABI ***************"
     CFLAGS=""
@@ -191,30 +201,35 @@ for ABI in $ABI_FILTERS; do
     --prefix=$BUILD_ROOT/$ABI
     "
 
-#    echo "[1/5] Build $ABI libmp3lame..."
-#    (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
-#
-#    echo "[2/5] Build $ABI libogg..."
-#    (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
-#
-#    echo "[3/5] Build $ABI libvorbis..."
-#    LIBVORBIS_FLAGS="
-#    --disable-oggtest
-#    CFLAGS=-I$BUILD_ROOT/$ABI/include
-#    LDFLAGS=-L$BUILD_ROOT/$ABI/lib
-#    "
-#    (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
-#
-#    echo "[4/5] Build $ABI libwavpack..."
-#    LIBWAVPACK_FLAGS="
-#    --disable-asm
-#    --disable-apps
-#    --disable-dsd
-#    --enable-legacy
-#    "
-#    (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+    if [ -z "$FFMPEG_ONLY" ]; then
+        echo "[1/5] Build $ABI libmp3lame..."
+        (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
 
-    echo "[5/5] Build $ABI ffmpeg..."
+        echo "[2/5] Build $ABI libogg..."
+        (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+
+        echo "[3/5] Build $ABI libvorbis..."
+        LIBVORBIS_FLAGS="
+        --disable-oggtest
+        CFLAGS=-I$BUILD_ROOT/$ABI/include
+        LDFLAGS=-L$BUILD_ROOT/$ABI/lib
+        "
+        (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+
+        echo "[4/5] Build $ABI libwavpack..."
+        LIBWAVPACK_FLAGS="
+        --disable-asm
+        --disable-apps
+        --disable-dsd
+        --enable-legacy
+        "
+        (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+
+        echo "[5/5] Build $ABI ffmpeg..."
+    else
+        echo "[1/1] Build $ABI ffmpeg..."
+    fi
+
     ABI_FLAGS="
     $ABI_FLAGS
     --pkg-config=pkgconf
