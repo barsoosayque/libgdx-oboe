@@ -1,8 +1,8 @@
 package barsoosayque.libgdxoboe
 
-import android.content.res.AssetFileDescriptor
 import android.content.res.AssetManager
 import com.badlogic.gdx.Audio
+import com.badlogic.gdx.Files
 import com.badlogic.gdx.audio.AudioDevice
 import com.badlogic.gdx.audio.AudioRecorder
 import com.badlogic.gdx.audio.Music
@@ -11,6 +11,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.utils.GdxRuntimeException
 
 /** [Audio] implementation which utilize [OboeMusic] and [OboeSound] */
+// TODO: delegate errors from c++ to GdxRuntimeException
 class OboeAudio(private val assetManager: AssetManager) : Audio {
     private var audioEngine: Long = 0
 
@@ -19,15 +20,17 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
         init()
     }
 
-    /** @see <a>https://developer.android.com/guide/topics/media/media-formats</a> */
+    // FIXME: remove in favour of magic numbers in header
     private fun checkFileFormat(file: FileHandle) = when (file.extension().toLowerCase()) {
-        "flac", "mp3", "wav", "aac", "ogg" -> file
-        else -> throw GdxRuntimeException("Unknown file format (\"$file\"). Only FLAC, MP3, WAV, AAC and OGG is allowed here.")
+        "mp3", "wav", "ogg" -> file
+        else -> throw GdxRuntimeException("Unknown file format (\"$file\"). Only MP3, WAV, and OGG is allowed here.")
     }
 
     private external fun init()
-    private external fun createSoundpool(fd: AssetFileDescriptor): NativeSoundpool
-    private external fun createMusic(fd: AssetFileDescriptor): NativeMusic
+    private external fun createSoundpoolFromAsset(assetManager: AssetManager, path: String): NativeSoundpool
+    private external fun createSoundpoolFromPath(path: String): NativeSoundpool
+    private external fun createMusicFromAsset(assetManager: AssetManager, path: String): NativeMusic
+    private external fun createMusicFromPath(path: String): NativeMusic
     private external fun createAudioEngine(samplingRate: Int, isMono: Boolean): NativeAudioEngine
 
     external fun resume()
@@ -36,14 +39,17 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
 
     override fun newMusic(file: FileHandle): Music =
             checkFileFormat(file).path()
-                    .let(assetManager::openFd)
-                    .let(::createMusic)
+                    .let(::createMusicFromPath)
                     .let(::OboeMusic)
 
     override fun newSound(file: FileHandle): Sound =
-            checkFileFormat(file).path()
-                    .let(assetManager::openFd)
-                    .let(::createSoundpool)
+            checkFileFormat(file)
+                    .let {
+                        when (it.type()) {
+                            Files.FileType.Internal -> createSoundpoolFromAsset(assetManager, it.path())
+                            else -> createSoundpoolFromPath(it.file().path)
+                        }
+                    }
                     .let(::OboeSound)
 
     override fun newAudioDevice(samplingRate: Int, isMono: Boolean): AudioDevice =
