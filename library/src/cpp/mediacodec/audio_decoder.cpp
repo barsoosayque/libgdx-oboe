@@ -185,5 +185,12 @@ void audio_decoder::decode() {
 }
 
 void audio_decoder::seek(float seconds) {
-    // TODO
+    int64_t ts = av_rescale(static_cast<int64_t>(seconds * 1000),
+                            m_format_ctx->streams[m_packet->stream_index]->time_base.den,
+                            m_format_ctx->streams[m_packet->stream_index]->time_base.num) / 1000;
+
+    if(int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, ts, AVSEEK_FLAG_FRAME)) {
+        error("audio_decoder: Error while seeking ({})", av_err_str(err));
+    }
+    avcodec_flush_buffers(m_codec_ctx.get());
 }
