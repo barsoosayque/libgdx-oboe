@@ -2,13 +2,13 @@
 #include <iterator>
 #include <cmath>
 
-music::music(std::shared_ptr<audio_decoder> decoder, int8_t channels)
+music::music(std::unique_ptr<audio_decoder> &&decoder, int8_t channels)
     : m_pan(0)
     , m_looping(false)
     , m_cache_size(16 * 1024 * channels)
     , m_volume(1)
     , m_channels(channels)
-    , m_decoder(decoder)
+    , m_decoder(std::move(decoder))
     , m_current_frame(0)
     , m_buffer_swap(false)
     , m_executor([&]() { fill_second_buffer(); }) {
