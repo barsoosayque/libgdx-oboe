@@ -13,6 +13,8 @@ using decoder_result = Result<void, decoder_error>;
 
 class audio_decoder {
     private:
+        std::vector<int16_t> m_cache;
+
         format_context_ptr m_format_ctx;
         codec_context_ptr m_codec_ctx;
         avio_context_ptr m_avio_ctx;

@@ -1,4 +1,5 @@
 #include <tuple>
+#include <algorithm>
 #include "audio_decoder.hpp"
 #include "../utility/log.hpp"
 extern "C" {
@@ -123,6 +124,15 @@ void audio_decoder::decode(int samples) {
     }
     m_buffer.clear();
 
+    // use cache from last decode
+    if(!m_cache.empty()) {
+        processed_samples = std::min(m_cache.size(), static_cast<size_t>(samples));
+        auto begin = m_cache.begin(), end = std::next(m_cache.begin(), processed_samples);
+        std::move(begin, end, std::back_inserter(m_buffer));
+        m_cache.erase(begin, end);
+        request_more = processed_samples < samples;
+    }
+
     while (request_more && !(read_eof && decode_eof)) {
         if(!read_eof) {
             err = av_read_frame(m_format_ctx.get(), m_packet.get());
@@ -150,15 +160,12 @@ void audio_decoder::decode(int samples) {
                     } else {
                         data_size = m_oframe->nb_samples * m_oframe->channels;
                         processed_samples += data_size;
-                        auto begin = reinterpret_cast<int16_t*>(m_oframe->extended_data[0]),
-                             end = begin + data_size;
+                        auto begin = reinterpret_cast<int16_t*>(m_oframe->extended_data[0]), end = begin + data_size;
                         std::move(begin, end, std::back_inserter(m_buffer));
                     }
 
                     if(samples > 0 && processed_samples >= samples) {
                         request_more = false;
-                        // cache the rest ?
-                        break;
                     }
                 } while ((delay = swr_get_delay(m_swr_ctx.get(), m_iframe->sample_rate)));
             } else if (err == AVERROR(EAGAIN)) {
@@ -174,7 +181,14 @@ void audio_decoder::decode(int samples) {
         av_packet_unref(m_packet.get());
     }
 
-    debug("Requested {} samples, processed {} ({}, {}).", samples, m_buffer.size(), read_eof, decode_eof);
+    if(processed_samples > samples) {
+        // cache anything past requested
+        auto begin = std::next(m_buffer.begin(), samples),
+             end = m_buffer.end();
+        std::move(begin, end, std::back_inserter(m_cache));
+        m_buffer.resize(samples);
+    }
+
     if((m_eof = read_eof & decode_eof)) {
         avcodec_flush_buffers(m_codec_ctx.get());
     }
