@@ -181,10 +181,9 @@ void audio_decoder::decode(int samples) {
         av_packet_unref(m_packet.get());
     }
 
-    if(processed_samples > samples) {
+    if(samples > 0 && processed_samples > samples) {
         // cache anything past requested
-        auto begin = std::next(m_buffer.begin(), samples),
-             end = m_buffer.end();
+        auto begin = std::next(m_buffer.begin(), samples), end = m_buffer.end();
         std::move(begin, end, std::back_inserter(m_cache));
         m_buffer.resize(samples);
     }
