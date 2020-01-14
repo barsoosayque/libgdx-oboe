@@ -3,7 +3,7 @@
 
 # - libGDX Oboe -
 
-An audio component replacement for the **libGDX** framework, which allows music to flow without any delay or another unpleasant Android-related distortion. 
+Reimplementation of the Audio interface for **libGDX** framework using Oboe and FFmpeg, which allows music to flow without any delay or another unpleasant distortion.
 
 And if you ever asked yourself *"Why is my libGDX app music is so broken ?"*, then you've come to the right place.
 
@@ -32,7 +32,10 @@ class AndroidLauncher : OboeAndroidApplication() {
 
 ## How is this working ?
 
-You better ask amazing people behind [Oboe library][oboe]. In two words, Oboe uses either AAudio or OpenSL ES depending on the device API level. And library is actually trying to ensure that there will be no delay by adjusting buffers and other options. This repository is nothing but a mere Oboe wrapper for libGDX (hence, the name). 
+Using [Oboe library][oboe] from Google, you can create high-performance audio streams which may plug in and tweak some features in runtime to boost speed even further.
+This streams are native, so there is no GC that will slow things down.
+For audio decoding, this library also provide native tools: libavformat and friends (FFmpeg) with MP3, OGG and WAV support only.
+Such audio decoder is blazing fast, so combining that with oboe streams, we get ourselves responsive and fast Audio implementation.
 
 ## Progress:
 
@@ -43,7 +46,7 @@ You better ask amazing people behind [Oboe library][oboe]. In two words, Oboe us
 - [x] `newAudioDevice` method (With *OboeAudioDevice*);
 - [ ] `newAudioRecorder` method.
 
-*WARN: not marked methods will result in undefined behaviour. (probably, hard crash)*
+*WARN: not marked methods will result in undefined behaviour. (actually, just a crash)*
 
 [oboe]: https://github.com/google/oboe
 [libgdx]: https://github.com/libgdx/libgdx
