@@ -3,6 +3,7 @@ buildscript {
         kotlinVersion = '1.3.41'
         androidPluginVersion = '3.2.1'
         gdxVersion = '1.9.10'
+        benchmarkVersion = '1.0.0'
     }
     repositories {
         mavenLocal()
@@ -15,6 +16,7 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:$androidPluginVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "androidx.benchmark:benchmark-gradle-plugin:$benchmarkVersion"
     }
 }
 
