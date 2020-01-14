@@ -7,9 +7,7 @@ group publishedGroupId
 publishing {
     publications {
         Production(MavenPublication) {
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar") {
-                builtBy assembleRelease
-            }
+            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
             groupId
             artifactId artifact
             version libraryVersion
