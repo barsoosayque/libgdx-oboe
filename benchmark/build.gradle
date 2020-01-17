@@ -24,8 +24,8 @@ dependencies {
 //noinspection GroovyAssignabilityCheck
 android {
     testOptions.unitTests.includeAndroidResources = true
-    buildToolsVersion "28.0.3"
-    compileSdkVersion 28
+    buildToolsVersion "29.0.2"
+    compileSdkVersion 29
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -40,11 +40,11 @@ android {
     }
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 29
         testInstrumentationRunner "androidx.benchmark.junit4.AndroidBenchmarkRunner"
         testInstrumentationRunnerArgument 'androidx.benchmark.suppressErrors', 'EMULATOR,LOW_BATTERY'
         testInstrumentationRunnerArgument 'androidx.benchmark.output.enable', 'true'
-        testInstrumentationRunnerArgument 'additionalTestOutputDir', '/storage/emulated/0/Download/libgdx-oboe'
+        testInstrumentationRunnerArgument 'additionalTestOutputDir', '/storage/emulated/0/Download/libgdx-oboe-report'
     }
     buildTypes {
         debug {
@@ -57,6 +57,16 @@ android {
     }
 }
 
+task copyBenchmarkData(type: Exec) {
+    commandLine 'adb', 'pull', '/storage/emulated/0/Download/libgdx-oboe-report', "${project.buildDir}"
+}
+
+// Use it to run benchmarks
+task run {
+    description 'Run all benchmarks in a separated instance'
+    dependsOn(connectedCheck)
+    dependsOn(copyBenchmarkData)
+}
 
 // called every time gradle gets executed, takes the native dependencies of
 // the natives configuration, and extracts them to the proper libs/ folders
@@ -85,14 +95,6 @@ task copyAndroidNatives {
     }
 }
 
-task copyBenchmarkData(type: Exec) {
-    commandLine 'adb', 'pull', '/storage/emulated/0/Download/libgdx-oboe', "${project.buildDir}/benchmark/"
-}
-
-task run {
-    dependsOn(connectedCheck)
-    dependsOn(copyBenchmarkData)
-}
 
 tasks.whenTaskAdded { packageTask ->
     if (packageTask.name.contains("package")) {
