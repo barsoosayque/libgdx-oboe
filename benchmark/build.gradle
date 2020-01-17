@@ -30,10 +30,10 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
-            assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
         }
         androidTest {
+            assets.srcDirs = ['assets']
             manifest.srcFile 'test/AndroidManifest.xml'
             java.srcDirs = ['test']
         }
