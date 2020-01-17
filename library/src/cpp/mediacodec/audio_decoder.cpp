@@ -116,6 +116,7 @@ decoder_result audio_decoder::init(std::string_view filename) {
 }
 
 void audio_decoder::decode(int samples) {
+    while(m_use_flag.test_and_set(std::memory_order_acquire));
     int64_t delay = 0;
     int processed_samples = 0, err = 0, data_size;
     bool read_eof = false, decode_eof = false, request_more = true;
@@ -191,6 +192,7 @@ void audio_decoder::decode(int samples) {
     if((m_eof = read_eof & decode_eof)) {
         avcodec_flush_buffers(m_codec_ctx.get());
     }
+    m_use_flag.clear(std::memory_order_release);
 }
 
 void audio_decoder::decode() {
@@ -198,12 +200,15 @@ void audio_decoder::decode() {
 }
 
 void audio_decoder::seek(float seconds) {
+    while(m_use_flag.test_and_set(std::memory_order_acquire));
     int64_t ts = av_rescale(static_cast<int64_t>(seconds * 1000),
                             m_format_ctx->streams[m_packet->stream_index]->time_base.den,
                             m_format_ctx->streams[m_packet->stream_index]->time_base.num) / 1000;
 
-    if(int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, ts, AVSEEK_FLAG_FRAME)) {
+    avcodec_flush_buffers(m_codec_ctx.get());
+    m_cache.clear();
+    if(int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, ts, AVSEEK_FLAG_FRAME | AVSEEK_FLAG_ANY)) {
         error("audio_decoder: Error while seeking ({})", av_err_str(err));
     }
-    avcodec_flush_buffers(m_codec_ctx.get());
+    m_use_flag.clear(std::memory_order_release);
 }

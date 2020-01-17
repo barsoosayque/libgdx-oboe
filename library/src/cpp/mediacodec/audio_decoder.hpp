@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string_view>
+#include <atomic>
 
 #include <result.h>
 #include "internal_asset.hpp"
@@ -14,6 +15,7 @@ using decoder_result = Result<void, decoder_error>;
 class audio_decoder {
     private:
         std::vector<int16_t> m_cache;
+        std::atomic_flag m_use_flag = false;
 
         format_context_ptr m_format_ctx;
         codec_context_ptr m_codec_ctx;
