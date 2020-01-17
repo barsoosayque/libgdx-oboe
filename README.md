@@ -11,7 +11,7 @@ And if you ever asked yourself *"Why is my libGDX app music is so broken ?"*, th
 
 <div align="center">
 
-[🔰 How to Use][usage] ・ [🎺 Explore Examples][examples] ・ [🚜 How to Build][build]
+[🔰How to Use][usage] ・ [🎺Explore Examples][examples] ・ [Benchmark][benchmark] ・ [How to Build][build]
 
 *Content of `docs` directory.*
 </div>
@@ -52,4 +52,5 @@ Such audio decoder is blazing fast, so combining that with oboe streams, we get 
 [libgdx]: https://github.com/libgdx/libgdx
 [usage]: /docs/Usage.md
 [examples]: /docs/Examples.md
+[benchmark]: /docs/Benchmark.md
 [build]: /docs/Build.md
