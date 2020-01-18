@@ -5,7 +5,7 @@
 music::music(std::unique_ptr<audio_decoder> &&decoder, int8_t channels)
     : m_pan(0)
     , m_looping(false)
-    , m_cache_size(16 * 1024 * channels)
+    , m_cache_size(4 * 1024 * channels)
     , m_volume(1)
     , m_channels(channels)
     , m_decoder(std::move(decoder))

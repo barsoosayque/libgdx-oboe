@@ -64,11 +64,6 @@ FFMPEG_FLAGS="
 --enable-demuxer=wav,ogg,pcm*,mp3
 --enable-decoder=vorbis,opus,wavpack,mp3*,pcm*
 "
-#--enable-avfilter
-#--enable-demuxer=wav,ogg,pcm*,mp3
-#--enable-decoder=vorbis,opus,wavpack,mp3*,pcm*
-#--enable-filter=aresample
-#--enable-parser=mpegaudio,vorbis
 
 # =============== Option handle ==============
 while test $# -gt 0; do
