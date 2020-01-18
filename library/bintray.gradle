@@ -7,7 +7,7 @@ group publishedGroupId
 publishing {
     publications {
         Production(MavenPublication) {
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+            artifact("$buildDir/outputs/aar/${project.name}-${project.version}.aar")
             groupId
             artifactId artifact
             version libraryVersion
@@ -58,3 +58,4 @@ bintray {
 }
 
 bintrayUpload.dependsOn publishToMavenLocal
+publishToMavenLocal.dependsOn 'assembleRelease'

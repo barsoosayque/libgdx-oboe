@@ -12,16 +12,16 @@ ext {
     bintrayRepo = 'gitlab'
     bintrayName = 'libgdx-oboe'
 
-    publishedGroupId = 'com.gitlab.barsoosayque'
+    publishedGroupId = 'com.github.barsoosayque'
     libraryName = 'libGDX Oboe'
     artifact = 'libgdxoboe'
 
     libraryDescription = 'libGDX audio replacement for Android (API 16+) built on top of Oboe.'
 
-    siteUrl = 'https://gitlab.com/barsoosayque/libgdx-oboe'
-    gitUrl = 'https://gitlab.com/barsoosayque/libgdx-oboe.git'
+    siteUrl = 'https://github.com/barsoosayque/libgdx-oboe'
+    gitUrl = 'https://github.com/barsoosayque/libgdx-oboe.git'
 
-    libraryVersion = '0.1.5'
+    libraryVersion = '0.2.0'
 
     developerId = 'barsoosayque'
     developerName = 'barsoosayque'

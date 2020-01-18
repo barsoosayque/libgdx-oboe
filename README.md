@@ -34,7 +34,7 @@ class AndroidLauncher : OboeAndroidApplication() {
 }
 ```
 
-## How is this working ?
+## How does this works ?
 
 Using [Oboe library][oboe] from Google, you can create high-performance audio streams which may plug in and tweak some features in runtime to boost speed even further.
 This streams are native, so there is no GC that will slow things down.
