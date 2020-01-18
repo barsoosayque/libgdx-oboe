@@ -3,6 +3,10 @@
 
 # - libGDX Oboe -
 
+[![Download](https://api.bintray.com/packages/barsoosayque/gitlab/libgdx-oboe/images/download.svg)](https://bintray.com/barsoosayque/gitlab/libgdx-oboe/_latestVersion)
+[![libGDX](https://img.shields.io/badge/libGDX-1.9.10-yellow.svg)](https://github.com/libgdx/libgdx/tree/gdx-parent-1.9.10)
+[![oboe](https://img.shields.io/badge/oboe-1.2.0-yellow.svg)](https://github.com/google/oboe)
+
 Reimplementation of the Audio interface for **libGDX** framework using Oboe and FFmpeg, which allows music to flow without any delay or another unpleasant distortion.
 
 And if you ever asked yourself *"Why is my libGDX app music is so broken ?"*, then you've come to the right place.
