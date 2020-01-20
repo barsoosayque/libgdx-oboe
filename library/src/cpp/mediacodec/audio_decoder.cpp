@@ -137,6 +137,7 @@ void audio_decoder::decode(int samples) {
     while (request_more && !(read_eof && decode_eof)) {
         if(!read_eof) {
             err = av_read_frame(m_format_ctx.get(), m_packet.get());
+            decode_eof = false;
             if(err == AVERROR_EOF) {
                 read_eof = true;
             } else if (err < 0) {
@@ -154,12 +155,15 @@ void audio_decoder::decode(int samples) {
             if (err == 0) {
                 swr_config_frame(m_swr_ctx.get(), m_oframe.get(), m_iframe.get());
                 do {
-                    err = swr_convert_frame(m_swr_ctx.get(), m_oframe.get(), delay ? nullptr : m_iframe.get());
+                    err = swr_convert_frame(m_swr_ctx.get(), m_oframe.get(), delay > 0 ? nullptr : m_iframe.get());
 
                     if(err < 0) {
                         error("audio_decoder: Error converting demuxed data ({})", av_err_str(err));
                     } else {
-                        data_size = m_oframe->nb_samples * m_oframe->channels;
+                        if((data_size = m_oframe->nb_samples * m_oframe->channels) == 0) {
+                            // sometimes delay will return positive value, but there is nothing to be read
+                            break;
+                        }
                         processed_samples += data_size;
                         auto begin = reinterpret_cast<int16_t*>(m_oframe->extended_data[0]), end = begin + data_size;
                         std::move(begin, end, std::back_inserter(m_buffer));
@@ -168,7 +172,8 @@ void audio_decoder::decode(int samples) {
                     if(samples > 0 && processed_samples >= samples) {
                         request_more = false;
                     }
-                } while ((delay = swr_get_delay(m_swr_ctx.get(), m_iframe->sample_rate)));
+                } while ((delay = swr_get_delay(m_swr_ctx.get(), m_oframe->sample_rate)) > 0);
+                delay = 0;
             } else if (err == AVERROR(EAGAIN)) {
                 break;
             } else if (err == AVERROR_EOF) {
