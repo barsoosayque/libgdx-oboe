@@ -54,7 +54,7 @@ int resampler::process(std::vector<float>::const_iterator begin, std::vector<flo
         std::copy(begin, std::next(begin, len), output);
         return len;
     } else {
-        len = std::distance(begin, end);
+        len = std::distance(begin, end) / m_channels;
 
         m_data.data_in = &(*begin);
         m_data.data_out = &(*output);

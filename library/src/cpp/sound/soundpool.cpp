@@ -108,10 +108,10 @@ void soundpool::render(int16_t* audio_data, int32_t num_frames) {
 
             int used_frames = it->m_resampler.process(iter, m_pcm.cend(), m_sample_buffer.begin(), size);
 
-            iter = m_sample_buffer.begin();
-            auto end = std::next(iter, size * m_channels);
-            for (int i = 0; iter != end; ++iter, ++i) {
-                prevaluated = static_cast<int>(audio_data[i]) + static_cast<int>(*iter * limit_up * it->m_volume * it->m_pan.modulation(i % m_channels));
+            auto buffer_iter = m_sample_buffer.begin();
+            auto end = std::next(buffer_iter, size * m_channels);
+            for (int i = 0; buffer_iter != end; ++buffer_iter, ++i) {
+                prevaluated = static_cast<int>(audio_data[i]) + static_cast<int>(*buffer_iter * limit_up * it->m_volume * it->m_pan.modulation(i % m_channels));
                 audio_data[i] = static_cast<int16_t>(std::clamp(prevaluated, limit_down, limit_up));
             }
 
