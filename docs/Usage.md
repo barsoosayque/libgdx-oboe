@@ -6,7 +6,7 @@ You can use *jcenter* repository to find this library and use it as a dependency
 
 ```groovy
 ext {
-    libgdxoboe_version = "0.2.1"
+    libgdxoboe_version = "0.2.2"
 }
 
 repositories {
