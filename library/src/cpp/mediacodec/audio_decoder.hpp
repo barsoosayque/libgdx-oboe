@@ -16,7 +16,7 @@ class audio_decoder {
     private:
         std::vector<int16_t> m_cache;
         std::atomic_flag m_use_flag = false;
-        int64_t m_skip_frames = 0;
+        int64_t m_target_ts = -1;
 
         format_context_ptr m_format_ctx;
         codec_context_ptr m_codec_ctx;

@@ -119,7 +119,7 @@ void audio_decoder::decode(int samples) {
     while(m_use_flag.test_and_set(std::memory_order_acquire));
     int64_t delay = 0;
     int processed_samples = 0, err = 0, data_size;
-    bool read_eof = false, decode_eof = false, request_more = true, skip_mode = m_skip_frames > 0;
+    bool read_eof = false, decode_eof = false, request_more = true;
     if(samples > 0) {
         m_buffer.reserve(samples);
     }
@@ -144,6 +144,29 @@ void audio_decoder::decode(int samples) {
                 error("audio_decoder: Read frame error ({})", av_err_str(err));
             }
 
+            // we were seeking, but seek wasn't precise.
+            // so we need to drop some frames. sanity checks first.
+            if(m_packet->pts > 0 && m_target_ts > 0 && m_packet->pts < m_target_ts) {
+                auto stream = m_format_ctx->streams[m_packet->stream_index];
+                auto delta = static_cast<float>(m_target_ts - m_packet->pts) / stream->time_base.den;
+                int64_t skip_frames = delta * m_codec_ctx->time_base.den / m_codec_ctx->time_base.num;
+//                debug("{} of {} (diff {}, delta {}): skip {} frames", m_packet->pts, m_target_ts, m_target_ts - m_packet->pts,delta, skip_frames);
+
+                // AV_PKT_DATA_SKIP_SAMPLES layout:
+                // u32le number of samples to skip from start of this packet
+                // u32le number of samples to skip from end of this packet
+                // u8    reason for start skip
+                // u8    reason for end   skip (0=padding silence, 1=convergence)
+                uint8_t *data = av_packet_get_side_data(m_packet.get(), AV_PKT_DATA_SKIP_SAMPLES, nullptr);
+                if(!data) {
+                     data = av_packet_new_side_data(m_packet.get(), AV_PKT_DATA_SKIP_SAMPLES, 10);
+                }
+
+                // fixme: force little endian skip_frames
+                *reinterpret_cast<uint32_t*>(data) = skip_frames;
+                data[8] = 0;
+            }
+
             if ((err = avcodec_send_packet(m_codec_ctx.get(), read_eof ? nullptr : m_packet.get()))) {
                 error("audio_decoder: Error sending packets ({})", av_err_str(err));
                 break;
@@ -153,20 +176,6 @@ void audio_decoder::decode(int samples) {
         while(!decode_eof) {
             err = avcodec_receive_frame(m_codec_ctx.get(), m_iframe.get());
             if (err == 0) {
-                if(skip_mode) {
-                    m_skip_frames -= m_iframe->nb_samples;
-                    if(m_skip_frames <= 0) {
-                        int offset = m_iframe->nb_samples + m_skip_frames;
-                        m_iframe->nb_samples -= offset;
-                        m_iframe->data[0] = reinterpret_cast<uint8_t*>(
-                            reinterpret_cast<int16_t*>(m_iframe->data[0]) + offset
-                        );
-                        m_iframe->extended_data[0] = m_iframe->data[0];
-                        skip_mode = false;
-                    }
-                }
-                // if still skipping, break
-                if(skip_mode) break;
                 swr_config_frame(m_swr_ctx.get(), m_oframe.get(), m_iframe.get());
                 do {
                     err = swr_convert_frame(m_swr_ctx.get(), m_oframe.get(), delay > 0 ? nullptr : m_iframe.get());
@@ -224,19 +233,13 @@ void audio_decoder::seek(float seconds) {
     while(m_use_flag.test_and_set(std::memory_order_acquire));
 
     auto stream = m_format_ctx->streams[m_packet->stream_index];
-    int64_t ts = av_rescale_q(seconds * AV_TIME_BASE, AV_TIME_BASE_Q, stream->time_base);
+    m_target_ts = av_rescale_q(seconds * AV_TIME_BASE, AV_TIME_BASE_Q, stream->time_base);
 
     m_cache.clear();
     m_eof = false;
-    if(int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, ts, AVSEEK_FLAG_BACKWARD)) {
-        error("audio_decoder: Error while seeking ({})", av_err_str(err));
-        m_use_flag.clear(std::memory_order_release);
-        return;
-    }
-
-    float delta = static_cast<float>(av_rescale_q(ts - stream->cur_dts, stream->time_base, AV_TIME_BASE_Q)) / AV_TIME_BASE;
-    m_skip_frames = delta * m_codec_ctx->time_base.den / m_codec_ctx->time_base.num;
-
     avcodec_flush_buffers(m_codec_ctx.get());
+    if(int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, m_target_ts, AVSEEK_FLAG_BACKWARD)) {
+        error("audio_decoder: Error while seeking ({})", av_err_str(err));
+    }
     m_use_flag.clear(std::memory_order_release);
 }
