@@ -47,6 +47,7 @@ bool music::is_playing() {
 
 void music::position(float position) {
     while(m_buffer_swap.test_and_set(std::memory_order_acquire));
+    m_executor.wait();
     m_decoder->seek(position);
     m_position = position;
     fill_second_buffer();

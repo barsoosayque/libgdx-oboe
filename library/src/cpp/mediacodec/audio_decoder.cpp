@@ -119,7 +119,7 @@ void audio_decoder::decode(int samples) {
     while(m_use_flag.test_and_set(std::memory_order_acquire));
     int64_t delay = 0;
     int processed_samples = 0, err = 0, data_size;
-    bool read_eof = false, decode_eof = false, request_more = true;
+    bool read_eof = false, decode_eof = false, request_more = true, skip_mode = m_skip_frames > 0;
     if(samples > 0) {
         m_buffer.reserve(samples);
     }
@@ -153,6 +153,20 @@ void audio_decoder::decode(int samples) {
         while(!decode_eof) {
             err = avcodec_receive_frame(m_codec_ctx.get(), m_iframe.get());
             if (err == 0) {
+                if(skip_mode) {
+                    m_skip_frames -= m_iframe->nb_samples;
+                    if(m_skip_frames <= 0) {
+                        int offset = m_iframe->nb_samples + m_skip_frames;
+                        m_iframe->nb_samples -= offset;
+                        m_iframe->data[0] = reinterpret_cast<uint8_t*>(
+                            reinterpret_cast<int16_t*>(m_iframe->data[0]) + offset
+                        );
+                        m_iframe->extended_data[0] = m_iframe->data[0];
+                        skip_mode = false;
+                    }
+                }
+                // if still skipping, break
+                if(skip_mode) break;
                 swr_config_frame(m_swr_ctx.get(), m_oframe.get(), m_iframe.get());
                 do {
                     err = swr_convert_frame(m_swr_ctx.get(), m_oframe.get(), delay > 0 ? nullptr : m_iframe.get());
@@ -164,9 +178,11 @@ void audio_decoder::decode(int samples) {
                             // sometimes delay will return positive value, but there is nothing to be read
                             break;
                         }
-                        processed_samples += data_size;
-                        auto begin = reinterpret_cast<int16_t*>(m_oframe->extended_data[0]), end = begin + data_size;
+
+                        auto begin = reinterpret_cast<int16_t*>(m_oframe->extended_data[0]),
+                             end = begin + data_size;
                         std::move(begin, end, std::back_inserter(m_buffer));
+                        processed_samples += data_size;
                     }
 
                     if(samples > 0 && processed_samples >= samples) {
@@ -206,14 +222,19 @@ void audio_decoder::decode() {
 
 void audio_decoder::seek(float seconds) {
     while(m_use_flag.test_and_set(std::memory_order_acquire));
-    int64_t ts = av_rescale(static_cast<int64_t>(seconds * 1000),
-                            m_format_ctx->streams[m_packet->stream_index]->time_base.den,
-                            m_format_ctx->streams[m_packet->stream_index]->time_base.num) / 1000;
 
-    avcodec_flush_buffers(m_codec_ctx.get());
+    auto stream = m_format_ctx->streams[m_packet->stream_index];
+    int64_t ts = av_rescale_q(seconds * AV_TIME_BASE, AV_TIME_BASE_Q, stream->time_base);
+
     m_cache.clear();
-    if(int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, ts, AVSEEK_FLAG_FRAME | AVSEEK_FLAG_ANY)) {
+    m_eof = false;
+    if(int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, ts, AVSEEK_FLAG_BACKWARD)) {
         error("audio_decoder: Error while seeking ({})", av_err_str(err));
     }
+
+    float delta = static_cast<float>(av_rescale_q(ts - stream->cur_dts, stream->time_base, AV_TIME_BASE_Q)) / AV_TIME_BASE;
+    m_skip_frames = delta * m_codec_ctx->time_base.den / m_codec_ctx->time_base.num;
+
+    avcodec_flush_buffers(m_codec_ctx.get());
     m_use_flag.clear(std::memory_order_release);
 }
