@@ -230,6 +230,8 @@ void audio_decoder::seek(float seconds) {
     m_eof = false;
     if(int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, ts, AVSEEK_FLAG_BACKWARD)) {
         error("audio_decoder: Error while seeking ({})", av_err_str(err));
+        m_use_flag.clear(std::memory_order_release);
+        return;
     }
 
     float delta = static_cast<float>(av_rescale_q(ts - stream->cur_dts, stream->time_base, AV_TIME_BASE_Q)) / AV_TIME_BASE;
