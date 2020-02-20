@@ -41,6 +41,14 @@ This streams are native, so there is no GC that will slow things down.
 For audio decoding, this library also provide native tools: libavformat and friends (FFmpeg) with MP3, OGG and WAV support only.
 Such audio decoder is blazing fast, so combining that with oboe streams, we get ourselves responsive and fast Audio implementation.
 
+## State of features
+
+Here is a table of known goodies and problems for certain features per file format (decoder):
+
+| Feature | WAV | OGG | MP3 |
+|-|-|-|-|
+| Seek | ✅ Precise, no content lost | ⚠️ Good precision, loss may be around ~20ms. But may produce artifacts. | 👌 Good precision, loss may be around ~20ms |
+
 ## Progress:
 
 **OboeAudio** class:
