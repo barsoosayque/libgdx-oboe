@@ -1,33 +1,36 @@
-apply plugin: 'maven-publish'
 apply plugin: "com.jfrog.bintray"
 
 version = libraryVersion
-group = publishedGroupId
 
-publishing {
-    publications {
-        Production(MavenPublication) {
-            artifact("$buildDir/outputs/aar/${project.name}-${project.version}.aar")
-            groupId publishedGroupId
-            artifactId artifact
-            version libraryVersion
-
-            pom.withXml {
-                def dependenciesNode = asNode().getAt('dependencies')[0] ?: asNode().appendNode('dependencies')
-
-                // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.implementation.allDependencies.each {
-                    // Ensure dependencies such as fileTree are not included.
-                    if (it.name != 'unspecified') {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
-                }
-            }
-        }
+if (project.hasProperty("kotlin")) { //Kotlin libraries
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
     }
+
+    task javadoc(type: Javadoc, dependsOn: dokka) {
+
+    }
+} else if (project.hasProperty("android")) { // Android libraries
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
+    }
+
+    task javadoc(type: Javadoc, dependsOn: dokka) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
 }
 
 Properties properties = new Properties()
@@ -37,8 +40,7 @@ bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
 
-    publications = ['Production']
-    override = true
+    configurations = ['archives']
     pkg {
         repo = bintrayRepo
         name = bintrayName
@@ -46,16 +48,13 @@ bintray {
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = allLicenses
-        dryRun = false
-        publish = true
         override = true
         publicDownloadNumbers = true
+        publish = true
         version {
             name = this.version
             desc = libraryDescription
         }
     }
 }
-
-bintrayUpload.dependsOn publishToMavenLocal
-publishToMavenLocal.dependsOn 'assembleRelease'
+bintrayUpload.dependsOn install
