@@ -9,7 +9,7 @@ buildscript {
 }
 
 ext {
-    bintrayRepo = 'gitlab'
+    bintrayRepo = 'github'
     bintrayName = 'libgdx-oboe'
 
     publishedGroupId = 'com.github.barsoosayque'
