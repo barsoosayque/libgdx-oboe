@@ -47,7 +47,7 @@ Here is a table of known goodies and problems for certain features per file form
 
 | Feature | WAV | OGG | MP3 |
 |-|-|-|-|
-| Seek | ✅ Precise, no content lost | 👌️ Bad initial seek, but dropping frames until PTS is equal to desired seek TS. May lose some content if PTS isn't precise enough.  | 👌 Same as OGG |
+| Seek | <table><tr><td>⭐️</td><td>Precise, no content lost.</td></tr></table>  | <table><tr><td>👌</td><td>Bad initial seek, but dropping frames until PTS is equal to desired seek TS. May lose some content if PTS isn't precise enough.</td></tr></table> | <table><tr><td>👌</td><td>Same as OGG.</td></tr></table> |
 
 ## Progress:
 
