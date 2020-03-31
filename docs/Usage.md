@@ -2,7 +2,7 @@
 
 ### Package
 
-You can use *jcenter* repository to find this library and use it as a dependency:
+You can use *jcenter* repository to resolve this library and use it as a dependency:
 
 ```groovy
 ext {
@@ -16,8 +16,14 @@ repositories {
 
 dependencies {
     implementation "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version"
+    natives "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version:natives-armeabi-v7a"
+    natives "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version:natives-arm64-v8a"
+    natives "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version:natives-x86"
+    natives "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version:natives-x86_64"
 }
 ```
+
+Note *natives* configuration. This is libGDX specific configuration for native libraries, it's used by `copyAndroidNatives` task.
 
 ### Launcher
 
