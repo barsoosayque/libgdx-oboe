@@ -18,6 +18,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation group: 'io.github.libktx', name: 'ktx-actors', version: "$ktxVersion"
     implementation group: 'io.github.libktx', name: 'ktx-scene2d', version: "$ktxVersion"
+    natives tasks.getByPath(':library:nativesArm64v8aJar').outputs.files
+    natives tasks.getByPath(':library:nativesArmeabiv7aJar').outputs.files
+    natives tasks.getByPath(':library:nativesX86Jar').outputs.files
+    natives tasks.getByPath(':library:nativesX86_64Jar').outputs.files
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
