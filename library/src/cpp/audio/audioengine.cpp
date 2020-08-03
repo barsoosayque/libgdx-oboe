@@ -75,7 +75,7 @@ void audio_engine::stop() {
     }
 }
 
-void audio_engine::play(std::shared_ptr<renderable_audio> audio) {
+void audio_engine::play(renderable_audio* audio) {
     android_assert(m_mode == mode::async, "playing sounds and music in blocking mode is not implemented.");
     m_mixer->play_audio(audio);
 }

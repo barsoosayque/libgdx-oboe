@@ -13,6 +13,7 @@ import com.badlogic.gdx.files.FileHandle
 // TODO: delegate errors from c++ to GdxRuntimeException
 class OboeAudio(private val assetManager: AssetManager) : Audio {
     private var audioEngine: Long = 0
+    private val audioDevices: MutableList<AudioDevice> = mutableListOf()
 
     init {
         System.loadLibrary("libgdx-oboe")
@@ -28,7 +29,14 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
 
     external fun resume()
     external fun stop()
-    external fun dispose()
+    private external fun disposeEngine()
+
+    fun dispose() {
+        // also disposes sounds and music
+        disposeEngine()
+
+        audioDevices.onEach { it.dispose() }.clear()
+    }
 
     override fun newMusic(file: FileHandle): Music = when (file.type()) {
         Files.FileType.Internal -> createMusicFromAsset(assetManager, file.path())
@@ -43,6 +51,7 @@ class OboeAudio(private val assetManager: AssetManager) : Audio {
     override fun newAudioDevice(samplingRate: Int, isMono: Boolean): AudioDevice =
             createAudioEngine(samplingRate, isMono)
                     .let(::OboeAudioDevice)
+                    .also { audioDevices.add(it) }
 
     override fun newAudioRecorder(samplingRate: Int, isMono: Boolean): AudioRecorder =
             createAudioEngine(samplingRate, isMono)

@@ -11,22 +11,22 @@ OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
 }
 
 inline jlong createMusic(JNIEnv* env, jobject self, std::unique_ptr<audio_decoder> &&decoder) {
-    auto ptr = new std::shared_ptr<music>();
-    *ptr = std::make_shared<music>(std::move(decoder), 2);
-
-    get_var_as<audio_engine>(env, self, "audioEngine")->play(*ptr);
-
-    return reinterpret_cast<jlong>(ptr);
+    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
+        music* ptr = new music(std::move(decoder), 2);
+        engine->play(ptr);
+        return reinterpret_cast<jlong>(ptr);
+    }
+    return 0;
 }
 
 inline jlong createSoundpool(JNIEnv* env, jobject self, std::unique_ptr<audio_decoder> &&decoder) {
-    decoder->decode();
-    auto ptr = new std::shared_ptr<soundpool>();
-    *ptr = std::make_shared<soundpool>(std::move(decoder->m_buffer), 2);
-
-    get_var_as<audio_engine>(env, self, "audioEngine")->play(*ptr);
-
-    return reinterpret_cast<jlong>(ptr);
+    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
+        decoder->decode();
+        soundpool* ptr = new soundpool(std::move(decoder->m_buffer), 2);
+        engine->play(ptr);
+        return reinterpret_cast<jlong>(ptr);
+    }
+    return 0;
 }
 
 inline std::unique_ptr<audio_decoder> fromAsset(JNIEnv* env, jobject self, jobject asset_manager, jstring path) {
@@ -75,21 +75,23 @@ OBOEAUDIO_METHOD(jlong, createSoundpoolFromPath) (JNIEnv* env, jobject self, jst
 }
 
 OBOEAUDIO_METHOD(jlong, createAudioEngine) (JNIEnv* env, jobject self, jint sample_rate, bool mono) {
-    auto ptr = new std::shared_ptr<audio_engine>();
-    *ptr = std::make_shared<audio_engine>(audio_engine::mode::blocking, mono ? 1 : 2, sample_rate);
-    (*ptr)->resume();
-
+    audio_engine* ptr = new audio_engine(audio_engine::mode::blocking, mono ? 1 : 2, sample_rate);
+    ptr->resume();
     return reinterpret_cast<jlong>(ptr);
 }
 
-OBOEAUDIO_METHOD(void, dispose) (JNIEnv* env, jobject self) {
+OBOEAUDIO_METHOD(void, disposeEngine) (JNIEnv* env, jobject self) {
     delete get_var_as<audio_engine>(env, self, "audioEngine");
 }
 
 OBOEAUDIO_METHOD(void, resume) (JNIEnv* env, jobject self) {
-    get_var_as<audio_engine>(env, self, "audioEngine")->resume();
+    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
+        engine->resume();
+    }
 }
 
 OBOEAUDIO_METHOD(void, stop) (JNIEnv* env, jobject self) {
-    get_var_as<audio_engine>(env, self, "audioEngine")->stop();
+    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
+        engine->stop();
+    }
 }

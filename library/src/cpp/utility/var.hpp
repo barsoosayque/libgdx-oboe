@@ -10,13 +10,6 @@ T* get_var_as(JNIEnv* env, jobject obj, std::string_view var) {
 }
 
 template<class T>
-std::shared_ptr<T> shared_ptr_var(JNIEnv* env, jobject obj, std::string_view var) {
-    auto object_class = env->GetObjectClass(obj);
-    auto var_id = env->GetFieldID(object_class, var.data(), "J");
-    return *reinterpret_cast<std::shared_ptr<T>*>(env->GetLongField(obj, var_id));
-}
-
-template<class T>
 void set_var_as(JNIEnv* env, jobject obj, std::string_view var, T* value) {
     auto object_class = env->GetObjectClass(obj);
     auto var_id = env->GetFieldID(object_class, var.data(), "J");

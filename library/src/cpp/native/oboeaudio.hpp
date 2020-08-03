@@ -25,8 +25,8 @@ OBOEAUDIO_METHOD(jlong, createMusicFromAsset) (JNIEnv*, jobject, jobject, jstrin
 // fun OboeAudio::createAudioEngine(): NativeAudioDevice
 OBOEAUDIO_METHOD(jlong, createAudioEngine) (JNIEnv*, jobject, jint, bool);
 
-// fun OboeAudio::dispose(): Unit
-OBOEAUDIO_METHOD(void, dispose) (JNIEnv*, jobject);
+// fun OboeAudio::disposeEngine(): Unit
+OBOEAUDIO_METHOD(void, disposeEngine) (JNIEnv*, jobject);
 
 // fun OboeAudio::resume(): Unit
 OBOEAUDIO_METHOD(void, resume) (JNIEnv*, jobject);
