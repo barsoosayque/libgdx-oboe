@@ -9,7 +9,6 @@ class mixer: renderable_audio {
     public:
         /// Initialize mixer with specified buffer size and channel size
         mixer(int32_t, int8_t);
-        ~mixer();
 
         void resize_buffer(int32_t);
         void play_audio(renderable_audio*);
