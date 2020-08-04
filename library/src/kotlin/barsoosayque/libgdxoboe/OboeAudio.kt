@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.Disposable
 /** [Audio] implementation which utilize [OboeMusic] and [OboeSound] */
 // TODO: delegate errors from c++ to GdxRuntimeException
 class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
-    private var audioEngine: Long = 0
+    private var audioEngine: NativeAudioEngine = NativeAudioEngine()
     private val audioDevicesList: MutableList<AudioDevice> = mutableListOf()
     private val musicList: MutableList<Music> = mutableListOf()
     private val soundsList: MutableList<Sound> = mutableListOf()
