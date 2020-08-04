@@ -60,3 +60,8 @@ template <class Custom>
 struct jvm_signature_t { static constexpr auto value = "L"_fstr +
                                                        Custom::cls +
                                                        ";"_fstr; };
+
+struct Music {
+    static constexpr auto cls = "com/badlogic/gdx/audio/Music"_fstr;
+    jobject obj;
+};

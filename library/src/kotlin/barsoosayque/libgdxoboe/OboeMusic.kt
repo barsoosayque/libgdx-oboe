@@ -1,12 +1,10 @@
 package barsoosayque.libgdxoboe
 
-import android.media.MediaCodec
 import com.badlogic.gdx.audio.Music
 
 /** [Music] implementation using ffmpeg and oboe stream. */
 class OboeMusic(private val music: NativeMusic) : Music {
-    private var onComplete: NativeCallback = NativeCallback(0)
-    private external fun setCompletionCallback(callback: () -> Unit)
+    private var listener: NativeListener = NativeListener()
 
     external override fun isPlaying(): Boolean
     external override fun isLooping(): Boolean
@@ -20,8 +18,5 @@ class OboeMusic(private val music: NativeMusic) : Music {
     external override fun setVolume(volume: Float)
     external override fun setPosition(position: Float)
     external override fun dispose()
-
-    override fun setOnCompletionListener(listener: Music.OnCompletionListener?) {
-        setCompletionCallback { listener?.onCompletion(this) }
-    }
+    external override fun setOnCompletionListener(listener: Music.OnCompletionListener?)
 }

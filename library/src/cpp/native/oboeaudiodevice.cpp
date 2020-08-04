@@ -32,7 +32,7 @@ OBOEAUDIODEVICE_METHOD(void, writeSamples___3FII) (JNIEnv* env, jobject self, jf
 }
 
 OBOEAUDIODEVICE_METHOD(void, dispose) (JNIEnv* env, jobject self) {
-    delete get_var_as<audio_engine>(env, self, "audioEngine");
+    delete_var<audio_engine>(env, self, "audioEngine");
 }
 
 OBOEAUDIODEVICE_METHOD(bool, isMono) (JNIEnv* env, jobject self) {

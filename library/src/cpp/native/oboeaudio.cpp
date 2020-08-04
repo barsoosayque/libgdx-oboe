@@ -12,8 +12,9 @@ OBOEAUDIO_METHOD(void, init) (JNIEnv* env, jobject self) {
 
 inline jlong createMusic(JNIEnv* env, jobject self, std::unique_ptr<audio_decoder> &&decoder) {
     if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
-        music* ptr = new music(std::move(decoder), 2);
-        engine->play(ptr);
+        auto ptr = new std::shared_ptr<music>();
+        ptr->reset(new music(std::move(decoder), 2));
+        engine->play(*ptr);
         return reinterpret_cast<jlong>(ptr);
     }
     return 0;
@@ -22,8 +23,9 @@ inline jlong createMusic(JNIEnv* env, jobject self, std::unique_ptr<audio_decode
 inline jlong createSoundpool(JNIEnv* env, jobject self, std::unique_ptr<audio_decoder> &&decoder) {
     if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
         decoder->decode();
-        soundpool* ptr = new soundpool(std::move(decoder->m_buffer), 2);
-        engine->play(ptr);
+        auto ptr = new std::shared_ptr<soundpool>();
+        ptr->reset(new soundpool(std::move(decoder->m_buffer), 2));
+        engine->play(*ptr);
         return reinterpret_cast<jlong>(ptr);
     }
     return 0;
@@ -81,7 +83,7 @@ OBOEAUDIO_METHOD(jlong, createAudioEngine) (JNIEnv* env, jobject self, jint samp
 }
 
 OBOEAUDIO_METHOD(void, disposeEngine) (JNIEnv* env, jobject self) {
-    delete get_var_as<audio_engine>(env, self, "audioEngine");
+    delete_var<audio_engine>(env, self, "audioEngine");
 }
 
 OBOEAUDIO_METHOD(void, resume) (JNIEnv* env, jobject self) {

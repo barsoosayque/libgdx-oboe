@@ -40,7 +40,7 @@ class audio_engine : protected oboe::AudioStreamCallback {
         void stop();
 
         /// Play sound or music. Automatically set mode to mix
-        void play(renderable_audio* audio);
+        void play(const std::shared_ptr<renderable_audio>& audio);
 
         /// Queue pcm for streaming. Automatically set mode to stream
         void play(const std::vector<int16_t>& pcm);

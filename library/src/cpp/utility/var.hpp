@@ -15,3 +15,10 @@ void set_var_as(JNIEnv* env, jobject obj, std::string_view var, T* value) {
     auto var_id = env->GetFieldID(object_class, var.data(), "J");
     return env->SetLongField(obj, var_id, reinterpret_cast<jlong>(value));
 }
+template<class T>
+void delete_var(JNIEnv* env, jobject obj, std::string_view var) {
+    auto instance = get_var_as<T>(env, obj, var);
+    delete instance;
+    instance = nullptr;
+    set_var_as<T>(env, obj, var, nullptr);
+}

@@ -13,7 +13,7 @@ void mixer::resize_buffer(int32_t new_size) {
     m_buffer.reserve(new_size);
 }
 
-void mixer::play_audio(renderable_audio* track) {
+void mixer::play_audio(const std::shared_ptr<renderable_audio>& track) {
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
     m_tracks.emplace_back(track);
     m_rendering_flag.clear(std::memory_order_release);
@@ -27,9 +27,9 @@ void mixer::render(int16_t* audio_data, int32_t num_frames) {
     int prevaluated = 0;
     bool is_dirty = false;
     while(m_rendering_flag.test_and_set(std::memory_order_acquire));
-    for(const auto& track : m_tracks) {
-        is_dirty |= track == nullptr;
-        if(track) {
+    for(const auto& weak_track : m_tracks) {
+        is_dirty |= weak_track.expired();
+        if(auto track = weak_track.lock()) {
             std::fill(m_buffer.begin(), m_buffer.begin() + num_frames * m_channels, 0);
             track->render(m_buffer.data(), num_frames);
 
@@ -40,8 +40,8 @@ void mixer::render(int16_t* audio_data, int32_t num_frames) {
         }
     }
     if(is_dirty) {
-        m_tracks.erase(std::remove_if(m_tracks.begin(), m_tracks.end(), [](const renderable_audio* track) {
-            return !track;
+        m_tracks.erase(std::remove_if(m_tracks.begin(), m_tracks.end(), [](std::weak_ptr<renderable_audio> track) {
+            return track.expired();
         }), m_tracks.end());
     }
     m_rendering_flag.clear(std::memory_order_release);
