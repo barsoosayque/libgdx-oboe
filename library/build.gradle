@@ -54,12 +54,6 @@ android {
         jni.srcDirs = ['src/cpp']
         jniLibs.srcDirs= [ 'libs' ]
     }
-    packagingOptions {
-        exclude 'lib/armeabi-v7a/*.so'
-        exclude 'lib/arm64-v8a/*.so'
-        exclude 'lib/x86/*.so'
-        exclude 'lib/x86_64/*.so'
-    }
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 29

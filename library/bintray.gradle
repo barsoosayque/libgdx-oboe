@@ -28,33 +28,10 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-task nativesArm64v8aJar(type: Jar, dependsOn: "assembleRelease") {
-    archiveClassifier.set('natives-arm64-v8a')
-    from files("$project.projectDir/libs/arm64-v8a", "$project.buildDir/intermediates/cmake/release/obj/arm64-v8a")
-}
-
-task nativesArmeabiv7aJar(type: Jar, dependsOn: "assembleRelease") {
-    archiveClassifier.set('natives-armeabi-v7a')
-    from files("$project.rootDir/libs/armeabi-v7a", "$project.buildDir/intermediates/cmake/release/obj/armeabi-v7a")
-}
-
-task nativesX86Jar(type: Jar, dependsOn: "assembleRelease") {
-    archiveClassifier.set('natives-x86')
-    from files("$project.rootDir/libs/x86", "$project.buildDir/intermediates/cmake/release/obj/x86")
-}
-
-task nativesX86_64Jar(type: Jar, dependsOn: "assembleRelease") {
-    archiveClassifier.set('natives-x86_64')
-    from files("$project.rootDir/libs/x86_64", "$project.buildDir/intermediates/cmake/release/obj/x86_64")
-}
 
 artifacts {
     archives javadocJar
     archives sourcesJar
-    archives nativesArm64v8aJar
-    archives nativesArmeabiv7aJar
-    archives nativesX86Jar
-    archives nativesX86_64Jar
 }
 
 Properties properties = new Properties()

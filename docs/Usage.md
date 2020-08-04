@@ -16,10 +16,6 @@ repositories {
 
 dependencies {
     implementation "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version"
-    natives "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version:natives-armeabi-v7a"
-    natives "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version:natives-arm64-v8a"
-    natives "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version:natives-x86"
-    natives "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version:natives-x86_64"
 }
 ```
 
