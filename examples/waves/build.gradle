@@ -72,8 +72,19 @@ task copyAndroidNatives {
     }
 }
 
+task clearNatives {
+    file("libs/armeabi-v7a/").deleteDir()
+    file("libs/arm64-v8a/").deleteDir()
+    file("libs/x86_64/").deleteDir()
+    file("libs/x86/").deleteDir()
+}
+
 tasks.whenTaskAdded { packageTask ->
     if (packageTask.name.contains("package")) {
         packageTask.dependsOn 'copyAndroidNatives'
     }
+    if (packageTask.name.contains("clear")) {
+        packageTask.dependsOn 'clearNatives'
+    }
 }
+
