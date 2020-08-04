@@ -25,8 +25,8 @@ And if you ever asked yourself *"Why is my libGDX app music is so broken ?"*, th
 Here is how do one essentially "use" this library (code in Kotlin):
 
 ```kotlin
-// Note super class.
 class AndroidLauncher : AndroidApplication() {
+    // Magic happens here:
     override fun createAudio(context: Context, config: AndroidApplicationConfiguration): AndroidAudio =
             OboeAudio(context.assets)
 

@@ -32,6 +32,7 @@ Simply override *createAudio* method in your android launcher class to create an
 Java:
 ```java
 public class AndroidLauncher extends AndroidApplication {
+    // Magic happens here:
     @Override
     public AndroidAudio createAudio(Context context, AndroidApplicationConfiguration config) {
         return new OboeAudio(context.getAssets());
@@ -49,8 +50,8 @@ public class AndroidLauncher extends AndroidApplication {
 
 Kotlin:
 ```kotlin
-// Note super class.
 class AndroidLauncher : AndroidApplication() {
+    // Magic happens here:
     override fun createAudio(context: Context, config: AndroidApplicationConfiguration): AndroidAudio =
             OboeAudio(context.assets)
 
