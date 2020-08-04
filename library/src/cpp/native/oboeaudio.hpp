@@ -31,7 +31,7 @@ OBOEAUDIO_METHOD(void, disposeEngine) (JNIEnv*, jobject);
 // fun OboeAudio::resume(): Unit
 OBOEAUDIO_METHOD(void, resume) (JNIEnv*, jobject);
 
-// fun OboeAudio::stop(): Unit
-OBOEAUDIO_METHOD(void, stop) (JNIEnv*, jobject);
+// fun OboeAudio::pause(): Unit
+OBOEAUDIO_METHOD(void, pause) (JNIEnv*, jobject);
 
 }

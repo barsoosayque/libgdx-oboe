@@ -7,12 +7,14 @@ import com.badlogic.gdx.audio.AudioDevice
 import com.badlogic.gdx.audio.AudioRecorder
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
+import com.badlogic.gdx.backends.android.AndroidAudio
+import com.badlogic.gdx.backends.android.AndroidMusic
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.utils.Disposable
 
 /** [Audio] implementation which utilize [OboeMusic] and [OboeSound] */
 // TODO: delegate errors from c++ to GdxRuntimeException
-class OboeAudio(private val assetManager: AssetManager) : Audio, Disposable {
+class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
     private var audioEngine: Long = 0
     private val audioDevicesList: MutableList<AudioDevice> = mutableListOf()
     private val musicList: MutableList<Music> = mutableListOf()
@@ -30,9 +32,14 @@ class OboeAudio(private val assetManager: AssetManager) : Audio, Disposable {
     private external fun createMusicFromPath(path: String): NativeMusic
     private external fun createAudioEngine(samplingRate: Int, isMono: Boolean): NativeAudioEngine
 
-    external fun resume()
-    external fun stop()
+    external override fun resume()
+    external override fun pause()
     private external fun disposeEngine()
+
+    override fun notifyMusicDisposed(music: AndroidMusic?) {
+        // No need to do anything here since runtime disposal of music/soundpool is
+        // well handled in mixer.cpp
+    }
 
     override fun dispose() {
         disposeEngine()

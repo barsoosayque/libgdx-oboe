@@ -90,7 +90,7 @@ OBOEAUDIO_METHOD(void, resume) (JNIEnv* env, jobject self) {
     }
 }
 
-OBOEAUDIO_METHOD(void, stop) (JNIEnv* env, jobject self) {
+OBOEAUDIO_METHOD(void, pause) (JNIEnv* env, jobject self) {
     if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
         engine->stop();
     }

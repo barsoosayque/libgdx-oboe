@@ -27,13 +27,16 @@ Note *natives* configuration. This is libGDX specific configuration for native l
 
 ### Launcher
 
-Since **libGDX** does not allow you to inherit from an *AndroidAudio* (and this is the only class that can be overloaded in your Android Launcher) class, the only workaround to it is just to mimic defualt *audio* behaviour.
-
-But you don't have to do that. If your intentions to just utilize the library, then you can use special *OboeAndroidApplication* class instead of the default one:
+Simply override *createAudio* method in your android launcher class to create an instance of *OboeAudio*:
 
 Java:
 ```java
-public class AndroidLauncher extends OboeAndroidApplication {
+public class AndroidLauncher extends AndroidApplication {
+    @Override
+    public AndroidAudio createAudio(Context context, AndroidApplicationConfiguration config) {
+        return new OboeAudio(context.getAssets());
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +50,10 @@ public class AndroidLauncher extends OboeAndroidApplication {
 Kotlin:
 ```kotlin
 // Note super class.
-class AndroidLauncher : OboeAndroidApplication() {
+class AndroidLauncher : AndroidApplication() {
+    override fun createAudio(context: Context, config: AndroidApplicationConfiguration): AndroidAudio =
+            OboeAudio(context.assets)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         

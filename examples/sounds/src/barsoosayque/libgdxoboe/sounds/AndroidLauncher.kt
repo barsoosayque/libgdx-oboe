@@ -1,11 +1,17 @@
 package barsoosayque.libgdxoboe.sounds
 
+import android.content.Context
 import android.os.Bundle
-import barsoosayque.libgdxoboe.OboeAndroidApplication
+import barsoosayque.libgdxoboe.OboeAudio
 import barsoosayque.libgdxoboe.sounds.app.MainApp
+import com.badlogic.gdx.backends.android.AndroidApplication
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration
+import com.badlogic.gdx.backends.android.AndroidAudio
 
-class AndroidLauncher : OboeAndroidApplication() {
+class AndroidLauncher : AndroidApplication() {
+    override fun createAudio(context: Context, config: AndroidApplicationConfiguration): AndroidAudio =
+            OboeAudio(context.assets)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

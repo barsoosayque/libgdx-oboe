@@ -7,6 +7,7 @@ import com.badlogic.gdx.backends.android.AndroidApplication
 
 /** Utility class which mimics behaviour of default [audio] in [AndroidApplication],
  * but does this with a custom [OboeAudio]. */
+@Deprecated("Deprecated in favour of libGDX 1.9.11 AndroidAudio interface w/ createAudio method in AndroidApplication")
 open class OboeAndroidApplication : AndroidApplication() {
     private var focusWasChanged: Boolean = true
     private var resumeAudio: Boolean = true
@@ -22,7 +23,7 @@ open class OboeAndroidApplication : AndroidApplication() {
     private fun oboeAudioListener() {
         addLifecycleListener(object : LifecycleListener {
             override fun pause() {
-                oboeAudio.stop()
+                oboeAudio.pause()
             }
 
             override fun dispose() {

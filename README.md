@@ -25,11 +25,17 @@ And if you ever asked yourself *"Why is my libGDX app music is so broken ?"*, th
 Here is how do one essentially "use" this library (code in Kotlin):
 
 ```kotlin
-// Note the super class
-class AndroidLauncher : OboeAndroidApplication() {
+// Note super class.
+class AndroidLauncher : AndroidApplication() {
+    override fun createAudio(context: Context, config: AndroidApplicationConfiguration): AndroidAudio =
+            OboeAudio(context.assets)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initialize(AmazingMusicApp(), AndroidApplicationConfiguration())
+
+        // Create an app like always
+        val config = AndroidApplicationConfiguration()
+        initialize(SomeApp(), config)
     }
 }
 ```
