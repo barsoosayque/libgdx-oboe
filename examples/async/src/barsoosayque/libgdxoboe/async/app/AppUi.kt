@@ -2,6 +2,7 @@ package barsoosayque.libgdxoboe.async.app
 
 import barsoosayque.libgdxoboe.async.content.MusicAsset
 import barsoosayque.libgdxoboe.async.content.SoundAsset
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
@@ -40,19 +41,24 @@ class AppUi(val assetManager: AssetManager) : Stage(ExtendViewport(480f, 700f)) 
                         MusicAsset.values().forEach { asset ->
                             assetManager.load(asset.path, Music::class.java)
                         }
-                        recacheList = true
                     }
                 }
                 container {
                     width(100f).height(50f)
                     textButton("Unload").onChange {
+                        GdxArray<Music>().let { assetManager.getAll(Music::class.java, it) }
+                                .forEach {
+                                    repeat(50) { _ ->
+                                        it.setOnCompletionListener { Gdx.app.log("Async", "$it // Test message") }
+                                    }
+                                    Gdx.app.log("Async", "Listener is set for $it")
+                                }
                         SoundAsset.values().forEach { asset ->
                             if (assetManager.isLoaded(asset.path)) assetManager.unload(asset.path)
                         }
                         MusicAsset.values().forEach { asset ->
                             if (assetManager.isLoaded(asset.path)) assetManager.unload(asset.path)
                         }
-                        recacheList = true
                     }
                 }
             }
@@ -76,8 +82,7 @@ class AppUi(val assetManager: AssetManager) : Stage(ExtendViewport(480f, 700f)) 
 
     override fun act(delta: Float) {
         super.act(delta)
-        if (assetManager.update() && recacheList) {
-            recacheList = false
+        if (assetManager.update()) {
             assetsList.setItems(assetManager.assetNames)
         }
         progress.value = assetManager.progress
