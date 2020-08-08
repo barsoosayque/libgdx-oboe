@@ -1,4 +1,8 @@
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.7.1)
+
+# Enable LTO optimization
+# https://github.com/android/ndk/issues/721
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto=full")
 
 set (OBOE_DIR dependencies/oboe)
 add_subdirectory (${OBOE_DIR} ./oboe)
@@ -22,10 +26,10 @@ include_directories (${SAMPLERATE}/include)
 
 set (FFMPEG_DIR dependencies/ffmpeg)
 include_directories (${FFMPEG_DIR})
-set (FFMPEG_LIBS avformat avcodec avutil swresample)
+set (FFMPEG_LIBS avformat avcodec swresample avutil)
 foreach(LIB ${FFMPEG_LIBS})
-    add_library( ${LIB} SHARED IMPORTED )
-    set_target_properties( ${LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so" )
+    add_library( ${LIB} STATIC IMPORTED )
+    set_target_properties( ${LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.a" )
 endforeach()
 
 set (SRC_DIR src/cpp)
@@ -44,4 +48,4 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/native/oboeaudiodevice.cpp)
 
 target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${FFMPEG_LIBS})
-target_compile_options(libgdx-oboe PRIVATE -Wall -Werror "$<$<CONFIG:RELEASE>:-Ofast>")
+target_compile_options(libgdx-oboe PRIVATE -Wall -Werror)

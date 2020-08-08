@@ -30,16 +30,19 @@ FFMPEG_FLAGS="
 --enable-cross-compile
 --target-os=android
 --pkg-config-flags=--static
---disable-static
 --disable-postproc
 --disable-debug
---enable-shared
 --enable-pic
 --enable-runtime-cpudetect
 --enable-hardcoded-tables
 --enable-version3
 --enable-x86asm
 --enable-nonfree
+
+--enable-static
+--disable-shared
+--enable-lto
+--enable-small
 
 --disable-everything
 --disable-doc
@@ -74,12 +77,12 @@ FFMPEG_FLAGS="
 while test $# -gt 0; do
     case "$1" in
         --help|-h)
-            echo "build_ffmpeg.sh -- script to build ffmpeg for android with support for mp3, wav and ogg."
+            echo "build_ffmpeg.sh -- script to build static ffmpeg libraries for android with support for mp3, wav and ogg."
             echo "usage: build_ffmpeg.sh (-h|--help) (--update) (--clear)"
             echo "options:"
             echo "    -h, --help:     print this message and exit."
             echo "    --update:       copy built libraries to ./libs (this option assume that the library is built)."
-            echo "    --clear:        clear build and temporary directories before any action."
+            echo "    --clear:        clear build and temporary directories and exit."
             echo "    --ffmpeg-only:  only build ffmpeg (assuming that dependencies already built)"
             exit 0;
             ;;
@@ -87,11 +90,7 @@ while test $# -gt 0; do
             for ABI in $ABI_FILTERS; do
                 DIR="$(pwd)/libs/$ABI"
                 mkdir -p "$DIR"
-                cp -av -t "$DIR" \
-                $BUILD_ROOT/$ABI/lib/libavcodec.so \
-                $BUILD_ROOT/$ABI/lib/libavutil.so \
-                $BUILD_ROOT/$ABI/lib/libavformat.so \
-                $BUILD_ROOT/$ABI/lib/libswresample.so
+                cp -av -t "$DIR" $BUILD_ROOT/$ABI/lib/lib{avformat,avcodec,swresample,avutil}.a
             done
             exit 0;
             ;;
@@ -101,6 +100,7 @@ while test $# -gt 0; do
             rm -r "$LIBOGG_ROOT"
             rm -r "$LIBWAVPACK_ROOT"
             rm -r "$LIBVORBIS_ROOT"
+            exit 0;
             ;;
         --ffmpeg-only)
             FFMPEG_ONLY=1
