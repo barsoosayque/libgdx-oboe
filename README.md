@@ -51,9 +51,7 @@ Such audio decoder is blazing fast, so combining that with oboe streams, we get 
 
 Here is a table of known goodies and problems for certain features per file format (decoder):
 
-| Feature | WAV | OGG | MP3 |
-|-|-|-|-|
-| Seek | <table><tr><td>⭐️</td><td>Precise, no content lost.</td></tr></table>  | <table><tr><td>👌</td><td>Bad initial seek, but dropping frames until PTS is equal to desired seek TS. May lose some content if PTS isn't precise enough.</td></tr></table> | <table><tr><td>👌</td><td>Same as OGG.</td></tr></table> |
+<table><thead><tr><th rowspan="2">Feature</th><th colspan="2">WAV</th><th colspan="2">OGG</th><th colspan="2">MP3</th></tr><tr><td>🧮</td><td><em>State</em></td><td>🧮</td><td><em>State</em></td><td>🧮</td><td><em>State</em></td></tr></thead><tbody><tr><td><em>Seek</em></td><td>⭐️</td><td>Precise, no content lost.</td><td>👌</td><td>Bad initial seek, but dropping frames until PTS is equal to desired seek TS. May lose some content if PTS isn't precise enough.</td><td>👌</td><td>Same as OGG.</td></tr></tbody></table>
 
 ## Progress:
 
