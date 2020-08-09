@@ -21,6 +21,7 @@ TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/$HOST_TAG"
 
 # Consult library/build.gradle for those options
 # android.defaultConfig.ndk.abiFilters
+#ABI_FILTERS="x86_64"
 ABI_FILTERS="x86 x86_64 armeabi-v7a arm64-v8a"
 # android.defaultConfig.minSdkVersion
 MIN_SDK_VERSION="16"
@@ -30,18 +31,17 @@ FFMPEG_FLAGS="
 --enable-cross-compile
 --target-os=android
 --pkg-config-flags=--static
+--pkg-config=pkgconf
 --disable-postproc
 --disable-debug
---enable-pic
---enable-runtime-cpudetect
 --enable-hardcoded-tables
 --enable-version3
 --enable-x86asm
 --enable-nonfree
 
---enable-static
---disable-shared
---enable-lto
+--enable-shared
+--disable-static
+--enable-pic
 --enable-small
 
 --disable-everything
@@ -67,17 +67,22 @@ FFMPEG_FLAGS="
 --enable-demuxer=wav,ogg,pcm*,mp3
 --enable-decoder=vorbis,opus,wavpack,mp3*,pcm*
 "
-#--enable-avfilter
-#--enable-demuxer=wav,ogg,pcm*,mp3
-#--enable-decoder=vorbis,opus,wavpack,mp3*,pcm*
-#--enable-filter=aresample
-#--enable-parser=mpegaudio,vorbis
+# static:
+#--enable-statoc
+#--disable-shared
+#--enable-lto
+
+# shared:
+#--enable-shared
+#--disable-static
+#--enable-pic
+
 
 # =============== Option handle ==============
 while test $# -gt 0; do
     case "$1" in
         --help|-h)
-            echo "build_ffmpeg.sh -- script to build static ffmpeg libraries for android with support for mp3, wav and ogg."
+            echo "build_ffmpeg.sh -- script to build shared ffmpeg libraries for android with support for mp3, wav and ogg."
             echo "usage: build_ffmpeg.sh (-h|--help) (--update) (--clear)"
             echo "options:"
             echo "    -h, --help:     print this message and exit."
@@ -90,7 +95,7 @@ while test $# -gt 0; do
             for ABI in $ABI_FILTERS; do
                 DIR="$(pwd)/libs/$ABI"
                 mkdir -p "$DIR"
-                cp -av -t "$DIR" $BUILD_ROOT/$ABI/lib/lib{avformat,avcodec,swresample,avutil}.a
+                cp -av -t "$DIR" $BUILD_ROOT/$ABI/lib/lib{avformat,avcodec,swresample,avutil}.so
             done
             exit 0;
             ;;
@@ -112,6 +117,8 @@ done
 # =============== Actual build ===============
 
 echo "*************** Prepare dependepcies ***************"
+
+mkdir -p "$BUILD_ROOT"
 
 if [ ! -e $LIBMP3LAME_ROOT ]; then
     curl -L "https://netcologne.dl.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz" | tar xz
@@ -137,34 +144,37 @@ fi
 echo "*************** FFmpeg cross-compilation ***************"
 for ABI in $ABI_FILTERS; do
     echo "*************** $ABI ***************"
-    CFLAGS=""
-    LDFLAGS="-Wl,-Bsymbolic"
+    CFLAGS="-O3"
+    LDFLAGS="-lm"
     ABI_FLAGS=""
     case $ABI in
         x86)
             ARCH=x86
             TOOLCHAIN_DIR="$TOOLCHAIN/i686-linux-android"
             TOOLCHAIN_PREFIX="i686-linux-android"
-            ABI_FLAGS="--cpu=i686 --disable-asm"
+            ABI_FLAGS="--disable-asm"
+            CPU="i686"
             CFLAGS="$CFLAGS -march=i686"
             ;;
         x86_64)
             ARCH=x86_64
             TOOLCHAIN_DIR="$TOOLCHAIN/x86_64-linux-android"
             TOOLCHAIN_PREFIX="x86_64-linux-android"
+            CPU="x86_64"
             ABI_FLAGS="--disable-x86asm"
             ;;
         armeabi-v7a)
             ARCH=arm
             TOOLCHAIN_DIR="$TOOLCHAIN/arm-linux-androideabi"
             TOOLCHAIN_PREFIX="arm-linux-androideabi"
-            ABI_FLAGS="--cpu=armv7-a"
+            CPU="armv7a"
             ;;
         arm64-v8a)
             ARCH=aarch64
             TOOLCHAIN_DIR="$TOOLCHAIN/aarch64-linux-android"
             TOOLCHAIN_PREFIX="aarch64-linux-android"
-            LDFLAGS="-fuse-ld=gold"
+            #LDFLAGS="-fuse-ld=gold "
+            CPU="generic"
             ;;
     esac
 
@@ -183,15 +193,21 @@ for ABI in $ABI_FILTERS; do
     export AR=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-ar
     export AS=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-as
     export CC=$TOOLCHAIN/bin/$CC
-    export LD=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-ld
+    export CXX=$CC++
+    export LD=$CC
     export RANLIB=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-ranlib
     export STRIP=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-strip
+    export NM=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-nm
+
+    export PKG_CONFIG_PATH=$BUILD_ROOT/$ABI/lib/pkgconfig
+
+    export TOOLCHAIN=$TOOLCHAIN
+    export TARGET=$TOOLCHAIN_PREFIX
+    export API=$MIN_SDK_VERSION
 
     AUTOCONF_CROSS_FLAGS="
     --quiet
-    --with-pic
-    --with-sysroot=$TOOLCHAIN/sysroot
-    --host=$TOOLCHAIN_PREFIX
+    --host=$TARGET
     --disable-shared
     --enable-static
     --disable-frontend
@@ -200,6 +216,7 @@ for ABI in $ABI_FILTERS; do
     --disable-encoder
     --prefix=$BUILD_ROOT/$ABI
     "
+#      --with-sysroot=$TOOLCHAIN/sysroot
 
     if [ -z "$FFMPEG_ONLY" ]; then
         echo "[1/5] Build $ABI libmp3lame..."
@@ -232,18 +249,28 @@ for ABI in $ABI_FILTERS; do
 
     ABI_FLAGS="
     $ABI_FLAGS
-    --pkg-config=pkgconf
+    --cpu=$CPU
     --cc=$CC
+    --cxx=$XX
+    --ld=$LD
+    --ar=$AR
+    --as=$CC
+    --nm=$NM
+    --ranlib=$RANLIB
+    --strip=$STRIP
     --arch=$ARCH
     --sysroot=$TOOLCHAIN/sysroot
     --prefix=$BUILD_ROOT/$ABI
     --cross-prefix=$TOOLCHAIN/bin/$TOOLCHAIN_PREFIX-
-     --env=PKG_CONFIG_PATH=$BUILD_ROOT/$ABI/lib/pkgconfig
+    --env=PKG_CONFIG_PATH=$BUILD_ROOT/$ABI/lib/pkgconfig
     "
     CFLAGS="$CFLAGS -I$BUILD_ROOT/$ABI/include"
     LDFLAGS="$LDFLAGS -L$BUILD_ROOT/$ABI/lib"
     (cd "$FFMPEG_ROOT" && \
-    ./configure --extra-libs="-lm" \
-        --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS" $FFMPEG_FLAGS $ABI_FLAGS \
+    ./configure \
+        --extra-cflags="$CFLAGS" \
+        --extra-ldflags="$LDFLAGS" \
+        $FFMPEG_FLAGS \
+        $ABI_FLAGS \
     && $MAKE clean && $MAKE && $MAKE install)
 done

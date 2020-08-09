@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.7.1)
 
 # Enable LTO optimization
 # https://github.com/android/ndk/issues/721
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -flto=full")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -flto=full -ffunction-sections -fdata-sections -fvisibility=hidden")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -flto=full -ffunction-sections -fdata-sections -fvisibility=hidden")
+# Enable --as-needed
+set(LINK_WHAT_YOU_USE TRUE)
 
 set (OBOE_DIR dependencies/oboe)
 add_subdirectory (${OBOE_DIR} ./oboe)
@@ -26,10 +29,10 @@ include_directories (${SAMPLERATE}/include)
 
 set (FFMPEG_DIR dependencies/ffmpeg)
 include_directories (${FFMPEG_DIR})
-set (FFMPEG_LIBS avformat avcodec swresample avutil)
+set (FFMPEG_LIBS avformat avcodec avutil swresample)
 foreach(LIB ${FFMPEG_LIBS})
-    add_library( ${LIB} STATIC IMPORTED )
-    set_target_properties( ${LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.a" )
+    add_library( ${LIB} SHARED IMPORTED )
+    set_target_properties( ${LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so" )
 endforeach()
 
 set (SRC_DIR src/cpp)
@@ -49,3 +52,13 @@ add_library(libgdx-oboe SHARED
 
 target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${FFMPEG_LIBS})
 target_compile_options(libgdx-oboe PRIVATE -Wall -Werror)
+
+# Strip
+add_custom_command(TARGET libgdx-oboe POST_BUILD
+        COMMAND "${ANDROID_TOOLCHAIN_PREFIX}strip" -g -S -d --strip-debug --verbose
+        "$<TARGET_FILE:libgdx-oboe>")
+foreach(LIB ${FFMPEG_LIBS})
+    add_custom_command(TARGET libgdx-oboe POST_BUILD
+            COMMAND "${ANDROID_TOOLCHAIN_PREFIX}strip" -g -S -d --strip-debug --verbose
+            "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so")
+endforeach()
