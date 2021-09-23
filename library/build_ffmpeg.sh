@@ -16,8 +16,6 @@ LIBWAVPACK_ROOT="build/libwavpack"
 LIBVORBIS_ROOT="build/libvorbis"
 FFMPEG_ROOT="dependencies/ffmpeg"
 BUILD_ROOT="$(pwd)/build/libs"
-NDK="$ANDROID_HOME/ndk-bundle"
-TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/$HOST_TAG"
 
 # Consult library/build.gradle for those options
 # android.defaultConfig.ndk.abiFilters
@@ -47,7 +45,6 @@ FFMPEG_FLAGS="
 --disable-everything
 --disable-doc
 --disable-avdevice
---disable-avresample
 --disable-network
 --disable-swscale
 --disable-pthreads
@@ -63,7 +60,6 @@ FFMPEG_FLAGS="
 --disable-encoders
 --enable-libmp3lame
 --enable-libvorbis
---enable-libwavpack
 --enable-demuxer=wav,ogg,pcm*,mp3
 --enable-decoder=vorbis,opus,wavpack,mp3*,pcm*
 "
@@ -79,17 +75,19 @@ FFMPEG_FLAGS="
 
 
 # =============== Option handle ==============
-while test $# -gt 0; do
+while [[ $# -gt 0 ]]; do
     case "$1" in
         --help|-h)
             echo "build_ffmpeg.sh -- script to build shared ffmpeg libraries for android with support for mp3, wav and ogg."
-            echo "usage: build_ffmpeg.sh (-h|--help) (--update) (--clear)"
+            echo "usage: build_ffmpeg.sh (--ndk-dir <NDK_DIR>) (-h|--help) (--update) (--clear) (--ffmpeg-only) (--init)"
             echo "options:"
-            echo "    -h, --help:     print this message and exit."
-            echo "    --update:       copy built libraries to ./libs (this option assume that the library is built)."
-            echo "    --clear:        clear build and temporary directories and exit."
-            echo "    --ffmpeg-only:  only build ffmpeg (assuming that dependencies already built)"
-            exit 0;
+            echo "    -h, --help:          print this message and exit."
+            echo "    --ndk-dir <NDK_DIR>: uses toolchain from provided ndk directory (or env var NDK_DIR otherwise)"
+            echo "    --update:            copy built libraries to ./libs (this option assume that the library is built)."
+            echo "    --clear:             clear build and temporary directories and exit."
+            echo "    --ffmpeg-only:       only build ffmpeg (assuming that dependencies already built)"
+            echo "    --init:              configure ffmpeg and generate required files (this implies --ffmpeg-only)"
+            exit 0
             ;;
         --update)
             for ABI in $ABI_FILTERS; do
@@ -97,7 +95,7 @@ while test $# -gt 0; do
                 mkdir -p "$DIR"
                 cp -av -t "$DIR" $BUILD_ROOT/$ABI/lib/lib{avformat,avcodec,swresample,avutil}.so
             done
-            exit 0;
+            exit 0
             ;;
         --clear)
             rm -r "$BUILD_ROOT"
@@ -105,40 +103,58 @@ while test $# -gt 0; do
             rm -r "$LIBOGG_ROOT"
             rm -r "$LIBWAVPACK_ROOT"
             rm -r "$LIBVORBIS_ROOT"
-            exit 0;
+            exit 0
+            ;;
+        --init)
+            INIT_ONLY=1
+            FFMPEG_ONLY=1
             ;;
         --ffmpeg-only)
             FFMPEG_ONLY=1
+            ;;
+        --ndk-dir)
+            NDK_DIR="$2"
+            shift
             ;;
     esac
     shift
 done
 
+if [ -z "$NDK_DIR" ]; then
+  echo "ERROR: define NDK_DIR env var or pass --ndk-dir to the script"
+  exit 1
+fi
+
+TOOLCHAIN="$NDK_DIR/toolchains/llvm/prebuilt/$HOST_TAG"
+
+
 # =============== Actual build ===============
 
-echo "*************** Prepare dependepcies ***************"
+if [ -z "INIT_ONLY" ]; then
+  echo "*************** Prepare dependepcies ***************"
 
-mkdir -p "$BUILD_ROOT"
+  mkdir -p "$BUILD_ROOT"
 
-if [ ! -e $LIBMP3LAME_ROOT ]; then
-    curl -L "https://netcologne.dl.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz" | tar xz
-    mv lame-3.100 "$LIBMP3LAME_ROOT"
-fi
+  if [ ! -e $LIBMP3LAME_ROOT ]; then
+      curl -L "https://netcologne.dl.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz" | tar xz
+      mv lame-3.100 "$LIBMP3LAME_ROOT"
+  fi
 
-if [ ! -e $LIBOGG_ROOT ]; then
-    curl -L "http://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.gz" | tar xz
-    mv libogg-1.3.4 "$LIBOGG_ROOT"
-fi
+  if [ ! -e $LIBOGG_ROOT ]; then
+      curl -L "http://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.gz" | tar xz
+      mv libogg-1.3.4 "$LIBOGG_ROOT"
+  fi
 
-if [ ! -e $LIBVORBIS_ROOT ]; then
-    curl -L "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.gz" | tar xz
-    mv libvorbis-1.3.5 "$LIBVORBIS_ROOT"
-    patch $LIBVORBIS_ROOT/configure < dependencies/libvorbis-clang.patch
-fi
+  if [ ! -e $LIBVORBIS_ROOT ]; then
+      curl -L "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.gz" | tar xz
+      mv libvorbis-1.3.5 "$LIBVORBIS_ROOT"
+      patch $LIBVORBIS_ROOT/configure < dependencies/libvorbis-clang.patch
+  fi
 
-if [ ! -e $LIBWAVPACK_ROOT ]; then
-    curl -L "http://www.wavpack.com/wavpack-5.2.0.tar.xz" | tar xJ
-    mv wavpack-5.2.0 "$LIBWAVPACK_ROOT"
+  if [ ! -e $LIBWAVPACK_ROOT ]; then
+      curl -L "http://www.wavpack.com/wavpack-5.2.0.tar.xz" | tar xJ
+      mv wavpack-5.2.0 "$LIBWAVPACK_ROOT"
+  fi
 fi
 
 echo "*************** FFmpeg cross-compilation ***************"
@@ -218,12 +234,18 @@ for ABI in $ABI_FILTERS; do
     "
 #      --with-sysroot=$TOOLCHAIN/sysroot
 
+    if [ -z "$INIT_ONLY" ]; then
+      BUILD_CMD="$MAKE clean && $MAKE && $MAKE install"
+    else
+      BUILD_CMD=":"
+    fi
+
     if [ -z "$FFMPEG_ONLY" ]; then
         echo "[1/5] Build $ABI libmp3lame..."
-        (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+        (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $BUILD_CMD)
 
         echo "[2/5] Build $ABI libogg..."
-        (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+        (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $BUILD_CMD)
 
         echo "[3/5] Build $ABI libvorbis..."
         LIBVORBIS_FLAGS="
@@ -231,7 +253,7 @@ for ABI in $ABI_FILTERS; do
         CFLAGS=-I$BUILD_ROOT/$ABI/include
         LDFLAGS=-L$BUILD_ROOT/$ABI/lib
         "
-        (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+        (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && $BUILD_CMD)
 
         echo "[4/5] Build $ABI libwavpack..."
         LIBWAVPACK_FLAGS="
@@ -240,7 +262,7 @@ for ABI in $ABI_FILTERS; do
         --disable-dsd
         --enable-legacy
         "
-        (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && $MAKE clean && $MAKE && $MAKE install)
+        (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && $BUILD_CMD)
 
         echo "[5/5] Build $ABI ffmpeg..."
     else
@@ -272,5 +294,5 @@ for ABI in $ABI_FILTERS; do
         --extra-ldflags="$LDFLAGS" \
         $FFMPEG_FLAGS \
         $ABI_FLAGS \
-    && $MAKE clean && $MAKE && $MAKE install)
+    && $BUILD_CMD)
 done

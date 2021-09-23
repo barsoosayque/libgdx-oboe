@@ -21,7 +21,7 @@ Result<std::pair<codec_context_ptr, int>, decoder_error> audio_decoder::create_c
         return Err(decoder_error{fmt::format("Could not retrieve stream info from {}: {}", format_ctx->url, av_err_str(err))});
     }
 
-    AVCodec *codec;
+    const AVCodec *codec;
     AVCodecParameters *codec_params;
     int stream_index = -1;
 
@@ -86,7 +86,6 @@ Result<std::tuple<swr_context_ptr, frame_ptr, frame_ptr, packet_ptr>, decoder_er
     }
 
     packet_ptr packet = make_packet();
-    av_init_packet(packet.get());
     packet->stream_index = stream_index;
 
     return Ok(std::make_tuple(ctx, oframe, iframe, packet));
