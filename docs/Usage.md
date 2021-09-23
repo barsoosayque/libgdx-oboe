@@ -2,24 +2,7 @@
 
 ### Package
 
-You can use *jcenter* repository to resolve this library and use it as a dependency:
-
-```groovy
-ext {
-    libgdxoboe_version = "0.2.4"
-}
-
-repositories {
-    jcenter()
-    ...
-}
-
-dependencies {
-    implementation "com.github.barsoosayque:libgdxoboe:$libgdxoboe_version"
-}
-```
-
-Note *natives* configuration. This is libGDX specific configuration for native libraries, it's used by `copyAndroidNatives` task.
+*TBD*
 
 ### Launcher
 
