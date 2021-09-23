@@ -4,8 +4,8 @@
 # - libGDX Oboe -
 
 [![Download](https://api.bintray.com/packages/barsoosayque/github/libgdx-oboe/images/download.svg)](https://bintray.com/barsoosayque/github/libgdx-oboe/_latestVersion)
-[![libGDX](https://img.shields.io/badge/libGDX-1.9.11-yellow.svg)](https://github.com/libgdx/libgdx/releases/tag/gdx-parent-1.9.11)
-[![oboe](https://img.shields.io/badge/oboe-1.4.2-yellow.svg)](https://github.com/google/oboe/releases/tag/1.4.2)
+[![libGDX](https://img.shields.io/badge/libGDX-1.10.0-yellow.svg)](https://github.com/libgdx/libgdx/releases/tag/gdx-parent-1.10.0)
+[![oboe](https://img.shields.io/badge/oboe-1.6.1-yellow.svg)](https://github.com/google/oboe/releases/tag/1.6.1)
 
 Reimplementation of the Audio interface for **libGDX** framework using Oboe and FFmpeg, which allows music to flow without any delay or another unpleasant distortion.
 

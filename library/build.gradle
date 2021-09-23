@@ -1,17 +1,8 @@
-apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
-apply plugin: 'org.jetbrains.dokka-android'
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.17"
-    }
+plugins {
+    id "org.jetbrains.kotlin.android" version "$kotlinVersion"
 }
+
+apply plugin: "com.android.library"
 
 ext {
     bintrayRepo = 'github'
@@ -46,17 +37,16 @@ dependencies {
 }
 
 android {
-    buildToolsVersion "29.0.2"
-    compileSdkVersion 29
+    buildToolsVersion androidBuildToolsVersion
+    compileSdkVersion androidSdkVersion
     sourceSets.main {
         manifest.srcFile 'AndroidManifest.xml'
         java.srcDirs = ['src/kotlin']
         jni.srcDirs = ['src/cpp']
-        jniLibs.srcDirs= [ 'libs' ]
     }
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 29
+        targetSdkVersion androidSdkVersion
         ndk { abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a' }
         externalNativeBuild {
             cmake {
@@ -71,11 +61,3 @@ android {
         }
     }
 }
-
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/javadoc"
-}
-
-apply from: 'install.gradle'
-apply from: 'bintray.gradle'
