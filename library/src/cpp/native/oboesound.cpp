@@ -4,14 +4,14 @@
 
 OBOESOUND_METHOD(jlong, play) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
     if(auto instance = get_var_as<std::shared_ptr<soundpool>>(env, self, "soundpool")) {
-        (*instance)->play(volume, pitch, pan, false);
+        return (*instance)->play(volume, pitch, pan, false);
     }
     return 0;
 }
 
 OBOESOUND_METHOD(jlong, loop) (JNIEnv* env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {
     if(auto instance = get_var_as<std::shared_ptr<soundpool>>(env, self, "soundpool")) {
-        (*instance)->play(volume, pitch, pan, true);
+        return (*instance)->play(volume, pitch, pan, true);
     }
     return 0;
 }
