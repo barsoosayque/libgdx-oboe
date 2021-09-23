@@ -41,7 +41,7 @@ class soundpool: public renderable_audio {
             resampler m_resampler;
         };
         sound gen_sound(float volume, float pan, float speed, bool loop);
-        void do_by_id(long, std::function<void(std::vector<sound>::iterator)>);
+        void do_by_id(long, const std::function<void(std::vector<sound>::iterator)>&);
         std::vector<sound> m_sounds;
         long m_last_id;
 
