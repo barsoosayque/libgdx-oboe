@@ -1,4 +1,3 @@
-#include "assert.h"
 #include "audioengine.hpp"
 #include "../utility/ptrptr.hpp"
 #include "../utility/log.hpp"
@@ -7,12 +6,15 @@
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <cassert>
 
 audio_engine::audio_engine(mode mode, int8_t channels, int32_t sample_rate)
-    : oboe::AudioStreamCallback()
+    : oboe::AudioStreamDataCallback()
+    , oboe::AudioStreamErrorCallback()
     , m_mixer(std::make_unique<mixer>(1024, channels))
     , m_channels(channels)
     , m_sample_rate(sample_rate)
+    , m_payload_size(0)
     , m_volume(1)
     , m_rendering_flag(false)
     , m_is_playing(false)
@@ -31,7 +33,8 @@ void audio_engine::connect_to_device() {
     builder.setChannelCount(m_channels);
     builder.setSampleRate(m_sample_rate);
     if(m_mode == mode::async) {
-        builder.setCallback(this);
+        builder.setDataCallback(this);
+        builder.setErrorCallback(this);
     }
     builder.setFormat(oboe::AudioFormat::I16);
     builder.setPerformanceMode(oboe::PerformanceMode::LowLatency);
@@ -96,7 +99,7 @@ void audio_engine::play(const std::vector<float>& pcm) {
     m_stream->write(m_pcm_buffer.data(), m_pcm_buffer.size() / m_channels, std::numeric_limits<int64_t>::max());
 }
 
-bool audio_engine::is_mono() {
+bool audio_engine::is_mono() const {
     return m_channels == 1;
 }
 
@@ -105,6 +108,6 @@ void audio_engine::volume(float volume) {
     m_mixer->m_volume = m_volume;
 }
 
-int32_t audio_engine::payload_size() {
+int32_t audio_engine::payload_size() const {
     return m_payload_size * m_channels;
 }

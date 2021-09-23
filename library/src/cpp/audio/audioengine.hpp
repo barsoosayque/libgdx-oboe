@@ -6,7 +6,7 @@
 #include <vector>
 #include <atomic>
 
-class audio_engine : protected oboe::AudioStreamCallback {
+class audio_engine : protected oboe::AudioStreamDataCallback, oboe::AudioStreamErrorCallback {
     public:
         enum class mode { blocking, async };
     private:
@@ -49,11 +49,11 @@ class audio_engine : protected oboe::AudioStreamCallback {
         void play(const std::vector<float>& pcm);
 
         /// Return if this stream has 1 channel
-        bool is_mono();
+        bool is_mono() const;
 
         /// Set volume of the mixer
         void volume(float);
 
         /// Get size of buffer in samples
-        int32_t payload_size();
+        int32_t payload_size() const;
 };
