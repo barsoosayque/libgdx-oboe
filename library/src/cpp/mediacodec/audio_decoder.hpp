@@ -6,44 +6,47 @@
 #include <result.h>
 #include "internal_asset.hpp"
 #include "ffmpeg_utils.hpp"
+#include "decoder_bundle.hpp"
 
-struct decoder_error {
-    std::string m_text;
-};
-using decoder_result = Result<void, decoder_error>;
-
+/// Main class to perform an asset decoding.
+/// Supports full/partial decoding and seeking.
 class audio_decoder {
-    private:
-        std::vector<int16_t> m_cache;
-        std::atomic_flag m_use_flag = false;
-        int64_t m_target_ts = -1;
+public:
+    using buffer = std::vector<int16_t>;
 
-        format_context_ptr m_format_ctx;
-        codec_context_ptr m_codec_ctx;
-        avio_context_ptr m_avio_ctx;
-        swr_context_ptr m_swr_ctx;
-        frame_ptr m_iframe, m_oframe;
-        packet_ptr m_packet;
+    /// Creates an audio_decoder from a decoder_bundle
+    /// @note: use one of the @p decoder_bundle::create methods
+    audio_decoder(decoder_bundle&&);
+    audio_decoder(audio_decoder&) = delete;
+    audio_decoder(audio_decoder&&) = delete;
 
-        static Result<format_context_ptr, decoder_error>
-        create_context(std::string_view filename, AVFormatContext *format_ctx = nullptr);
+    /// Partial decoding
+    /// @param samples Number of samples to decode
+    /// @return Decoding result
+    buffer decode(int samples);
+    /// Full decoding
+    /// @result Decoding result
+    buffer decode();
 
-        static Result<std::pair<codec_context_ptr, int>, decoder_error>
-        create_codec(const format_context_ptr &format_ctx);
+    /// Perform seeking inside an asset
+    /// @param seconds Absolute time to seek to (amount of time from the start)
+    void seek(float seconds);
 
-        static Result<std::tuple<swr_context_ptr, frame_ptr, frame_ptr, packet_ptr>, decoder_error>
-        create_swr(const codec_context_ptr& codec_ctx, int stream_index);
-    public:
-        audio_decoder() = default;
-        audio_decoder(audio_decoder&) = delete;
-        audio_decoder(audio_decoder&&) = delete;
+    /// @return Is decoder at end of file ?
+    bool is_eof() const;
 
-        decoder_result init(std::string_view filename);
-        decoder_result init(internal_asset &asset);
-        void decode(int samples);
-        void decode();
-        void seek(float seconds);
+private:
+    std::vector<int16_t> m_buffer;
+    std::vector<int16_t> m_cache;
 
-        std::vector<int16_t> m_buffer;
-        bool m_eof = false;
+    bool m_eof = false;
+
+    std::atomic_flag m_use_flag = false;
+    int64_t m_target_ts = -1;
+
+    format_context_ptr m_format_ctx;
+    codec_context_ptr m_codec_ctx;
+    swr_context_ptr m_swr_ctx;
+    frame_ptr m_iframe, m_oframe;
+    packet_ptr m_packet;
 };

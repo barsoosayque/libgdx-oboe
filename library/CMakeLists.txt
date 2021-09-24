@@ -40,6 +40,7 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/samplerate/resampler.cpp
             ${SRC_DIR}/mediacodec/audio_decoder.cpp
             ${SRC_DIR}/mediacodec/internal_asset.cpp
+            ${SRC_DIR}/mediacodec/decoder_bundle.cpp
             ${SRC_DIR}/audio/audioengine.cpp
             ${SRC_DIR}/audio/mixer.cpp
             ${SRC_DIR}/sound/soundpool.cpp

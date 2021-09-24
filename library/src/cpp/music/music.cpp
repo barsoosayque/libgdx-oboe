@@ -17,12 +17,12 @@ music::music(std::unique_ptr<audio_decoder> &&decoder, int8_t channels)
 }
 
 void music::fill_second_buffer() {
-    m_decoder->decode(m_cache_size);
+    m_decoder->decode(m_cache_size).swap(m_buffer_pcm);
 }
 
-void music::swabuffers() {
-    m_main_pcm.swap(m_decoder->m_buffer);
-    m_eof = m_decoder->m_eof;
+void music::swap_buffers() {
+    m_main_pcm.swap(m_buffer_pcm);
+    m_eof = m_decoder->is_eof();
     m_current_frame = 0;
 }
 
@@ -41,7 +41,7 @@ void music::stop() {
     position(0);
 }
 
-bool music::is_playing() {
+bool music::is_playing() const {
     return m_playing;
 }
 
@@ -51,12 +51,12 @@ void music::position(float position) {
     m_decoder->seek(position);
     m_position = position;
     fill_second_buffer();
-    swabuffers();
+    swap_buffers();
     m_executor.queue();
     m_buffer_swap.clear(std::memory_order_release);
 }
 
-float music::position() {
+float music::position() const {
     return m_position;
 }
 
@@ -64,11 +64,11 @@ void music::volume(float volume) {
     m_volume = std::min(std::max(0.0f, volume), 1.0f);
 }
 
-float music::volume() {
+float music::volume() const {
     return m_volume;
 }
 
-bool music::is_looping() {
+bool music::is_looping() const {
     return m_looping;
 }
 
@@ -76,7 +76,7 @@ void music::is_looping(bool loop) {
     m_looping = loop;
 }
 
-void music::on_complete(std::function<void()> callback) {
+void music::on_complete(const std::function<void()>& callback) {
     m_on_complete = callback;
 }
 
@@ -118,9 +118,9 @@ void music::render(int16_t* stream, int32_t frames) {
 
         // wait for buffer in case there was no position reset
         m_executor.wait();
-        swabuffers();
+        swap_buffers();
         if(m_playing) {
-            if (m_looping && m_decoder->m_eof) {
+            if (m_looping && m_decoder->is_eof()) {
                 m_decoder->seek(0);
             }
             m_executor.queue();
