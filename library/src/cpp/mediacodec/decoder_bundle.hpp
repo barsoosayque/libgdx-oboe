@@ -4,15 +4,9 @@
 #include <result.h>
 #include "ffmpeg_utils.hpp"
 #include "internal_asset.hpp"
+#include "../utility/result_utils.hpp"
 
-struct decoder_bundle_error;
-class decoder_bundle;
-using decoder_bundle_result = Result<decoder_bundle, decoder_bundle_error>;
-
-/// Delegated errors from creating a decoder_bundle
-struct decoder_bundle_error {
-    std::string m_text;
-};
+SIMPLE_RESULT(decoder_bundle)
 
 /// Complete data set, required to make decoder work
 class decoder_bundle {

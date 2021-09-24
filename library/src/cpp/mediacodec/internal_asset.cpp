@@ -21,6 +21,19 @@ namespace {
     }
 }
 
+internal_asset_result internal_asset::create(std::string_view path, AAssetManager* manager) {
+    if (!manager) {
+        return make_error<internal_asset_error>("Invalid AAssetManager (nullptr)");
+    }
+
+    auto* asset = AAssetManager_open(manager, path.data(), AASSET_MODE_RANDOM);
+    if (!asset) {
+        return make_error<internal_asset_error>("Can't open an asset: {}", path);
+    }
+
+    return Ok(internal_asset(path, asset));
+}
+
 internal_asset::internal_asset(std::string_view path, AAsset *asset)
         : m_path(path), m_asset(asset, &AAsset_close) {}
 

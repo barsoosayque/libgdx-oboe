@@ -37,10 +37,16 @@ inline jlong createSoundpool(JNIEnv* env, jobject self, std::unique_ptr<audio_de
 inline std::unique_ptr<audio_decoder> fromAsset(JNIEnv* env, jobject self, jobject asset_manager, jstring path) {
     AAssetManager *native_manager = AAssetManager_fromJava(env, asset_manager);
     const char *native_path = env->GetStringUTFChars(path, nullptr);
-    internal_asset asset(native_path, AAssetManager_open(native_manager, native_path, AASSET_MODE_RANDOM));
+    auto asset_res = internal_asset::create(native_path, native_manager);
     env->ReleaseStringUTFChars(path, native_path);
 
-    auto result = decoder_bundle::create(asset);
+    if (asset_res.isErr())
+    {
+        error(asset_res.unwrapErr().m_text);
+        return {};
+    }
+
+    auto result = decoder_bundle::create(asset_res.unwrap());
     if(result.isErr()) {
         error(result.unwrapErr().m_text);
         return {};

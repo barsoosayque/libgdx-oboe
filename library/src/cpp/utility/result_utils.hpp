@@ -14,3 +14,8 @@ auto make_error(std::string_view msg)
 {
     return Err(E{std::string(msg)});
 }
+
+#define SIMPLE_RESULT(name) \
+struct name ## _error { std::string m_text; }; \
+class name; \
+using name ## _result = Result<name, name ## _error>;
