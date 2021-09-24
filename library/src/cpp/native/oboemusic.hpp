@@ -3,7 +3,7 @@
 
 #define OBOEMUSIC_METHOD(result, method) \
     JNIEXPORT result JNICALL \
-    Java_barsoosayque_libgdxoboe_OboeMusic ## _ ## method
+    Java_barsoosayque_libgdxoboe_OboeMusic_ ## method
 
 extern "C" {
 
