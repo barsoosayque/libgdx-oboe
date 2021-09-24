@@ -2,25 +2,24 @@
 #include "../utility/log.hpp"
 
 resampler::resampler(resampler::converter converter, int8_t channels, float ratio)
-    : m_channels(channels) {
+        : m_channels(channels) {
     int err = 0;
     m_state = src_new(static_cast<int>(converter), channels, &err);
-    if(err) {
+    if (err) {
         error("resampler::resampler error: {}", src_strerror(err));
         m_state = nullptr;
     }
-    m_data = SRC_DATA { .src_ratio = ratio };
+    m_data = SRC_DATA{ .src_ratio = ratio };
 }
 
-resampler::resampler(resampler&& other)
-    : m_channels(other.m_channels)
-{
+resampler::resampler(resampler &&other)
+        : m_channels(other.m_channels) {
     m_state = other.m_state;
     other.m_state = nullptr;
     m_data = other.m_data;
 }
 
-resampler& resampler::operator=(resampler&& other) {
+resampler &resampler::operator=(resampler &&other) {
     m_state = other.m_state;
     other.m_state = nullptr;
     m_data = other.m_data;
@@ -29,7 +28,7 @@ resampler& resampler::operator=(resampler&& other) {
 }
 
 resampler::~resampler() {
-    if(m_state != nullptr) {
+    if (m_state != nullptr) {
         src_delete(m_state);
     }
 }
@@ -46,11 +45,12 @@ void resampler::reset() {
     src_reset(m_state);
 }
 
-int resampler::process(std::vector<float>::const_iterator begin, std::vector<float>::const_iterator end,
-                      std::vector<float>::iterator output, int requested_frames) {
-    if(m_state == nullptr) {
+int resampler::process(std::vector<float>::const_iterator begin,
+                       std::vector<float>::const_iterator end,
+                       std::vector<float>::iterator output, int requested_frames) {
+    if (m_state == nullptr) {
         len = std::distance(begin, end);
-        len = len < requested_frames*m_channels ? len : requested_frames*m_channels;
+        len = len < requested_frames * m_channels ? len : requested_frames * m_channels;
         std::copy(begin, std::next(begin, len), output);
         return len;
     } else {

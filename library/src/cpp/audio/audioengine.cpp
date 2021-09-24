@@ -9,16 +9,16 @@
 #include <cassert>
 
 audio_engine::audio_engine(mode mode, int8_t channels, int32_t sample_rate)
-    : oboe::AudioStreamDataCallback()
-    , oboe::AudioStreamErrorCallback()
-    , m_mixer(std::make_unique<mixer>(1024, channels))
-    , m_channels(channels)
-    , m_sample_rate(sample_rate)
-    , m_payload_size(0)
-    , m_volume(1)
-    , m_rendering_flag(false)
-    , m_is_playing(false)
-    , m_mode(mode) {
+        : oboe::AudioStreamDataCallback()
+        , oboe::AudioStreamErrorCallback()
+        , m_mixer(std::make_unique<mixer>(1024, channels))
+        , m_channels(channels)
+        , m_sample_rate(sample_rate)
+        , m_payload_size(0)
+        , m_volume(1)
+        , m_rendering_flag(false)
+        , m_is_playing(false)
+        , m_mode(mode) {
     connect_to_device();
 }
 
@@ -32,7 +32,7 @@ void audio_engine::connect_to_device() {
     oboe::AudioStreamBuilder builder;
     builder.setChannelCount(m_channels);
     builder.setSampleRate(m_sample_rate);
-    if(m_mode == mode::async) {
+    if (m_mode == mode::async) {
         builder.setDataCallback(this);
         builder.setErrorCallback(this);
     }
@@ -47,19 +47,20 @@ void audio_engine::connect_to_device() {
     m_mixer->resize_buffer(m_payload_size * m_channels);
 }
 
-void audio_engine::onErrorAfterClose(oboe::AudioStream* self, oboe::Result error) {
+void audio_engine::onErrorAfterClose(oboe::AudioStream *self, oboe::Result error) {
     if (error == oboe::Result::ErrorDisconnected) {
         info("Previous device disconnected. Trying to connect to a new one...");
         connect_to_device();
-        if(m_is_playing) {
+        if (m_is_playing) {
             resume();
         }
     }
 }
 
-oboe::DataCallbackResult audio_engine::onAudioReady(oboe::AudioStream* self, void* audio_data, int32_t num_frames) {
-    while(m_rendering_flag.test_and_set(std::memory_order_acquire));
-    auto stream = static_cast<int16_t*>(audio_data);
+oboe::DataCallbackResult audio_engine::onAudioReady(oboe::AudioStream *self, void *audio_data,
+                                                    int32_t num_frames) {
+    while (m_rendering_flag.test_and_set(std::memory_order_acquire));
+    auto stream = static_cast<int16_t *>(audio_data);
     m_mixer->render(stream, num_frames);
     m_rendering_flag.clear(std::memory_order_release);
 
@@ -67,36 +68,38 @@ oboe::DataCallbackResult audio_engine::onAudioReady(oboe::AudioStream* self, voi
 }
 
 void audio_engine::resume() {
-    if(check(m_stream->requestStart(), "Error starting stream: {}")) {
+    if (check(m_stream->requestStart(), "Error starting stream: {}")) {
         m_is_playing = true;
     }
 }
 
 void audio_engine::stop() {
-    if(check(m_stream->requestStop(), "Error stopping stream: {}")) {
+    if (check(m_stream->requestStop(), "Error stopping stream: {}")) {
         m_is_playing = false;
     }
 }
 
-void audio_engine::play(const std::shared_ptr<renderable_audio>& audio) {
-    android_assert(m_mode == mode::async, "playing sounds and music in blocking mode is not implemented.");
+void audio_engine::play(const std::shared_ptr<renderable_audio> &audio) {
+    android_assert(m_mode == mode::async,
+                   "playing sounds and music in blocking mode is not implemented.");
     m_mixer->play_audio(audio);
 }
 
-void audio_engine::play(const std::vector<int16_t>& pcm) {
+void audio_engine::play(const std::vector<int16_t> &pcm) {
     android_assert(m_mode == mode::blocking, "playing raw pcm in async mode is not implemented.");
     m_stream->write(pcm.data(), pcm.size() / m_channels, std::numeric_limits<int64_t>::max());
 }
 
-void audio_engine::play(const std::vector<float>& pcm) {
+void audio_engine::play(const std::vector<float> &pcm) {
     android_assert(m_mode == mode::blocking, "playing raw pcm in async mode is not implemented.");
     m_pcm_buffer.clear();
     std::transform(pcm.cbegin(), pcm.cend(), std::back_inserter(m_pcm_buffer),
-                   [](const float& sample) {
+                   [](const float &sample) {
                        auto converted = sample * std::numeric_limits<int16_t>::max();
                        return static_cast<int16_t>(converted);
                    });
-    m_stream->write(m_pcm_buffer.data(), m_pcm_buffer.size() / m_channels, std::numeric_limits<int64_t>::max());
+    m_stream->write(m_pcm_buffer.data(), m_pcm_buffer.size() / m_channels,
+                    std::numeric_limits<int64_t>::max());
 }
 
 bool audio_engine::is_mono() const {

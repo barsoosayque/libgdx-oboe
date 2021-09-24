@@ -1,4 +1,5 @@
 #pragma once
+
 #include <vector>
 #include <string_view>
 #include <atomic>
@@ -16,9 +17,9 @@ public:
 
     /// Creates an audio_decoder from a decoder_bundle
     /// @note: use one of the @p decoder_bundle::create methods
-    audio_decoder(decoder_bundle&&);
-    audio_decoder(audio_decoder&) = delete;
-    audio_decoder(audio_decoder&&) = delete;
+    audio_decoder(decoder_bundle &&);
+    audio_decoder(audio_decoder &) = delete;
+    audio_decoder(audio_decoder &&) = delete;
 
     /// Partial decoding
     /// @param samples Number of samples to decode
@@ -46,6 +47,7 @@ private:
 
     format_context_ptr m_format_ctx;
     codec_context_ptr m_codec_ctx;
+    avio_context_ptr m_avio_ctx;
     swr_context_ptr m_swr_ctx;
     frame_ptr m_iframe, m_oframe;
     packet_ptr m_packet;

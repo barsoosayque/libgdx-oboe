@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
@@ -22,7 +23,7 @@ inline std::string av_err_str(int err) {
 
 /// Convert AVCodecParameters* to codec's name
 inline std::string codec_params_to_name(AVCodecParameters *codec_params) {
-    return std::string{avcodec_profile_name(codec_params->codec_id, codec_params->profile)};
+    return std::string{ avcodec_profile_name(codec_params->codec_id, codec_params->profile) };
 }
 
 /// Make RAII AVFormatContext

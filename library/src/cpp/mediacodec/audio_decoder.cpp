@@ -9,12 +9,13 @@ extern "C" {
 }
 
 audio_decoder::audio_decoder(decoder_bundle &&bundle)
-        : m_format_ctx(std::move(bundle.m_format_ctx)),
-          m_codec_ctx(std::move(bundle.m_codec_ctx)),
-          m_swr_ctx(std::move(bundle.m_swr_ctx)),
-          m_iframe(std::move(bundle.m_iframe)),
-          m_oframe(std::move(bundle.m_oframe)),
-          m_packet(std::move(bundle.m_packet)) {}
+        : m_format_ctx(std::move(bundle.m_format_ctx))
+        , m_codec_ctx(std::move(bundle.m_codec_ctx))
+        , m_avio_ctx(std::move(bundle.m_avio_ctx))
+        , m_swr_ctx(std::move(bundle.m_swr_ctx))
+        , m_iframe(std::move(bundle.m_iframe))
+        , m_oframe(std::move(bundle.m_oframe))
+        , m_packet(std::move(bundle.m_packet)) { }
 
 audio_decoder::buffer audio_decoder::decode(int samples) {
     while (m_use_flag.test_and_set(std::memory_order_acquire));

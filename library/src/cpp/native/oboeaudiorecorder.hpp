@@ -1,4 +1,5 @@
 #pragma once
+
 #include "jni.h"
 
 #define OBOEAUDIORECORDER_METHOD(result, method) \
@@ -7,7 +8,7 @@
 
 extern "C" {
 
-OBOEAUDIORECORDER_METHOD(void, read) (JNIEnv*, jobject, jshortArray, jint, jint);
-OBOEAUDIORECORDER_METHOD(void, dispose) (JNIEnv*, jobject);
+OBOEAUDIORECORDER_METHOD(void, read) (JNIEnv * , jobject , jshortArray , jint , jint ) ;
+OBOEAUDIORECORDER_METHOD(void, dispose) (JNIEnv * , jobject ) ;
 
 }

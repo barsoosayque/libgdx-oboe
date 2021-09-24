@@ -1,4 +1,5 @@
 #pragma once
+
 #include "log.hpp"
 #include <oboe/Oboe.h>
 

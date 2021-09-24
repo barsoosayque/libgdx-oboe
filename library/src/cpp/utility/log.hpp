@@ -19,18 +19,22 @@ void log(log_level level, std::string_view format, Params... params) {
     auto message = fmt::format(format, params...);
     auto mapped_level = ANDROID_LOG_DEBUG;
 
-    switch(level) {
-        case log_level::debug: mapped_level = ANDROID_LOG_DEBUG; break;
-        case log_level::info: mapped_level = ANDROID_LOG_INFO; break;
-        case log_level::error: mapped_level = ANDROID_LOG_ERROR; break;
-        case log_level::warn: mapped_level = ANDROID_LOG_WARN; break;
+    switch (level) {
+        case log_level::debug: mapped_level = ANDROID_LOG_DEBUG;
+            break;
+        case log_level::info: mapped_level = ANDROID_LOG_INFO;
+            break;
+        case log_level::error: mapped_level = ANDROID_LOG_ERROR;
+            break;
+        case log_level::warn: mapped_level = ANDROID_LOG_WARN;
+            break;
     }
 
     __android_log_print(mapped_level, "libGDX-Oboe", "%s", message.c_str());
 }
 
 inline void android_assert(bool cond, std::string_view msg) {
-    if(!cond) {
+    if (!cond) {
         __android_log_assert(msg.data(), "libGDX-Oboe", nullptr);
     }
 }

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <android/asset_manager_jni.h>
 #include <memory>
 #include <string_view>
@@ -20,7 +21,7 @@ public:
     /// Try to wrap an android internal asset
     /// @param path Asset path
     /// @param manager Valid android asset manager
-    static internal_asset_result create(std::string_view path, AAssetManager* manager);
+    static internal_asset_result create(std::string_view path, AAssetManager *manager);
 
     /// Generates a working avio context for reading/seeking an android internal asset
     /// @return RAII avio context

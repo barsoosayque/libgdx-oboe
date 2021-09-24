@@ -5,8 +5,11 @@
 #include "../utility/log.hpp"
 
 soundpool::soundpool(const data &pcm, int8_t channels)
-        : m_last_id(0), m_frames(pcm.size() / channels), m_channels(channels), m_pcm(to_float(pcm)),
-          m_rendering_flag(false) {}
+        : m_last_id(0)
+        , m_frames(pcm.size() / channels)
+        , m_channels(channels)
+        , m_pcm(to_float(pcm))
+        , m_rendering_flag(false) { }
 
 void soundpool::do_by_id(long id, const std::function<void(
         std::vector<soundpool::sound>::iterator)> &callback) {
@@ -43,7 +46,9 @@ long soundpool::play(float volume, float speed, float pan, bool loop) {
 
 void soundpool::pause() {
     while (m_rendering_flag.test_and_set(std::memory_order_acquire));
-    for (auto &sound : m_sounds) { sound.m_paused = true; }
+    for (auto &sound : m_sounds) {
+        sound.m_paused = true;
+    }
     m_rendering_flag.clear(std::memory_order_release);
 }
 
@@ -53,7 +58,9 @@ void soundpool::pause(long id) {
 
 void soundpool::resume() {
     while (m_rendering_flag.test_and_set(std::memory_order_acquire));
-    for (auto &sound : m_sounds) { sound.m_paused = false; }
+    for (auto &sound : m_sounds) {
+        sound.m_paused = false;
+    }
     m_rendering_flag.clear(std::memory_order_release);
 }
 
