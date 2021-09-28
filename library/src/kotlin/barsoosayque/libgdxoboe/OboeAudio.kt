@@ -10,10 +10,10 @@ import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.backends.android.AndroidAudio
 import com.badlogic.gdx.backends.android.AndroidMusic
 import com.badlogic.gdx.files.FileHandle
-import com.badlogic.gdx.utils.Disposable
+import com.badlogic.gdx.utils.GdxRuntimeException
 
-/** [Audio] implementation which utilize [OboeMusic] and [OboeSound] */
-// TODO: delegate errors from c++ to GdxRuntimeException
+/** [Audio] implementation which utilize [OboeMusic] and [OboeSound].
+ * Returns [GdxRuntimeException] on native errors */
 class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
     private var audioEngine: NativeAudioEngine = NativeAudioEngine()
     private val audioDevicesList: MutableList<AudioDevice> = mutableListOf()
@@ -26,11 +26,11 @@ class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
     }
 
     private external fun init()
-    private external fun createSoundpoolFromAsset(assetManager: AssetManager, path: String): NativeSoundpool
-    private external fun createSoundpoolFromPath(path: String): NativeSoundpool
-    private external fun createMusicFromAsset(assetManager: AssetManager, path: String): NativeMusic
-    private external fun createMusicFromPath(path: String): NativeMusic
-    private external fun createAudioEngine(samplingRate: Int, isMono: Boolean): NativeAudioEngine
+    private external fun createSoundpoolFromAsset(assetManager: AssetManager, path: String): Long
+    private external fun createSoundpoolFromPath(path: String): Long
+    private external fun createMusicFromAsset(assetManager: AssetManager, path: String): Long
+    private external fun createMusicFromPath(path: String): Long
+    private external fun createAudioEngine(samplingRate: Int, isMono: Boolean): Long
 
     external override fun resume()
     external override fun pause()
@@ -49,24 +49,28 @@ class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
         soundsList.onEach { it.dispose() }.clear()
     }
 
-    override fun newMusic(file: FileHandle): Music = when (file.type()) {
+    override fun newMusic(file: FileHandle): Music? = when (file.type()) {
         Files.FileType.Internal -> createMusicFromAsset(assetManager, file.path())
         else -> createMusicFromPath(file.file().path)
-    }.let(::OboeMusic)
-            .also { musicList.add(it) }
+    }.takeIf { it != 0L }
+        ?.let(::NativeMusic)
+        ?.let(::OboeMusic)
+        ?.also(musicList::add)
 
-    override fun newSound(file: FileHandle): Sound = when (file.type()) {
+    override fun newSound(file: FileHandle): Sound? = when (file.type()) {
         Files.FileType.Internal -> createSoundpoolFromAsset(assetManager, file.path())
         else -> createSoundpoolFromPath(file.file().path)
-    }.let(::OboeSound)
-            .also { soundsList.add(it) }
+    }.takeIf { it != 0L }
+        ?.let(::NativeSoundpool)
+        ?.let(::OboeSound)
+        ?.also(soundsList::add)
 
     override fun newAudioDevice(samplingRate: Int, isMono: Boolean): AudioDevice =
-            createAudioEngine(samplingRate, isMono)
-                    .let(::OboeAudioDevice)
-                    .also { audioDevicesList.add(it) }
+        createAudioEngine(samplingRate, isMono).let(::NativeAudioEngine)
+            .let(::OboeAudioDevice)
+            .also(audioDevicesList::add)
 
     override fun newAudioRecorder(samplingRate: Int, isMono: Boolean): AudioRecorder =
-            createAudioEngine(samplingRate, isMono)
-                    .let(::OboeAudioRecorder)
+        createAudioEngine(samplingRate, isMono).let(::NativeAudioEngine)
+            .let(::OboeAudioRecorder)
 }

@@ -35,3 +35,4 @@ Thumbs.db
 
 ## build logs
 *.log
+/library/.cxx/

@@ -43,7 +43,7 @@ audio_decoder::buffer audio_decoder::decode(int samples) {
             if (err == AVERROR_EOF) {
                 read_eof = true;
             } else if (err < 0) {
-                error("audio_decoder: Read frame error ({})", av_err_str(err));
+                warn("audio_decoder: Read frame error ({})", av_err_str(err));
             }
 
             // we were seeking, but seek wasn't precise.
@@ -74,7 +74,7 @@ audio_decoder::buffer audio_decoder::decode(int samples) {
 
             if ((err = avcodec_send_packet(m_codec_ctx.get(),
                                            read_eof ? nullptr : m_packet.get()))) {
-                error("audio_decoder: Error sending packets ({})", av_err_str(err));
+                warn("audio_decoder: Error sending packets ({})", av_err_str(err));
                 break;
             }
         }
@@ -88,7 +88,7 @@ audio_decoder::buffer audio_decoder::decode(int samples) {
                                             delay > 0 ? nullptr : m_iframe.get());
 
                     if (err < 0) {
-                        error("audio_decoder: Error converting demuxed data ({})", av_err_str(err));
+                        warn("audio_decoder: Error converting demuxed data ({})", av_err_str(err));
                     } else {
                         if ((data_size = m_oframe->nb_samples * m_oframe->channels) == 0) {
                             // sometimes delay will return positive value, but there is nothing to be read
@@ -111,7 +111,7 @@ audio_decoder::buffer audio_decoder::decode(int samples) {
             } else if (err == AVERROR_EOF) {
                 decode_eof = true;
             } else {
-                error("audio_decoder: Error while trying to receive a frame from the decoder ({})",
+                warn("audio_decoder: Error while trying to receive a frame from the decoder ({})",
                       av_err_str(err));
                 break;
             }
@@ -150,7 +150,7 @@ void audio_decoder::seek(float seconds) {
     avcodec_flush_buffers(m_codec_ctx.get());
     if (int err = av_seek_frame(m_format_ctx.get(), m_packet->stream_index, m_target_ts,
                                 AVSEEK_FLAG_BACKWARD)) {
-        error("audio_decoder: Error while seeking ({})", av_err_str(err));
+        warn("audio_decoder: Error while seeking ({})", av_err_str(err));
     }
     m_use_flag.clear(std::memory_order_release);
 }

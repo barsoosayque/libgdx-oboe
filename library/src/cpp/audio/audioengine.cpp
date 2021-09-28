@@ -1,12 +1,23 @@
 #include "audioengine.hpp"
 #include "../utility/ptrptr.hpp"
 #include "../utility/log.hpp"
-#include "../utility/oboeutils.hpp"
+#include "../utility/exception.hpp"
 #include <array>
 #include <algorithm>
 #include <iterator>
 #include <limits>
 #include <cassert>
+
+namespace {
+/// @note: message should contain {}
+inline bool check(oboe::Result result, std::string_view msg) {
+    if (result != oboe::Result::OK) {
+        throw_exception(msg, oboe::convertToText(result));
+        return false;
+    }
+    return true;
+}
+}
 
 audio_engine::audio_engine(mode mode, int8_t channels, int32_t sample_rate)
         : oboe::AudioStreamDataCallback()

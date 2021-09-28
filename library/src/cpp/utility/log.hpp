@@ -12,7 +12,13 @@
 //                Details
 // <><><><><><><><><><><><><><><><><><><><>
 
-enum class log_level { debug, info, error, warn };
+enum class log_level {
+    debug,
+    info,
+    /// @deprecated Throw native exceptions
+    error,
+    warn
+};
 
 template<class ... Params>
 void log(log_level level, std::string_view format, Params... params) {
@@ -53,8 +59,9 @@ inline void info(std::string_view format, Params... params) {
     log(log_level::info, format, params...);
 }
 
+/// @deprecated Throw native exceptions
 template<class ... Params>
-inline void error(std::string_view format, Params... params) {
+[[deprecated]] inline void error(std::string_view format, Params... params) {
     log(log_level::error, format, params...);
 }
 

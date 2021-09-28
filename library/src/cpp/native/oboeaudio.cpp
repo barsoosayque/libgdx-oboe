@@ -4,9 +4,11 @@
 #include "../audio/audioengine.hpp"
 #include "../utility/var.hpp"
 #include "../utility/log.hpp"
+#include "../utility/exception.hpp"
 #include "../mediacodec/audio_decoder.hpp"
 #include "../mediacodec/decoder_bundle.hpp"
 #include "../mediacodec/internal_asset.hpp"
+#include "../jni/jvm_signature.hpp"
 
 OBOEAUDIO_METHOD(void, init)(JNIEnv *env, jobject self) {
     // set default audioEngine in OboeAudio class
@@ -47,15 +49,14 @@ inline std::unique_ptr<audio_decoder> fromAsset(JNIEnv *env, jobject self, jobje
     auto asset_res = internal_asset::create(native_path, native_manager);
     env->ReleaseStringUTFChars(path, native_path);
 
-    if (asset_res.isErr())
-    {
-        error(asset_res.unwrapErr().m_text);
+    if (asset_res.isErr()) {
+        throw_exception(asset_res.unwrapErr().m_text);
         return {};
     }
 
     auto result = decoder_bundle::create(asset_res.unwrap());
-    if(result.isErr()) {
-        error(result.unwrapErr().m_text);
+    if (result.isErr()) {
+        throw_exception(asset_res.unwrapErr().m_text);
         return {};
     }
 
@@ -69,7 +70,7 @@ inline std::unique_ptr<audio_decoder> fromPath(JNIEnv *env, jobject self, jstrin
     env->ReleaseStringUTFChars(path, native_path);
 
     if (result.isErr()) {
-        error(result.unwrapErr().m_text);
+        throw_exception(result.unwrapErr().m_text);
         return {};
     }
 

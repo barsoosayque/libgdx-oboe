@@ -1,5 +1,6 @@
 #include "resampler.hpp"
 #include "../utility/log.hpp"
+#include "../utility/exception.hpp"
 
 resampler::resampler(resampler::converter converter, int8_t channels, float ratio)
         : m_data(SRC_DATA{ .src_ratio = ratio })
@@ -8,7 +9,7 @@ resampler::resampler(resampler::converter converter, int8_t channels, float rati
     int err = 0;
     m_state = src_state_ptr{ src_new(static_cast<int>(converter), channels, &err) };
     if (err) {
-        error("resampler::resampler error: {}", src_strerror(err));
+        throw_exception("resampler::resampler error: {}", src_strerror(err));
         m_state = nullptr;
     }
 }
@@ -55,7 +56,7 @@ int resampler::process(std::vector<float>::const_iterator begin,
         m_data.end_of_input = requested_frames <= m_len;
 
         if (int err = src_process(m_state.get(), &m_data)) {
-            error("resampler::process error: {}", src_strerror(err));
+            throw_exception("resampler::process error: {}", src_strerror(err));
         }
 
         return m_data.input_frames_used;
