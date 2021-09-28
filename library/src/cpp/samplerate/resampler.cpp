@@ -2,35 +2,27 @@
 #include "../utility/log.hpp"
 
 resampler::resampler(resampler::converter converter, int8_t channels, float ratio)
-        : m_channels(channels) {
+        : m_data(SRC_DATA{ .src_ratio = ratio })
+        , m_channels(channels)
+        , m_len(0) {
     int err = 0;
-    m_state = src_new(static_cast<int>(converter), channels, &err);
+    m_state = src_state_ptr{ src_new(static_cast<int>(converter), channels, &err) };
     if (err) {
         error("resampler::resampler error: {}", src_strerror(err));
         m_state = nullptr;
     }
-    m_data = SRC_DATA{ .src_ratio = ratio };
 }
 
-resampler::resampler(resampler &&other)
-        : m_channels(other.m_channels) {
-    m_state = other.m_state;
-    other.m_state = nullptr;
-    m_data = other.m_data;
+resampler::resampler(resampler &&other) noexcept {
+    *this = std::move(other);
 }
 
-resampler &resampler::operator=(resampler &&other) {
-    m_state = other.m_state;
-    other.m_state = nullptr;
-    m_data = other.m_data;
-    m_channels = other.m_channels;
+resampler &resampler::operator=(resampler &&other) noexcept {
+    m_data = std::exchange(other.m_data, SRC_DATA{});
+    m_state = std::exchange(other.m_state, nullptr);
+    m_channels = std::exchange(other.m_channels, 0);
+    m_len = std::exchange(other.m_len, 0);
     return *this;
-}
-
-resampler::~resampler() {
-    if (m_state != nullptr) {
-        src_delete(m_state);
-    }
 }
 
 float resampler::ratio() const {
@@ -42,27 +34,27 @@ void resampler::ratio(float ratio) {
 }
 
 void resampler::reset() {
-    src_reset(m_state);
+    src_reset(m_state.get());
 }
 
 int resampler::process(std::vector<float>::const_iterator begin,
                        std::vector<float>::const_iterator end,
                        std::vector<float>::iterator output, int requested_frames) {
     if (m_state == nullptr) {
-        len = std::distance(begin, end);
-        len = len < requested_frames * m_channels ? len : requested_frames * m_channels;
-        std::copy(begin, std::next(begin, len), output);
-        return len;
+        m_len = std::distance(begin, end);
+        m_len = m_len < requested_frames * m_channels ? m_len : requested_frames * m_channels;
+        std::copy(begin, std::next(begin, m_len), output);
+        return m_len;
     } else {
-        len = std::distance(begin, end) / m_channels;
+        m_len = std::distance(begin, end) / m_channels;
 
         m_data.data_in = &(*begin);
         m_data.data_out = &(*output);
-        m_data.input_frames = len;
+        m_data.input_frames = m_len;
         m_data.output_frames = requested_frames;
-        m_data.end_of_input = requested_frames <= len;
+        m_data.end_of_input = requested_frames <= m_len;
 
-        if (int err = src_process(m_state, &m_data)) {
+        if (int err = src_process(m_state.get(), &m_data)) {
             error("resampler::process error: {}", src_strerror(err));
         }
 

@@ -3,6 +3,17 @@
 #include <vector>
 #include <samplerate.h>
 #include <cstdint>
+#include <memory>
+
+namespace {
+struct resampler_state_deleter {
+    void operator()(SRC_STATE *ptr) {
+        src_delete(ptr);
+    }
+};
+
+using src_state_ptr = std::unique_ptr<SRC_STATE, resampler_state_deleter>;
+}
 
 class resampler {
 public:
@@ -16,12 +27,10 @@ public:
     };
 
     resampler(resampler::converter converter, int8_t channels, float ratio);
-    // no copy (todo: copy constructor)
     resampler(const resampler &) = delete;
     resampler &operator=(const resampler &) = delete;
-    resampler(resampler &&);
-    resampler &operator=(resampler &&);
-    ~resampler();
+    resampler(resampler &&) noexcept;
+    resampler &operator=(resampler &&) noexcept;
 
     void ratio(float ratio);
     float ratio() const;
@@ -34,10 +43,10 @@ public:
                 int requested_frames);
 
 private:
-    SRC_STATE *m_state;
     SRC_DATA m_data;
+    src_state_ptr m_state;
     int8_t m_channels;
 
     // internal variables
-    int len;
+    int m_len;
 };
