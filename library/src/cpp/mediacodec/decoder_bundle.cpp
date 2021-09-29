@@ -69,6 +69,11 @@ codec_result create_codec(const format_context_ptr &format_ctx) {
                               av_err_str(error));
         }
 
+        // WAV uses pcm_s16le codec and channel layout is 0.
+        // more here https://stackoverflow.com/a/20049638
+        if ( codec_ctx->channel_layout == 0 )
+            codec_ctx->channel_layout = av_get_default_channel_layout( codec_ctx->channels );
+
         return ok(std::make_pair(make_codec_context(codec_ctx), stream_index));
     } else {
         return make_error("Failed to allocate memory for Codec Context");
@@ -82,12 +87,18 @@ swr_result create_swr(const codec_context_ptr &codec_ctx, int stream_index) {
     iframe->format = codec_ctx->sample_fmt;
     iframe->channels = codec_ctx->channels;
 
+    debug("audio_decoder: iframe config:\nchannel_layout: {}\nsample_rate: {}\nformat: {}\nchannels: {}",
+          iframe->channel_layout, iframe->sample_rate, iframe->format, iframe->channels);
+
     frame_ptr oframe = make_frame();
     // TODO: remove hardcoded channels
     oframe->channel_layout = AV_CH_LAYOUT_STEREO;
     oframe->sample_rate = 44100;
     oframe->format = AV_SAMPLE_FMT_S16;
     oframe->channels = av_get_channel_layout_nb_channels(oframe->channel_layout);
+
+    debug("audio_decoder: oframe config:\nchannel_layout: {}\nsample_rate: {}\nformat: {}\nchannels: {}",
+          oframe->channel_layout, oframe->sample_rate, oframe->format, oframe->channels);
 
     swr_context_ptr ctx = make_swr_context();
     swr_alloc_set_opts(ctx.get(),
