@@ -1,0 +1,46 @@
+publishing {
+    publications {
+        gpr(MavenPublication) {
+            groupId = publishedGroupId
+            artifactId = artifact
+            version = libraryVersion
+            artifact "$buildDir/outputs/aar/${project.name}-release.aar"
+
+            pom {
+                name = libraryName
+                description = libraryDescription
+                url = siteUrl
+                licenses {
+                    license {
+                        name = licenseName
+                        url = licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        id = developerId
+                        name = developerName
+                        email = developerEmail
+                    }
+                }
+                scm {
+                    url = gitUrl
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/barsoosayque/libgdx-oboe") // Github Package
+            credentials {
+                Properties properties = new Properties()
+                properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+                username = properties.get("gpr.usr") as String ?: System.getenv("GPR_USER")
+                password = properties.get("gpr.key") as String ?: System.getenv("GPR_API_KEY")
+            }
+        }
+    }
+}

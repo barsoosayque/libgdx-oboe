@@ -1,13 +1,11 @@
 plugins {
     id "org.jetbrains.kotlin.android" version "$kotlinVersion"
+    id 'maven-publish'
 }
 
 apply plugin: "com.android.library"
 
 ext {
-    bintrayRepo = 'github'
-    bintrayName = 'libgdx-oboe'
-
     publishedGroupId = 'com.github.barsoosayque'
     libraryName = 'libGDX Oboe'
     artifact = 'libgdxoboe'
@@ -62,3 +60,5 @@ android {
         }
     }
 }
+
+apply from: "github.gradle"
