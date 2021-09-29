@@ -9,27 +9,27 @@ extern "C" {
 }
 
 namespace {
-using format_context_result = Result<format_context_ptr, decoder_bundle_error>;
-using codec_result = Result<std::pair<codec_context_ptr, int>, decoder_bundle_error>;
-using swr_result = Result<std::tuple<swr_context_ptr, frame_ptr, frame_ptr, packet_ptr>,
-                          decoder_bundle_error>;
+using format_context_result = result<format_context_ptr, simple_error>;
+using codec_result = result<std::pair<codec_context_ptr, int>, simple_error>;
+using swr_result = result<std::tuple<swr_context_ptr, frame_ptr, frame_ptr, packet_ptr>,
+                          simple_error>;
 
 
 format_context_result create_context(std::string_view filename,
                                      AVFormatContext *format_ctx) {
-    if (int err = avformat_open_input(&format_ctx, filename.data(), nullptr, nullptr)) {
-        return make_error<decoder_bundle_error>("Could not open {}: {}", filename,
-                                                av_err_str(err));
+    if (int error = avformat_open_input(&format_ctx, filename.data(), nullptr, nullptr)) {
+        return make_error("Could not open {}: {}", filename,
+                          av_err_str(error));
     }
-    return Ok(make_format_context(format_ctx));
+    return ok(make_format_context(format_ctx));
 }
 
 codec_result create_codec(const format_context_ptr &format_ctx) {
     // Read streams info
-    if (int err = avformat_find_stream_info(format_ctx.get(), nullptr)) {
-        return make_error<decoder_bundle_error>("Could not retrieve stream info from {}: {}",
-                                                format_ctx->url,
-                                                av_err_str(err));
+    if (int error = avformat_find_stream_info(format_ctx.get(), nullptr)) {
+        return make_error("Could not retrieve stream info from {}: {}",
+                          format_ctx->url,
+                          av_err_str(error));
     }
 
     AVCodec *codec = nullptr;
@@ -38,10 +38,10 @@ codec_result create_codec(const format_context_ptr &format_ctx) {
 
     // Find first audio stream
     for (int i = 0; i < format_ctx->nb_streams; ++i) {
-        codec_params = format_ctx->streams[i]->codecpar;
+        codec_params = format_ctx->streams[ i ]->codecpar;
         codec = avcodec_find_decoder(codec_params->codec_id);
         if (!codec) {
-            return make_error<decoder_bundle_error>(
+            return make_error(
                     "Unsupported codec {}", codec_params_to_name(codec_params));
         }
 
@@ -51,27 +51,27 @@ codec_result create_codec(const format_context_ptr &format_ctx) {
         }
     }
     if (stream_index == -1) {
-        return make_error<decoder_bundle_error>("Could not retrieve audio stream from {}",
-                                                format_ctx->url);
+        return make_error("Could not retrieve audio stream from {}",
+                          format_ctx->url);
     }
 
     // Try to create a context
     if (AVCodecContext *codec_ctx = avcodec_alloc_context3(codec)) {
-        if (int err = avcodec_parameters_to_context(codec_ctx, codec_params)) {
-            return make_error<decoder_bundle_error>(
+        if (int error = avcodec_parameters_to_context(codec_ctx, codec_params)) {
+            return make_error(
                     "Failed to copy params to context for codec {}: {}",
-                    codec_params_to_name(codec_params), av_err_str(err));
+                    codec_params_to_name(codec_params), av_err_str(error));
         }
 
-        if (int err = avcodec_open2(codec_ctx, codec, nullptr)) {
-            return make_error<decoder_bundle_error>("Failed to open codec {}: {}",
-                                                    codec_params_to_name(codec_params),
-                                                    av_err_str(err));
+        if (int error = avcodec_open2(codec_ctx, codec, nullptr)) {
+            return make_error("Failed to open codec {}: {}",
+                              codec_params_to_name(codec_params),
+                              av_err_str(error));
         }
 
-        return Ok(std::make_pair(make_codec_context(codec_ctx), stream_index));
+        return ok(std::make_pair(make_codec_context(codec_ctx), stream_index));
     } else {
-        return make_error<decoder_bundle_error>("Failed to allocate memory for Codec Context");
+        return make_error("Failed to allocate memory for Codec Context");
     }
 }
 
@@ -97,18 +97,18 @@ swr_result create_swr(const codec_context_ptr &codec_ctx, int stream_index) {
                        iframe->sample_rate,
                        0, nullptr
                       );
-    int err = swr_init(ctx.get());
+    int error = swr_init(ctx.get());
     if (!swr_is_initialized(ctx.get())) {
-        return make_error<decoder_bundle_error>(
+        return make_error(
                 "Resampler couldn't been initialized. Error: {}",
-                av_err_str(err));
+                av_err_str(error));
     }
 
     packet_ptr packet = make_packet();
     av_init_packet(packet.get());
     packet->stream_index = stream_index;
 
-    return Ok(std::make_tuple(ctx, oframe, iframe, packet));
+    return ok(std::make_tuple(ctx, oframe, iframe, packet));
 }
 }
 
@@ -121,7 +121,7 @@ decoder_bundle_result decoder_bundle::create(std::string_view filename) {
     std::tie(bundle.m_swr_ctx, bundle.m_oframe, bundle.m_iframe, bundle.m_packet) = TRY(
             create_swr(bundle.m_codec_ctx, stream_index));
 
-    return Ok(std::move(bundle));
+    return ok(std::move(bundle));
 }
 
 decoder_bundle_result decoder_bundle::create(const internal_asset &asset) {
@@ -138,5 +138,5 @@ decoder_bundle_result decoder_bundle::create(const internal_asset &asset) {
     std::tie(bundle.m_swr_ctx, bundle.m_oframe, bundle.m_iframe, bundle.m_packet) = TRY(
             create_swr(bundle.m_codec_ctx, stream_index));
 
-    return Ok(std::move(bundle));
+    return ok(std::move(bundle));
 }

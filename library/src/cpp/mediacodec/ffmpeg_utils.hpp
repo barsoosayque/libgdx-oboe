@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -16,9 +17,9 @@ using swr_context_ptr = std::shared_ptr<SwrContext>;
 using frame_ptr = std::shared_ptr<AVFrame>;
 using packet_ptr = std::shared_ptr<AVPacket>;
 
-/// Convert AVERROR err to proper string message
-inline std::string av_err_str(int err) {
-    return std::string(av_err2str(err));
+/// Convert AVERROR error to proper string message
+inline std::string av_err_str(int error) {
+    return std::string(av_err2str(error));
 }
 
 /// Convert AVCodecParameters* to codec's name

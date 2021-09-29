@@ -5,6 +5,7 @@
 #include "../utility/var.hpp"
 #include "../utility/log.hpp"
 #include "../utility/exception.hpp"
+#include "../utility/jni_utils.hpp"
 #include "../mediacodec/audio_decoder.hpp"
 #include "../mediacodec/decoder_bundle.hpp"
 #include "../mediacodec/internal_asset.hpp"
@@ -45,36 +46,30 @@ inline jlong createSoundpool(JNIEnv *env, jobject self, std::unique_ptr<audio_de
 inline std::unique_ptr<audio_decoder> fromAsset(JNIEnv *env, jobject self, jobject asset_manager,
                                                 jstring path) {
     AAssetManager *native_manager = AAssetManager_fromJava(env, asset_manager);
-    const char *native_path = env->GetStringUTFChars(path, nullptr);
-    auto asset_res = internal_asset::create(native_path, native_manager);
-    env->ReleaseStringUTFChars(path, native_path);
+    std::string native_path = jni_utf8_string(env, path);
 
-    if (asset_res.isErr()) {
-        throw_exception(asset_res.unwrapErr().m_text);
-        return {};
-    }
-
-    auto result = decoder_bundle::create(asset_res.unwrap());
-    if (result.isErr()) {
-        throw_exception(asset_res.unwrapErr().m_text);
-        return {};
-    }
-
-    return std::make_unique<audio_decoder>(result.unwrap());
+    return internal_asset::create(native_path, native_manager)
+            .and_then([](internal_asset &&asset) { return decoder_bundle::create(asset); })
+            .map([](decoder_bundle &&bundle) {
+                return std::make_unique<audio_decoder>(std::move(bundle));
+            })
+            .unwrap_or_else([](simple_error &&error) {
+                throw_exception(error.m_text);
+                return nullptr;
+            });
 }
 
 inline std::unique_ptr<audio_decoder> fromPath(JNIEnv *env, jobject self, jstring path) {
-    const char *native_path = env->GetStringUTFChars(path, nullptr);
+    std::string native_path = jni_utf8_string(env, path);
 
-    auto result = decoder_bundle::create(native_path);
-    env->ReleaseStringUTFChars(path, native_path);
-
-    if (result.isErr()) {
-        throw_exception(result.unwrapErr().m_text);
-        return {};
-    }
-
-    return std::make_unique<audio_decoder>(result.unwrap());
+    return decoder_bundle::create(native_path)
+            .map([](decoder_bundle &&bundle) {
+                return std::make_unique<audio_decoder>(std::move(bundle));
+            })
+            .unwrap_or_else([](simple_error &&error) {
+                throw_exception(error.m_text);
+                return nullptr;
+            });
 }
 
 OBOEAUDIO_METHOD(jlong, createMusicFromAsset)(JNIEnv *env, jobject self, jobject asset_manager,
@@ -101,7 +96,7 @@ OBOEAUDIO_METHOD(jlong, createSoundpoolFromPath)(JNIEnv *env, jobject self, jstr
 
 OBOEAUDIO_METHOD(jlong, createAudioEngine)(JNIEnv *env, jobject self, jint sample_rate,
                                            jboolean mono) {
-    auto *ptr = new audio_engine(audio_engine::mode::blocking, mono ? 1 : 2, sample_rate);
+    auto *ptr = new audio_engine(audio_engine::mode::blocking, mono? 1 : 2, sample_rate);
     ptr->resume();
     return reinterpret_cast<jlong>(ptr);
 }

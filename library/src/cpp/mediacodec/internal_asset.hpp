@@ -4,7 +4,6 @@
 #include <memory>
 #include <string_view>
 #include <string>
-#include <result.h>
 
 #include "ffmpeg_utils.hpp"
 #include "../utility/result_utils.hpp"
