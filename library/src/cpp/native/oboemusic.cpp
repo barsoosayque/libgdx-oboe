@@ -3,36 +3,21 @@
 #include "../music/music.hpp"
 #include "../utility/var.hpp"
 #include "../jni/jvm_class.hpp"
+#include "external_classes.hpp"
 
-namespace {
-struct Music {
-    static constexpr auto cls = "com/badlogic/gdx/audio/Music"_fstr;
-    jobject obj;
-};
-}
-
-OBOEMUSIC_METHOD(void, setOnCompletionListener)(JNIEnv *env, jobject self, jobject callback) {
-    auto context = jni_context::acquire_thread();
-
-    if (auto old_callback = get_var_as<_jobject>(env, self, "listener")) {
-        context->DeleteGlobalRef(old_callback);
-    }
-
+OBOEMUSIC_METHOD(void, init)(JNIEnv *env, jobject self) {
     if (auto instance = get_var_as<std::shared_ptr<music>>(env, self, "music")) {
-        if (callback) {
-            auto new_callback = context->NewGlobalRef(callback);
-            auto self_weak = context->NewWeakGlobalRef(self);
-            set_var_as(env, self, "listener", new_callback);
-
-            (*instance)->on_complete([self_weak, new_callback] {
-                auto context = jni_context::acquire_thread();
-                auto callback_class =
-                        jvm_class(context->GetObjectClass(new_callback));
-                callback_class.execute_method<void(Music)>(new_callback,
-                                                           "onCompletion",
-                                                           Music{ self_weak });
-            });
-        }
+        auto self_weak = env->NewWeakGlobalRef(self);
+        (*instance)->on_complete([self_weak] {
+            auto ctx = jni_context::acquire_thread();
+            auto listener = get_jvm_var<external::gdx_music_listener>(*ctx, self_weak,
+                                                                      "listener");
+            if (listener.obj) {
+                auto cls = jvm_class(external::gdx_music_listener::cls.data());
+                cls.execute_method<void(external::gdx_music)>(listener.obj, "onCompletion",
+                                                              external::gdx_music{ self_weak });
+            }
+        });
     }
 }
 
@@ -108,12 +93,7 @@ OBOEMUSIC_METHOD(void, setPosition)(JNIEnv *env, jobject self, jfloat position) 
 }
 
 OBOEMUSIC_METHOD(void, dispose)(JNIEnv *env, jobject self) {
-    if (auto callback = get_var_as<_jobject>(env, self, "listener")) {
-        auto context = jni_context::acquire_thread();
-        context->DeleteGlobalRef(callback);
-        callback = nullptr;
-        set_var_as<_jobject>(env, self, "listener", nullptr);
-    }
+    set_jvm_var<external::gdx_music_listener>(env, self, "listener", nullptr);
     delete_var<std::shared_ptr<music>>(env, self, "music");
 }
 

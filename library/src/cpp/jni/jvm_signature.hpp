@@ -66,5 +66,5 @@ struct jvm_signature_t<R(Args...)> {
 
 template<class Custom>
 struct jvm_signature_t {
-    static constexpr auto value = Custom::cls;
+    static constexpr auto value = "L"_fstr + Custom::cls + ";"_fstr;
 };

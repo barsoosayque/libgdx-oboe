@@ -6,7 +6,7 @@
 template<class T>
 class jvm_throwable {
 public:
-    jvm_throwable(std::string_view msg) : m_cls(jvm_signature<T>()), m_msg(msg) { }
+    jvm_throwable(std::string_view msg) : m_cls(T::cls.data()), m_msg(msg) { }
 
     void throw_exception() {
         auto env = jni_context::acquire_thread();

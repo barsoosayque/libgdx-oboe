@@ -8,7 +8,7 @@
 
 extern "C" {
 
-OBOEMUSIC_METHOD(void, setOnCompletionListener)(JNIEnv *, jobject, jobject);
+OBOEMUSIC_METHOD(void, init)(JNIEnv *, jobject);
 OBOEMUSIC_METHOD(bool, isPlaying)(JNIEnv *, jobject);
 OBOEMUSIC_METHOD(bool, isLooping)(JNIEnv *, jobject);
 OBOEMUSIC_METHOD(void, pause)(JNIEnv *, jobject);
