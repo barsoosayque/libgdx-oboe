@@ -10,7 +10,9 @@ public:
 
     void throw_exception() {
         auto env = jni_context::acquire_thread();
-        env->ThrowNew(*m_cls, m_msg.data());
+        jstring msg = env->NewStringUTF(m_msg.data());
+        jvm_object<jobject> exception(m_cls.construct(msg));
+        env->Throw(exception.as<jthrowable>());
     }
 
 private:
