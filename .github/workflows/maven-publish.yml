@@ -42,3 +42,6 @@ jobs:
 
       - name: Publish to GitHub Packages Apache Maven
         run: gradle publish
+        env:
+          GPR_API_KEY: ${{ secrets.GITHUB_TOKEN }}
+          GPR_USER: ${{ github.repository_owner }}
