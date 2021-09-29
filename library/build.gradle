@@ -39,6 +39,7 @@ dependencies {
 android {
     buildToolsVersion androidBuildToolsVersion
     compileSdkVersion androidSdkVersion
+    ndkVersion androidNdkVersion
     sourceSets.main {
         manifest.srcFile 'AndroidManifest.xml'
         java.srcDirs = ['src/kotlin']

@@ -10,6 +10,7 @@ buildscript {
 
         androidBuildToolsVersion = "31.0.0"
         androidSdkVersion = 28
+        androidNdkVersion = "21.4.7075529"
     }
     repositories {
         mavenLocal()

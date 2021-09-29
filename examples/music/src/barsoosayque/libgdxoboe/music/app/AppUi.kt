@@ -4,6 +4,7 @@ import barsoosayque.libgdxoboe.music.content.MusicAsset
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Music
+import com.badlogic.gdx.math.MathUtils.random
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox
 import com.badlogic.gdx.scenes.scene2d.ui.Label
@@ -11,10 +12,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar
 import com.badlogic.gdx.scenes.scene2d.ui.Slider
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import ktx.actors.onChange
-import ktx.actors.onChangeEvent
 import ktx.actors.onClick
 import ktx.actors.txt
 import ktx.scene2d.*
+import kotlin.concurrent.thread
 import kotlin.math.floor
 import kotlin.random.Random
 import com.badlogic.gdx.utils.Array as GdxArray
@@ -25,13 +26,13 @@ class AppUi(
 ) : Stage(ExtendViewport(700f, 480f)) {
     private lateinit var volumeSlider: Slider
     private lateinit var panSlider: Slider
-    private lateinit var positionProgressBar: ProgressBar
-    private lateinit var positionLabel: Label
+    private var positionProgressBar: ProgressBar
+    private var positionLabel: Label
     private lateinit var loopingCheck: CheckBox
     private var selectedAsset: MusicAsset = music.first()
     private var selectedMusic: Music = selectedAsset.get(assetManager)
 
-    val root = table {
+    val root = scene2d.table {
         setFillParent(true)
         pad(30f)
         center()
@@ -41,9 +42,9 @@ class AppUi(
             label("Songs:")
             label("Controls")
             row()
-            listWidgetOf(GdxArray(music)).cell(growY = true).onChangeEvent { _, list ->
+            listWidgetOf(GdxArray(music)).cell(growY = true).onChange {
                 selectedMusic.stop()
-                selectedAsset = list.selected
+                selectedAsset = selected
                 selectedMusic = selectedAsset.get(assetManager)
                 volumeSlider.value = selectedMusic.volume
                 panSlider.value = 0.0f
@@ -63,12 +64,22 @@ class AppUi(
                     textButton("Pause").onChange { selectedMusic.pause() }
                     textButton("Stop").onChange { selectedMusic.stop() }
                 }
+                textButton("Delayed play & stop (Concurent)").onChange {
+                    thread {
+                        Thread.sleep(random(100L))
+                        selectedMusic.play()
+                    }
+                    thread {
+                        Thread.sleep(random(110L, 200L))
+                        selectedMusic.stop()
+                    }
+                }
                 horizontalGroup {
                     space(10f)
                     label("Volume: ")
                     volumeSlider = slider {
                         value = selectedMusic.volume
-                        onChangeEvent { _, slider -> selectedMusic.volume = slider.value }
+                        onChange { selectedMusic.volume = value }
                     }
                 }
                 horizontalGroup {
@@ -76,7 +87,7 @@ class AppUi(
                     label("Pan: ")
                     panSlider = slider(-1f) {
                         value = 0.0f
-                        onChangeEvent { _, slider -> selectedMusic.setPan(slider.value, volumeSlider.value) }
+                        onChange { selectedMusic.setPan(value, volumeSlider.value) }
                     }
                 }
                 loopingCheck = checkBox("Is looping") {
