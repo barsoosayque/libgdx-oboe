@@ -16,11 +16,10 @@ import ktx.scene2d.*
 import com.badlogic.gdx.utils.Array as GdxArray
 
 class AppUi(val assetManager: AssetManager) : Stage(ExtendViewport(480f, 700f)) {
-    private var recacheList = false
-    private lateinit var progress: ProgressBar
-    private lateinit var assetsList: List<String>
+    private var progress: ProgressBar
+    private var assetsList: List<String>
 
-    val root = table {
+    val root = scene2d.table {
         setFillParent(true)
         pad(30f)
         top()

@@ -15,7 +15,7 @@ class AppUi : Stage(ExtendViewport(480f, 700f)) {
     private val audioDevice = Gdx.audio.newAudioDevice(DEVICE_HZ, true)
     private val sin = SinGenerator(500f)
 
-    val root = table {
+    val root = scene2d.table {
         setFillParent(true)
         pad(30f)
         top()
@@ -30,8 +30,8 @@ class AppUi : Stage(ExtendViewport(480f, 700f)) {
 
             verticalGroup {
                 val lbl = label("Wave frequency: 500 Hz")
-                slider().onChangeEvent { _, actor ->
-                    sin.frequency = 500f + actor.value * 21500f
+                slider().onChange {
+                    sin.frequency = 500f + value * 21500f
                     lbl.txt = "Wave frequency: ${sin.frequency.toInt()} Hz"
                 }
             }
