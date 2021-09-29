@@ -1,11 +1,9 @@
-# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
-
 name: Maven Package
 
 on:
+  workflow_dispatch
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   build:
@@ -26,7 +24,7 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Build
-      run: ./gradlew :library:assembleRelease
+      run: gradle :library:assembleRelease
 
     - name: Publish to GitHub Packages Apache Maven
-      run: ./gradlew publish
+      run: gradle publish
