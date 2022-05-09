@@ -13,7 +13,9 @@
 
 OBOEAUDIO_METHOD(void, init)(JNIEnv *env, jobject self) {
     // set default audioEngine in OboeAudio class
-    set_var_as(env, self, "audioEngine", new audio_engine(audio_engine::mode::async, 2));
+    auto *default_engine = new audio_engine(audio_engine::mode::async, 2);
+    default_engine->resume();
+    set_var_as(env, self, "audioEngine", default_engine);
 }
 
 inline jlong createMusic(JNIEnv *env, jobject self, std::unique_ptr<audio_decoder> &&decoder) {
