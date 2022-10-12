@@ -12,7 +12,7 @@ namespace {
 /// @note: message should contain {}
 inline bool check(oboe::Result result, std::string_view msg) {
     if (result != oboe::Result::OK) {
-        throw_exception(msg, oboe::convertToText(result));
+        warn(msg, oboe::convertToText(result));
         return false;
     }
     return true;
@@ -79,12 +79,14 @@ oboe::DataCallbackResult audio_engine::onAudioReady(oboe::AudioStream *self, voi
 }
 
 void audio_engine::resume() {
+    debug("audio_engine::resume. State: {}", oboe::convertToText(m_stream->getState()));
     if (check(m_stream->requestStart(), "Error starting stream: {}")) {
         m_is_playing = true;
     }
 }
 
 void audio_engine::stop() {
+    debug("stop::resume. State: {}", oboe::convertToText(m_stream->getState()));
     if (check(m_stream->requestStop(), "Error stopping stream: {}")) {
         m_is_playing = false;
     }
