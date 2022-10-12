@@ -7,35 +7,35 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -flto=full -ffunction-se
 # Enable --as-needed
 set(LINK_WHAT_YOU_USE TRUE)
 
-set (OBOE_DIR dependencies/oboe)
+set(OBOE_DIR dependencies/oboe)
 add_subdirectory (${OBOE_DIR} ./oboe)
 include_directories (${OBOE_DIR}/include)
 
-set (FROZEN_STRING dependencies/frozen_string)
+set(FROZEN_STRING dependencies/frozen_string)
 include_directories (${FROZEN_STRING})
 
-set (FMT_DIR dependencies/fmt)
+set(FMT_DIR dependencies/fmt)
 add_subdirectory (${FMT_DIR} ./fmt)
 include_directories (${FMT_DIR}/include)
 
-set (RESULT_DIR dependencies/result)
+set(RESULT_DIR dependencies/result)
 include_directories (${RESULT_DIR})
 
-set (LIBSAMPLERATE_TESTS OFF)
-set (LIBSAMPLERATE_EXAMPLES OFF)
-set (SAMPLERATE dependencies/libsamplerate)
+set(LIBSAMPLERATE_TESTS OFF)
+set(LIBSAMPLERATE_EXAMPLES OFF)
+set(SAMPLERATE dependencies/libsamplerate)
 add_subdirectory (${SAMPLERATE} ./samplerate)
 include_directories (${SAMPLERATE}/include)
 
-set (FFMPEG_DIR dependencies/ffmpeg)
+set(FFMPEG_DIR dependencies/ffmpeg)
 include_directories (${FFMPEG_DIR})
-set (FFMPEG_LIBS avformat avcodec avutil swresample)
+set(FFMPEG_LIBS avformat avcodec avutil swresample)
 foreach(LIB ${FFMPEG_LIBS})
     add_library( ${LIB} SHARED IMPORTED )
     set_target_properties( ${LIB} PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so" )
 endforeach()
 
-set (SRC_DIR src/cpp)
+set(SRC_DIR src/cpp)
 add_library(libgdx-oboe SHARED
             ${SRC_DIR}/samplerate/resampler.cpp
             ${SRC_DIR}/mediacodec/audio_decoder.cpp
@@ -55,11 +55,12 @@ target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${FFM
 target_compile_options(libgdx-oboe PRIVATE -Wall -Werror)
 
 # Strip
+get_filename_component(ANDROID_TOOLCHAIN_DIR ${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX} DIRECTORY)
 add_custom_command(TARGET libgdx-oboe POST_BUILD
-        COMMAND "${ANDROID_TOOLCHAIN_PREFIX}strip" -g -S -d --strip-debug --verbose
+        COMMAND "${ANDROID_TOOLCHAIN_DIR}/llvm-strip" -g -S -d --strip-debug
         "$<TARGET_FILE:libgdx-oboe>")
 foreach(LIB ${FFMPEG_LIBS})
     add_custom_command(TARGET libgdx-oboe POST_BUILD
-            COMMAND "${ANDROID_TOOLCHAIN_PREFIX}strip" -g -S -d --strip-debug --verbose
+            COMMAND "${ANDROID_TOOLCHAIN_DIR}/llvm-strip" -g -S -d --strip-debug
             "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so")
 endforeach()

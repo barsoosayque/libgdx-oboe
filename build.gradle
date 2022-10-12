@@ -1,16 +1,15 @@
 buildscript {
     ext {
-        kotlinVersion = '1.5.31'
+        kotlinVersion = '1.7.20'
 
-        androidPluginVersion = '7.0.2'
-        ktxVersion = '1.10.0-b2'
-//        dokkaVersion = '1.4.30'
+        androidPluginVersion = '7.2.1'
+        ktxVersion = '1.11.0-rc2'
 
-        gdxVersion = '1.10.0'
+        gdxVersion = '1.11.0'
 
         androidBuildToolsVersion = "31.0.0"
-        androidSdkVersion = 28
-        androidNdkVersion = "21.4.7075529"
+        androidSdkVersion = 33
+        androidNdkVersion = "25.1.8937393"
     }
     repositories {
         mavenLocal()
