@@ -10,4 +10,6 @@ class OboeAudioDevice(private val audioEngine: NativeAudioEngine) : AudioDevice 
     external override fun writeSamples(samples: FloatArray, offset: Int, numSamples: Int)
     external override fun dispose()
     external override fun isMono(): Boolean
+    external override fun pause();
+    external override fun resume();
 }

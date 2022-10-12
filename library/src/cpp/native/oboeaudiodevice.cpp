@@ -43,3 +43,15 @@ OBOEAUDIODEVICE_METHOD(bool, isMono)(JNIEnv *env, jobject self) {
     }
     return false;
 }
+
+OBOEAUDIODEVICE_METHOD(void, pause)(JNIEnv *env, jobject self) {
+    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
+        engine->stop();
+    }
+}
+
+OBOEAUDIODEVICE_METHOD(void, resume)(JNIEnv *env, jobject self) {
+    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
+        engine->resume();
+    }
+}

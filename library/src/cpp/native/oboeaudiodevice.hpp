@@ -14,5 +14,7 @@ OBOEAUDIODEVICE_METHOD(void, writeSamples___3SII)(JNIEnv *, jobject, jshortArray
 OBOEAUDIODEVICE_METHOD(void, writeSamples___3FII)(JNIEnv *, jobject, jfloatArray, jint, jint);
 OBOEAUDIODEVICE_METHOD(void, dispose)(JNIEnv *, jobject);
 OBOEAUDIODEVICE_METHOD(bool, isMono)(JNIEnv *, jobject);
+OBOEAUDIODEVICE_METHOD(void, pause)(JNIEnv *, jobject);
+OBOEAUDIODEVICE_METHOD(void, resume)(JNIEnv *, jobject);
 
 }
