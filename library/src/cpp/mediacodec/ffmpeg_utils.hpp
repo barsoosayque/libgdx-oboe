@@ -23,7 +23,7 @@ inline std::string av_err_str(int error) {
 }
 
 /// Convert AVCodecParameters* to codec's name
-inline std::string codec_params_to_name(AVCodecParameters *codec_params) {
+inline std::string codec_params_to_name(const AVCodecParameters *codec_params) {
     return std::string{ avcodec_profile_name(codec_params->codec_id, codec_params->profile) };
 }
 

@@ -90,7 +90,7 @@ audio_decoder::buffer audio_decoder::decode(int samples) {
                     if (error < 0) {
                         warn("audio_decoder: Error converting demuxed data ({})", av_err_str(error));
                     } else {
-                        if ((data_size = m_oframe->nb_samples * m_oframe->channels) == 0) {
+                        if ((data_size = m_oframe->nb_samples * m_oframe->ch_layout.nb_channels) == 0) {
                             // sometimes delay will return positive value, but there is nothing to be read
                             break;
                         }
