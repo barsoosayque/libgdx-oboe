@@ -50,6 +50,17 @@ FFMPEG_FLAGS="
 --disable-pthreads
 --disable-programs
 --disable-zlib
+--disable-alsa
+--disable-iconv
+--disable-lzma
+--disable-metal
+--disable-sndio
+--disable-schannel
+--disable-sdl2
+--disable-securetransport
+--disable-vulkan
+--disable-xlib
+--disable-zlib
 --disable-autodetect
 --enable-swresample
 --enable-avformat

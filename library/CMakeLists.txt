@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -flto=full -ffunctio
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -flto=full -ffunction-sections -fdata-sections -fvisibility=hidden")
 # Enable --as-needed
 set(LINK_WHAT_YOU_USE TRUE)
+set(ANDROID_STL c++_static)
 
 set(OBOE_DIR dependencies/oboe)
 add_subdirectory (${OBOE_DIR} ./oboe)
