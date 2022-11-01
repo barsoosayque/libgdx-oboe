@@ -85,7 +85,7 @@ void music::pan(float pan) {
     m_pan.pan(pan);
 }
 
-void music::raw_render(int16_t *stream, int32_t frames) {
+void music::raw_render(int16_t *stream, uint32_t frames) {
     if (!m_playing)
         return;
 
@@ -100,13 +100,13 @@ void music::raw_render(int16_t *stream, int32_t frames) {
     m_current_frame += frames;
 }
 
-void music::render(int16_t *stream, int32_t frames) {
+void music::render(int16_t *stream, uint32_t frames) {
     if (!m_playing)
         return;
     while (m_buffer_swap.test_and_set(std::memory_order_acquire));
 
-    int32_t frames_in_pcm = m_main_pcm.size() / m_channels;
-    int32_t frames_to_process = std::min(frames, frames_in_pcm - m_current_frame);
+    uint32_t frames_in_pcm = m_main_pcm.size() / m_channels;
+    uint32_t frames_to_process = std::min(frames, frames_in_pcm - m_current_frame);
 
     raw_render(stream, frames_to_process);
     m_buffer_swap.clear(std::memory_order_release);

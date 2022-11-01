@@ -3,7 +3,7 @@ package barsoosayque.libgdxoboe
 import com.badlogic.gdx.audio.AudioDevice
 
 /** [AudioDevice] implementation using oboe stream. */
-class OboeAudioDevice(private val audioEngine: NativeAudioEngine) : AudioDevice {
+class OboeAudioDevice(private val audioStream: NativeAudioStream) : AudioDevice {
     external override fun getLatency(): Int
     external override fun setVolume(volume: Float)
     external override fun writeSamples(samples: ShortArray, offset: Int, numSamples: Int)

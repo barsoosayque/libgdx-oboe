@@ -99,7 +99,7 @@ void soundpool::pan(long id, float value) {
     do_by_id(id, [value](auto sound) { sound->m_pan.pan(value); });
 }
 
-void soundpool::render(int16_t *audio_data, int32_t num_frames) {
+void soundpool::render(int16_t *audio_data, uint32_t num_frames) {
     static int limit_down = std::numeric_limits<int16_t>::min(),
             limit_up = std::numeric_limits<int16_t>::max();
 

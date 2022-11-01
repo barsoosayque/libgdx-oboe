@@ -42,18 +42,20 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/mediacodec/audio_decoder.cpp
             ${SRC_DIR}/mediacodec/internal_asset.cpp
             ${SRC_DIR}/mediacodec/decoder_bundle.cpp
-            ${SRC_DIR}/audio/audioengine.cpp
-            ${SRC_DIR}/audio/mixer.cpp
+            ${SRC_DIR}/audio/oboe_engine.cpp
+            ${SRC_DIR}/audio/audio_stream.cpp
+            ${SRC_DIR}/audio/audio_player.cpp
             ${SRC_DIR}/sound/soundpool.cpp
             ${SRC_DIR}/music/music.cpp
             ${SRC_DIR}/native/init.cpp
-            ${SRC_DIR}/native/oboesound.cpp
-            ${SRC_DIR}/native/oboemusic.cpp
-            ${SRC_DIR}/native/oboeaudio.cpp
-            ${SRC_DIR}/native/oboeaudiodevice.cpp)
+            ${SRC_DIR}/native/oboe_sound.cpp
+            ${SRC_DIR}/native/oboe_music.cpp
+            ${SRC_DIR}/native/oboe_audio.cpp
+            ${SRC_DIR}/native/oboe_audio_device.cpp
+            ${SRC_DIR}/native/oboe_audio_recorder.cpp)
 
 target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${FFMPEG_LIBS})
-target_compile_options(libgdx-oboe PRIVATE -Wall -Werror)
+target_compile_options(libgdx-oboe PRIVATE -Wall)
 
 # Strip
 get_filename_component(ANDROID_TOOLCHAIN_DIR ${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX} DIRECTORY)

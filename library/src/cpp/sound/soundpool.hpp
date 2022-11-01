@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "../audio/pan_effect.hpp"
-#include "../audio/renderableaudio.hpp"
+#include "../audio/renderable_audio.hpp"
 #include "../samplerate/resampler.hpp"
 #include <functional>
 #include <atomic>
@@ -11,7 +11,7 @@ class soundpool : public renderable_audio {
 public:
     using data = std::vector<int16_t>;
     soundpool(const data &pcm, int8_t channels);
-    void render(int16_t *stream, int32_t frames);
+    void render(int16_t *stream, uint32_t frames);
 
     long play(float volume = 1.0f,
               float speed = 1.0f,
@@ -33,7 +33,7 @@ public:
     void looping(long id, bool loop);
 private:
     struct sound {
-        int32_t m_cur_frame;
+        uint32_t m_cur_frame;
         bool m_paused;
         long m_id;
         float m_volume;
@@ -46,7 +46,7 @@ private:
     std::vector<sound> m_sounds;
     long m_last_id;
 
-    int32_t m_frames;
+    uint32_t m_frames;
     int8_t m_channels;
     std::vector<float> m_pcm, m_sample_buffer;
 

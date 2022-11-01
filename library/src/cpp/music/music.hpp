@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../mediacodec/audio_decoder.hpp"
-#include "../audio/renderableaudio.hpp"
+#include "../audio/renderable_audio.hpp"
 #include "../audio/pan_effect.hpp"
 #include "../utility/executor.hpp"
 #include <atomic>
@@ -10,7 +10,7 @@ class music : public renderable_audio {
 public:
     music(std::unique_ptr<audio_decoder> &&decoder, int8_t channels);
 
-    void render(int16_t *stream, int32_t frames);
+    void render(int16_t *stream, uint32_t frames);
 
     void play();
     void pause();
@@ -33,7 +33,7 @@ private:
     void fill_second_buffer();
     void swap_buffers();
 
-    inline void raw_render(int16_t *stream, int32_t frames);
+    inline void raw_render(int16_t *stream, uint32_t frames);
 
     pan_effect m_pan;
     bool m_playing{}, m_looping, m_eof{};

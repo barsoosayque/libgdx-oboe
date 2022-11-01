@@ -1,7 +1,7 @@
-#include "oboeaudio.hpp"
+#include "oboe_audio.hpp"
 
 #include <memory>
-#include "../audio/audioengine.hpp"
+#include "../audio/oboe_engine.hpp"
 #include "../utility/var.hpp"
 #include "../utility/log.hpp"
 #include "../utility/exception.hpp"
@@ -10,39 +10,49 @@
 #include "../mediacodec/decoder_bundle.hpp"
 #include "../mediacodec/internal_asset.hpp"
 #include "../jni/jvm_signature.hpp"
+#include "../audio/audio_stream.hpp"
+#include "../audio/audio_player.hpp"
+#include "../music/music.hpp"
+#include "../sound/soundpool.hpp"
 
-OBOEAUDIO_METHOD(void, init)(JNIEnv *env, jobject self) {
-    // set default audioEngine in OboeAudio class
-    auto *default_engine = new audio_engine(audio_engine::mode::async, 2);
-    default_engine->resume();
-    set_var_as(env, self, "audioEngine", default_engine);
+namespace {
+    constexpr std::string_view k_shared_player = "sharedAudioPlayer";
+    constexpr uint8_t k_channels = 2;
+}
+
+inline audio_player* get_or_create_shared_player(JNIEnv *env, jobject self) {
+    if (auto player = get_var_as<audio_player>(env, self, k_shared_player)) {
+        return player;
+    } else {
+        auto* new_player = new audio_player();
+        new_player->resume();
+        set_var_as(env, self, k_shared_player, new_player);
+        return new_player;
+    }
 }
 
 inline jlong createMusic(JNIEnv *env, jobject self, std::unique_ptr<audio_decoder> &&decoder) {
     if (!decoder)
         return 0;
 
-    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
-        auto ptr = new std::shared_ptr<music>();
-        *ptr = std::make_shared<music>(std::move(decoder), 2);
-        engine->play(*ptr);
-        return reinterpret_cast<jlong>(ptr);
-    }
-    return 0;
+    auto* player = get_or_create_shared_player(env, self);
+    auto ptr = new std::shared_ptr<music>();
+    *ptr = std::make_shared<music>(std::move(decoder), k_channels);
+    player->play_audio(*ptr);
+    return reinterpret_cast<jlong>(ptr);
 }
 
 inline jlong createSoundpool(JNIEnv *env, jobject self, std::unique_ptr<audio_decoder> &&decoder) {
     if (!decoder)
         return 0;
 
-    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
-        auto buffer = decoder->decode();
-        auto ptr = new std::shared_ptr<soundpool>();
-        *ptr = std::make_shared<soundpool>(buffer, 2);
-        engine->play(*ptr);
-        return reinterpret_cast<jlong>(ptr);
-    }
-    return 0;
+    auto* player = get_or_create_shared_player(env, self);
+    auto buffer = decoder->decode();
+    auto ptr = new std::shared_ptr<soundpool>();
+    *ptr = std::make_shared<soundpool>(buffer, k_channels);
+    player->play_audio(*ptr);
+    return reinterpret_cast<jlong>(ptr);
+
 }
 
 inline std::unique_ptr<audio_decoder> fromAsset(JNIEnv *env, jobject self, jobject asset_manager,
@@ -96,25 +106,29 @@ OBOEAUDIO_METHOD(jlong, createSoundpoolFromPath)(JNIEnv *env, jobject self, jstr
     return createSoundpool(env, self, std::move(decoder));
 }
 
-OBOEAUDIO_METHOD(jlong, createAudioEngine)(JNIEnv *env, jobject self, jint sample_rate,
+OBOEAUDIO_METHOD(jlong, createAudioStream)(JNIEnv *env, jobject self, jint sample_rate,
                                            jboolean mono) {
-    auto *ptr = new audio_engine(audio_engine::mode::blocking, mono? 1 : 2, sample_rate);
+    auto *ptr = new audio_stream(mono? 1 : 2, sample_rate);
     ptr->resume();
     return reinterpret_cast<jlong>(ptr);
 }
 
+OBOEAUDIO_METHOD(jlong, createAudioRecorder)(JNIEnv *env, jobject self, jint sample_rate,
+                                            jboolean mono) {
+    // TODO
+    return 0;
+}
+
 OBOEAUDIO_METHOD(void, disposeEngine)(JNIEnv *env, jobject self) {
-    delete_var<audio_engine>(env, self, "audioEngine");
+    delete_var<audio_player>(env, self, k_shared_player);
 }
 
 OBOEAUDIO_METHOD(void, resume)(JNIEnv *env, jobject self) {
-    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
-        engine->resume();
-    }
+    auto* player = get_or_create_shared_player(env, self);
+    player->resume();
 }
 
 OBOEAUDIO_METHOD(void, pause)(JNIEnv *env, jobject self) {
-    if (auto engine = get_var_as<audio_engine>(env, self, "audioEngine")) {
-        engine->stop();
-    }
+    auto* player = get_or_create_shared_player(env, self);
+    player->stop();
 }

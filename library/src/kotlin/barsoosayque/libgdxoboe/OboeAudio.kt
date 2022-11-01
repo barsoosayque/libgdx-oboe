@@ -15,22 +15,21 @@ import com.badlogic.gdx.utils.GdxRuntimeException
 /** [Audio] implementation which utilize [OboeMusic] and [OboeSound].
  * Returns [GdxRuntimeException] on native errors */
 class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
-    private var audioEngine: NativeAudioEngine = NativeAudioEngine()
+    private var sharedAudioPlayer: NativeAudioPlayer = NativeAudioPlayer()
     private val audioDevicesList: MutableList<AudioDevice> = mutableListOf()
     private val musicList: MutableList<Music> = mutableListOf()
     private val soundsList: MutableList<Sound> = mutableListOf()
 
     init {
         System.loadLibrary("libgdx-oboe")
-        init()
     }
 
-    private external fun init()
     private external fun createSoundpoolFromAsset(assetManager: AssetManager, path: String): Long
     private external fun createSoundpoolFromPath(path: String): Long
     private external fun createMusicFromAsset(assetManager: AssetManager, path: String): Long
     private external fun createMusicFromPath(path: String): Long
-    private external fun createAudioEngine(samplingRate: Int, isMono: Boolean): Long
+    private external fun createAudioStream(samplingRate: Int, isMono: Boolean): Long
+    private external fun createAudioRecorder(samplingRate: Int, isMono: Boolean): Long
 
     external override fun resume()
     external override fun pause()
@@ -38,7 +37,7 @@ class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
 
     override fun notifyMusicDisposed(music: AndroidMusic?) {
         // No need to do anything here since runtime disposal of music/soundpool is
-        // well handled in mixer.cpp
+        // well handled in audio_player.cpp
     }
 
     override fun dispose() {
@@ -66,11 +65,11 @@ class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
         ?.also(soundsList::add)
 
     override fun newAudioDevice(samplingRate: Int, isMono: Boolean): AudioDevice =
-        createAudioEngine(samplingRate, isMono).let(::NativeAudioEngine)
+        createAudioStream(samplingRate, isMono).let(::NativeAudioStream)
             .let(::OboeAudioDevice)
             .also(audioDevicesList::add)
 
     override fun newAudioRecorder(samplingRate: Int, isMono: Boolean): AudioRecorder =
-        createAudioEngine(samplingRate, isMono).let(::NativeAudioEngine)
+        createAudioRecorder(samplingRate, isMono).let(::NativeAudioRecorder)
             .let(::OboeAudioRecorder)
 }
