@@ -31,7 +31,7 @@ class AppUi : Stage(ExtendViewport(480f, 700f)) {
             verticalGroup {
                 val lbl = label("Wave frequency: 500 Hz")
                 slider().onChange {
-                    sin.frequency = 500f + value * 21500f
+                    sin.frequency = 500f + value * 500f
                     lbl.txt = "Wave frequency: ${sin.frequency.toInt()} Hz"
                 }
             }

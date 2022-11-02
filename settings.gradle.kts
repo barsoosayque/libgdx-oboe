@@ -1,0 +1,6 @@
+include(":library")
+include(":examples:sounds")
+include(":examples:music")
+include(":examples:async")
+include(":examples:waves")
+//include(":examples:microphone")
