@@ -48,9 +48,13 @@ FFMPEG_FLAGS="
 --disable-network
 --disable-swscale
 --disable-pthreads
+--disable-w32threads
+--disable-os2threads
 --disable-programs
 --disable-zlib
 --disable-alsa
+--disable-appkit
+--disable-avfoundation
 --disable-iconv
 --disable-lzma
 --disable-metal
@@ -73,7 +77,7 @@ FFMPEG_FLAGS="
 --enable-libmp3lame
 --enable-libvorbis
 --enable-demuxer=wav,ogg,pcm*,mp3
---enable-decoder=vorbis,opus,wavpack,mp3*,pcm*
+--enable-decoder=vorbis,opus,wav,mp3*,pcm*
 "
 # static:
 #--enable-statoc
@@ -178,12 +182,6 @@ if [ -z "$INIT_ONLY" ]; then
     patch $LIBVORBIS_ROOT/configure < dependencies/libvorbis-clang.patch
   fi
 
-  if [ ! -e $LIBWAVPACK_ROOT ]; then
-    echo "Downloading LIBWAVPACK:"
-    curl -L "http://www.wavpack.com/wavpack-5.2.0.tar.xz" | tar xJ
-    mv wavpack-5.2.0 "$LIBWAVPACK_ROOT"
-  fi
-
   echo "Dependencies ready."
 fi
 
@@ -274,32 +272,23 @@ for ABI in $ABI_FILTERS; do
         --disable-examples
         --disable-encoder
         --prefix=$BUILD_ROOT/$ABI
-        "
-        
-        echo "[1/5] Build $ABI libmp3lame..."
-        (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE install)
-
-        echo "[2/5] Build $ABI libogg..."
-        (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE install)
-
-        echo "[3/5] Build $ABI libvorbis..."
-        LIBVORBIS_FLAGS="
-        --disable-oggtest
         CFLAGS=-I$BUILD_ROOT/$ABI/include
         LDFLAGS=-L$BUILD_ROOT/$ABI/lib
         "
+        
+        echo "[1/4] Build $ABI libmp3lame..."
+        (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE install)
+
+        echo "[2/4] Build $ABI libogg..."
+        (cd $LIBOGG_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE install)
+
+        echo "[3/4] Build $ABI libvorbis..."
+        LIBVORBIS_FLAGS="
+        --disable-oggtest
+        "
         (cd $LIBVORBIS_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBVORBIS_FLAGS && $MAKE clean && $MAKE install)
 
-        echo "[4/5] Build $ABI libwavpack..."
-        LIBWAVPACK_FLAGS="
-        --disable-asm
-        --disable-apps
-        --disable-dsd
-        --enable-legacy
-        "
-        (cd $LIBWAVPACK_ROOT && ./configure $AUTOCONF_CROSS_FLAGS $LIBWAVPACK_FLAGS && $MAKE clean && $MAKE install)
-
-        echo "[5/5] Build $ABI ffmpeg..."
+        echo "[4/4] Build $ABI ffmpeg..."
     else
         echo "[1/1] Build $ABI ffmpeg..."
     fi
