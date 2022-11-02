@@ -1,6 +1,6 @@
 #include "oboe_music.hpp"
 #include "../audio/oboe_engine.hpp"
-#include "../music/music.hpp"
+#include "../audio/music.hpp"
 #include "../utility/var.hpp"
 #include "../jni/jvm_class.hpp"
 #include "external_classes.hpp"

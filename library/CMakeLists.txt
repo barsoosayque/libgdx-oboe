@@ -45,8 +45,8 @@ add_library(libgdx-oboe SHARED
             ${SRC_DIR}/audio/oboe_engine.cpp
             ${SRC_DIR}/audio/audio_stream.cpp
             ${SRC_DIR}/audio/audio_player.cpp
-            ${SRC_DIR}/sound/soundpool.cpp
-            ${SRC_DIR}/music/music.cpp
+            ${SRC_DIR}/audio/soundpool.cpp
+            ${SRC_DIR}/audio/music.cpp
             ${SRC_DIR}/native/init.cpp
             ${SRC_DIR}/native/oboe_sound.cpp
             ${SRC_DIR}/native/oboe_music.cpp

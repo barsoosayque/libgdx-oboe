@@ -27,6 +27,7 @@ public:
     uint32_t latency() const { return m_engine.payload_size(); }
     /// Return true if this stream is mono.
     bool is_mono() const { return m_engine.is_mono(); }
+
 private:
     oboe_engine m_engine;
     float m_volume;

@@ -12,8 +12,8 @@
 #include "../jni/jvm_signature.hpp"
 #include "../audio/audio_stream.hpp"
 #include "../audio/audio_player.hpp"
-#include "../music/music.hpp"
-#include "../sound/soundpool.hpp"
+#include "../audio/music.hpp"
+#include "../audio/soundpool.hpp"
 
 namespace {
     constexpr std::string_view k_shared_player = "sharedAudioPlayer";

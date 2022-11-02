@@ -4,7 +4,7 @@
 #include "../samplerate/pcmtypes.hpp"
 #include "../utility/log.hpp"
 
-soundpool::soundpool(const data &pcm, int8_t channels)
+soundpool::soundpool(const data_t &pcm, int8_t channels)
         : m_last_id(0)
         , m_frames(pcm.size() / channels)
         , m_channels(channels)

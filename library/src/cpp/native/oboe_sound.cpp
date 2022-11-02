@@ -1,5 +1,5 @@
 #include "oboe_sound.hpp"
-#include "../sound/soundpool.hpp"
+#include "../audio/soundpool.hpp"
 #include "../utility/var.hpp"
 
 OBOESOUND_METHOD(jlong, play)(JNIEnv *env, jobject self, jfloat volume, jfloat pitch, jfloat pan) {

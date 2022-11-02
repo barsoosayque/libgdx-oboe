@@ -42,10 +42,6 @@ void music::stop() {
     position(0);
 }
 
-bool music::is_playing() const {
-    return m_playing;
-}
-
 void music::position(float position) {
     while (m_buffer_swap.test_and_set(std::memory_order_acquire));
     m_executor.wait();
@@ -55,34 +51,6 @@ void music::position(float position) {
     swap_buffers();
     m_executor.queue();
     m_buffer_swap.clear(std::memory_order_release);
-}
-
-float music::position() const {
-    return m_position;
-}
-
-void music::volume(float volume) {
-    m_volume = std::min(std::max(0.0f, volume), 1.0f);
-}
-
-float music::volume() const {
-    return m_volume;
-}
-
-bool music::is_looping() const {
-    return m_looping;
-}
-
-void music::is_looping(bool loop) {
-    m_looping = loop;
-}
-
-void music::on_complete(const std::function<void()> &callback) {
-    m_on_complete = callback;
-}
-
-void music::pan(float pan) {
-    m_pan.pan(pan);
 }
 
 void music::raw_render(int16_t *stream, uint32_t frames) {

@@ -7,7 +7,7 @@
 /// Oboe stream wrapper, with comfortable high level methods.
 class oboe_engine : protected oboe::AudioStreamDataCallback, oboe::AudioStreamErrorCallback {
 public:
-    using on_async_write = std::function<const std::vector<int16_t>&(uint32_t)>;
+    using on_async_write_t = std::function<const std::vector<int16_t>&(uint32_t)>;
 
     /// oboe_engine working mode.
     enum class mode {
@@ -32,7 +32,7 @@ public:
     void stop();
 
     /// Set callback to be used if mode is async_writing.
-    void set_on_async_write(on_async_write&& callback) { m_on_async_write = std::move(callback); }
+    void set_on_async_write(on_async_write_t&& callback) { m_on_async_write = std::move(callback); }
 
     /// Write 16bit PCM if mode is writing.
     void blocking_write(std::vector<int16_t> &&pcm);
@@ -48,23 +48,24 @@ public:
 
     /// Get size of buffer in samples.
     uint32_t payload_size() const;
+
 private:
     // oboe::AudioStreamDataCallback interface
     oboe::DataCallbackResult onAudioReady(oboe::AudioStream *, void *, int32_t);
     // oboe::AudioStreamErrorCallback interface
     void onErrorAfterClose(oboe::AudioStream *, oboe::Result);
 
+private:
     void connect_to_device();
 
     std::unique_ptr<oboe::AudioStream> m_stream;
     mode m_mode;
 
-    on_async_write m_on_async_write;
+    on_async_write_t m_on_async_write;
 
     uint8_t m_channels;
     uint32_t m_sample_rate;
     uint32_t m_payload_size;
 
     bool m_is_playing;
-
 };

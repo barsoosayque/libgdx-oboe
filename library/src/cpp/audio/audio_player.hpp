@@ -24,6 +24,7 @@ public:
     void stop() { m_engine.stop(); }
     /// Resume playing audio.
     void resume() { m_engine.resume(); }
+
 private:
     const std::vector<int16_t>& generate_audio(uint32_t num_frames);
 
