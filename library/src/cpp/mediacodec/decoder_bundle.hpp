@@ -19,7 +19,7 @@ public:
     /// Try to create a decoder_bundle from an internal_asset
     /// @param asset Valid internal_asset object
     /// @return Result with either a @p decoder_bundle, or delegated @p decoder_bundle_error
-    static decoder_bundle_result create(const internal_asset &asset);
+    static decoder_bundle_result create(internal_asset &asset);
 
     format_context_ptr m_format_ctx;
     codec_context_ptr m_codec_ctx;

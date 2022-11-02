@@ -38,7 +38,7 @@ codec_result create_codec(const format_context_ptr &format_ctx) {
 
     // Find first audio stream
     for (int i = 0; i < format_ctx->nb_streams; ++i) {
-        codec_params = format_ctx->streams[ i ]->codecpar;
+        codec_params = format_ctx->streams[i]->codecpar;
         codec = avcodec_find_decoder(codec_params->codec_id);
         if (!codec) {
             return make_error(
@@ -134,17 +134,19 @@ decoder_bundle_result decoder_bundle::create(std::string_view filename) {
     return ok(std::move(bundle));
 }
 
-decoder_bundle_result decoder_bundle::create(const internal_asset &asset) {
+decoder_bundle_result decoder_bundle::create(internal_asset &asset) {
     decoder_bundle bundle;
 
     AVFormatContext *format_ctx = avformat_alloc_context();
     bundle.m_avio_ctx = asset.generate_avio();
     format_ctx->pb = bundle.m_avio_ctx.get();
     format_ctx->flags |= AVFMT_FLAG_CUSTOM_IO | AVFMT_FLAG_NONBLOCK;
+    format_ctx->max_analyze_duration = 0;
+    bundle.m_format_ctx = TRY(create_context(asset.path(), format_ctx));
 
-    bundle.m_format_ctx = TRY(create_context(asset.m_path, format_ctx));
     int stream_index;
     std::tie(bundle.m_codec_ctx, stream_index) = TRY(create_codec(bundle.m_format_ctx));
+
     std::tie(bundle.m_swr_ctx, bundle.m_oframe, bundle.m_iframe, bundle.m_packet) = TRY(
             create_swr(bundle.m_codec_ctx, stream_index));
 

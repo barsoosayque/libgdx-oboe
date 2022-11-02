@@ -24,12 +24,16 @@ public:
 
     /// Generates a working avio context for reading/seeking an android internal asset
     /// @return RAII avio context
-    avio_context_ptr generate_avio() const;
+    avio_context_ptr generate_avio();
 
-    const std::string m_path;
+    const AAsset* get() const { return m_asset.get(); }
+    AAsset * get() { return m_asset.get(); }
+
+    const std::string& path() const { return m_path; }
 
 private:
     internal_asset(std::string_view path, AAsset *asset);
 
     std::shared_ptr<AAsset> m_asset;
+    const std::string m_path;
 };

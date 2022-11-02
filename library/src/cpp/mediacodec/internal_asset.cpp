@@ -3,12 +3,20 @@
 
 namespace {
 int asset_read(void *opaque, uint8_t *buf, int buf_size) {
-    auto asset = static_cast<std::shared_ptr<AAsset> *>(opaque);
-    return AAsset_read(asset->get(), buf, buf_size);
+    auto asset = static_cast<std::shared_ptr<AAsset>*>(opaque);
+
+    int bytes_read = AAsset_read(asset->get(), buf, buf_size);
+    if (bytes_read < 0) {
+        return AVERROR_INVALIDDATA;
+    } else if (bytes_read == 0) {
+        return AVERROR_EOF;
+    } else {
+        return bytes_read;
+    }
 }
 
 int64_t asset_seek(void *opaque, int64_t offset, int whence) {
-    auto asset = static_cast<std::shared_ptr<AAsset> *>(opaque);
+    auto asset = static_cast<std::shared_ptr<AAsset>*>(opaque);
     switch (whence) {
         case AVSEEK_SIZE: {
             return AAsset_getLength64(asset->get());
@@ -38,10 +46,10 @@ internal_asset_result internal_asset::create(std::string_view path, AAssetManage
 }
 
 internal_asset::internal_asset(std::string_view path, AAsset *asset)
-        : m_path(path)
-        , m_asset(asset, &AAsset_close) {}
+        :m_asset(asset, &AAsset_close)
+        , m_path(path) {}
 
-avio_context_ptr internal_asset::generate_avio() const {
+avio_context_ptr internal_asset::generate_avio() {
     int buf_size = 1024 * 4;
     auto *buffer = static_cast<unsigned char *>(av_malloc(buf_size));
     return make_avio_context(
