@@ -2,7 +2,20 @@
 
 ### Package
 
-*TBD*
+As for now, there is no place to get the library artifact for your app. So you would need to build it locally.
+First, set up NDK in your development environment (Android Studio can do that for you, for example).
+Second, clone this repository and add it to your build:
+```groovy
+// settings.gradle.kts
+include(":app")
+include(":libgdx-oboe")
+project(":libgdx-oboe").projectDir = file("/path/to/cloned/library")
+
+// build.gradle.kts
+dependenices {
+    implementations(":libgdx-oboe")
+}
+```
 
 ### Launcher
 
