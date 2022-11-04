@@ -57,3 +57,9 @@ Here is a table of known goodies and problems for certain features per file form
 |Music Seek|👌|_WAV_ is precise, no content lost. _OGG_ and _MP3_ is different: bad initial seek, but dropping frames until PTS is equal to desired seek TS. May lose some content if PTS isn't precise enough.|
 |Audio Device|👌|Repetitive writes to audio device might produce audio artifacts (cracks).|
 |Audio Recorder|👌|Repetitive reads bleed a little bit of cache from the last read to the buffer. Omit a few first frames when using recorded PCM.|
+
+[oboe]: https://github.com/google/oboe
+[libgdx]: https://github.com/libgdx/libgdx
+[usage]: /docs/Usage.md
+[examples]: /docs/Examples.md
+[build]: /docs/Build.md
