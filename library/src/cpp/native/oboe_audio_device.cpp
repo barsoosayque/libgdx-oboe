@@ -22,18 +22,20 @@ OBOEAUDIODEVICE_METHOD(void, setVolume)(JNIEnv *env, jobject self, jfloat volume
 OBOEAUDIODEVICE_METHOD(void, writeSamples___3SII)(JNIEnv *env, jobject self, jshortArray data,
                                                   jint offset, jint samples) {
     if (auto stream = get_var_as<audio_stream>(env, self, k_var)) {
-        std::vector<int16_t> pcm(samples);
-        env->GetShortArrayRegion(data, offset, samples, pcm.data());
-        stream->write(std::move(pcm));
+        auto* begin = env->GetShortArrayElements(data, nullptr) + offset;
+        auto* end = begin + samples;
+        stream->write(begin, end);
+        env->ReleaseShortArrayElements(data, begin, JNI_ABORT);
     }
 }
 
 OBOEAUDIODEVICE_METHOD(void, writeSamples___3FII)(JNIEnv *env, jobject self, jfloatArray data,
                                                   jint offset, jint samples) {
     if (auto stream = get_var_as<audio_stream>(env, self, k_var)) {
-        std::vector<float> pcm(samples);
-        env->GetFloatArrayRegion(data, offset, samples, pcm.data());
-        stream->write(std::move(pcm));
+        auto* begin = env->GetFloatArrayElements(data, nullptr) + offset;
+        auto* end = begin + samples;
+        stream->write(begin, end);
+        env->ReleaseFloatArrayElements(data, begin, JNI_ABORT);
     }
 }
 

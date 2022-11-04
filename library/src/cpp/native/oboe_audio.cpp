@@ -14,6 +14,7 @@
 #include "../audio/audio_player.hpp"
 #include "../audio/music.hpp"
 #include "../audio/soundpool.hpp"
+#include "../audio/audio_recorder.hpp"
 
 namespace {
     constexpr std::string_view k_shared_player = "sharedAudioPlayer";
@@ -109,14 +110,13 @@ OBOEAUDIO_METHOD(jlong, createSoundpoolFromPath)(JNIEnv *env, jobject self, jstr
 OBOEAUDIO_METHOD(jlong, createAudioStream)(JNIEnv *env, jobject self, jint sample_rate,
                                            jboolean mono) {
     auto *ptr = new audio_stream(mono? 1 : 2, sample_rate);
-    ptr->resume();
     return reinterpret_cast<jlong>(ptr);
 }
 
 OBOEAUDIO_METHOD(jlong, createAudioRecorder)(JNIEnv *env, jobject self, jint sample_rate,
                                             jboolean mono) {
-    // TODO
-    return 0;
+    auto *ptr = new audio_recorder(mono? 1 : 2, sample_rate);
+    return reinterpret_cast<jlong>(ptr);
 }
 
 OBOEAUDIO_METHOD(void, disposeEngine)(JNIEnv *env, jobject self) {

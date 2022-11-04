@@ -43,12 +43,29 @@ void oboe_engine::connect_to_device() {
     oboe::AudioStreamBuilder builder;
     builder.setChannelCount(m_channels);
     builder.setSampleRate(static_cast<int32_t>(m_sample_rate));
-    if (m_mode == mode::async_writing)
-        builder.setDataCallback(this);
     builder.setErrorCallback(this);
     builder.setFormat(oboe::AudioFormat::I16);
     builder.setPerformanceMode(oboe::PerformanceMode::LowLatency);
     builder.setSharingMode(oboe::SharingMode::Exclusive);
+    builder.setFormatConversionAllowed(true);
+
+    builder.setUsage(oboe::Usage::Game);
+    switch(m_mode) {
+        case mode::async_writing:
+        case mode::writing: {
+            builder.setContentType(oboe::ContentType::Music);
+            builder.setDirection(oboe::Direction::Output);
+
+            if (m_mode == mode::async_writing)
+                builder.setDataCallback(this);
+        }
+        break;
+        case mode::reading: {
+            builder.setDirection(oboe::Direction::Input);
+            builder.setInputPreset(oboe::InputPreset::Generic);
+        }
+        break;
+    }
 
     check(builder.openStream(ptrptr(m_stream)), "Error opening stream: {}");
 
@@ -114,23 +131,33 @@ void oboe_engine::stop() {
     }
 }
 
-void oboe_engine::blocking_write(std::vector<int16_t> &&pcm) {
+void oboe_engine::blocking_write(const int16_t* pcm, size_t len) {
     android_assert(m_mode == mode::writing,
                    "engine not in writing mode, something went wrong.");
 
-    if ( m_stream ) {
-        m_stream->write(pcm.data(), static_cast<int32_t>(pcm.size() / m_channels),
-                        std::numeric_limits<int64_t>::max());
-    }
+    if (!m_stream)
+        return;
+
+    int32_t len_in_frames = static_cast<int32_t>(len) / m_channels;
+    auto frames = m_stream->write(pcm, len_in_frames, std::numeric_limits<int64_t>::max());
+    check(frames, "Error while reading stream: {}");
 }
 
-void oboe_engine::blocking_read(std::vector<int16_t> &buffer) {
+void oboe_engine::blocking_read(int16_t* buffer, size_t len) {
     android_assert(m_mode == mode::reading,
                    "engine not in reading mode, something went wrong.");
 
-    if ( m_stream ) {
-        m_stream->read(buffer.data(), static_cast<int32_t>(buffer.size()),
-                       std::numeric_limits<int64_t>::max());
+    if (!m_stream)
+        return;
+
+    int32_t len_in_frames = static_cast<int32_t>(len) / m_channels;
+    auto frames = m_stream->read(buffer, len_in_frames, std::numeric_limits<int64_t>::max());
+
+    check(frames, "Error while writing into stream: {}");
+    if (frames && frames.value() < len_in_frames) {
+        std::fill(std::next(buffer, frames.value() * m_channels),
+                  std::next(buffer, static_cast<int32_t>(len)),
+                  0);
     }
 }
 

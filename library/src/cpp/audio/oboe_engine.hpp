@@ -35,10 +35,10 @@ public:
     void set_on_async_write(on_async_write_t&& callback) { m_on_async_write = std::move(callback); }
 
     /// Write 16bit PCM if mode is writing.
-    void blocking_write(std::vector<int16_t> &&pcm);
+    void blocking_write(const int16_t* pcm, size_t len);
 
     /// Read 16bit PCM if mode is reading.
-    void blocking_read(std::vector<int16_t> &buffer);
+    void blocking_read(int16_t* buffer, size_t len);
 
     /// Return true if this stream has 1 channel.
     bool is_mono() const { return m_channels == 1; }
