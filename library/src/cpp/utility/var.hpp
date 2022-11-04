@@ -34,8 +34,10 @@ void set_var_as(JNIEnv *env, jobject obj, std::string_view var, T *value) {
 
 template<class T>
 void delete_var(JNIEnv *env, jobject obj, std::string_view var) {
-    auto instance = get_var_as<T>(env, obj, var);
-    delete instance;
-    instance = nullptr;
-    set_var_as<T>(env, obj, var, nullptr);
+    // avoid double free
+    if (auto instance = get_var_as<T>(env, obj, var)) {
+        delete instance;
+        instance = nullptr;
+        set_var_as<T>(env, obj, var, nullptr);
+    }
 }
