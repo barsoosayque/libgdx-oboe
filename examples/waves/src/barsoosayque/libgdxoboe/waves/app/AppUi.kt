@@ -6,13 +6,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import ktx.actors.onChange
-import ktx.actors.onChangeEvent
 import ktx.actors.txt
 import ktx.scene2d.*
 import kotlin.math.roundToInt
 
 class AppUi : Stage(ExtendViewport(480f, 700f)) {
-    private val audioDevice = Gdx.audio.newAudioDevice(DEVICE_HZ, true)
+    private val audioDevice = Gdx.audio.newAudioDevice(DEVICE_HZ, false)
     private val sin = SinGenerator(500f)
 
     val root = scene2d.table {
@@ -39,23 +38,22 @@ class AppUi : Stage(ExtendViewport(480f, 700f)) {
             container {
                 width(400f).height(100f)
                 textButton("Generate 1 second of sin").onChange {
-                    repeat(4) {
-                        val payload = sin.generatePayload(0.25f)
-                        audioDevice.writeSamples(payload, 0, payload.size)
-                    }
+                    val payload = sin.generatePayload(1f)
+                    audioDevice.writeSamples(payload, 0, payload.size)
+
                 }
             }
-
         }.cell(grow = true)
     }.let(::addActor)
 
-    private fun SoundGenerator.generatePayload(duration: Float) = FloatArray((DEVICE_HZ * duration).roundToInt()) {
-        val time: Float = DEVICE_HZ_REV * it
-        generate(time)
-    }
+    private fun SoundGenerator.generatePayload(duration: Float) =
+        (0 until (DEVICE_HZ * duration).roundToInt()).flatMap {
+            val time: Float = it / (DEVICE_HZ * duration)
+            val value = generate(time)
+            listOf(value, value)
+        }.toFloatArray()
 
     companion object {
         private const val DEVICE_HZ = 44100
-        private const val DEVICE_HZ_REV = 1f / 44100f
     }
 }
