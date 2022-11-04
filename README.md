@@ -50,21 +50,10 @@ Such audio decoder is blazing fast, so combining that with oboe streams, we get 
 
 Here is a table of known goodies and problems for certain features per file format (decoder):
 
-<table><thead><tr><th rowspan="2">Feature</th><th colspan="2">WAV</th><th colspan="2">OGG</th><th colspan="2">MP3</th></tr><tr><td>🧮</td><td><em>State</em></td><td>🧮</td><td><em>State</em></td><td>🧮</td><td><em>State</em></td></tr></thead><tbody><tr><td><em>Seek</em></td><td>⭐️</td><td>Precise, no content lost.</td><td>👌</td><td>Bad initial seek, but dropping frames until PTS is equal to desired seek TS. May lose some content if PTS isn't precise enough.</td><td>👌</td><td>Same as OGG.</td></tr></tbody></table>
-
-## Progress:
-
-**OboeAudio** class:
-
-- [x] `newSound` method (With *OboeSound*);
-- [x] `newMusic` method (With *OboeMusic*);
-- [x] `newAudioDevice` method (With *OboeAudioDevice*);
-- [ ] `newAudioRecorder` method.
-
-*WARN: not marked methods will result in undefined behaviour. (actually, just a crash)*
-
-[oboe]: https://github.com/google/oboe
-[libgdx]: https://github.com/libgdx/libgdx
-[usage]: /docs/Usage.md
-[examples]: /docs/Examples.md
-[build]: /docs/Build.md
+|Feature|State|Description|
+|-------|-----|-----------|
+|Sounds|⭐|Per-sound soundpools. All features should be working. Although max sounds isn't read from android config, the number is infinite at the moment.
+|Music playing|⭐|Precise position, starts and pauses exactly when requested.|
+|Music Seek|👌|_WAV_ is precise, no content lost. _OGG_ and _MP3_ is different: bad initial seek, but dropping frames until PTS is equal to desired seek TS. May lose some content if PTS isn't precise enough.|
+|Audio Device|👌|Repetitive writes to audio device might produce audio artifacts (cracks).|
+|Audio Recorder|👌|Repetitive reads bleed a little bit of cache from the last read to the buffer. Omit a few first frames when using recorded PCM.|
