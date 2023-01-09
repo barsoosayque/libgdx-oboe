@@ -189,7 +189,8 @@ echo "========== FFmpeg cross-compilation =========="
 echo "Compiling list: $ABI_FILTERS."
 for ABI in $ABI_FILTERS; do
     echo "~~~~~~~~~ Compiling $ABI ~~~~~~~~~"
-    CFLAGS="-O3"
+    # https://github.com/barsoosayque/libgdx-oboe/issues/17
+    CFLAGS="-O3 -Wl,--hash-style=both"
     LDFLAGS="-lm"
     ABI_FLAGS=""
     case $ABI in
@@ -272,8 +273,8 @@ for ABI in $ABI_FILTERS; do
         --disable-examples
         --disable-encoder
         --prefix=$BUILD_ROOT/$ABI
-        CFLAGS=-I$BUILD_ROOT/$ABI/include
-        LDFLAGS=-L$BUILD_ROOT/$ABI/lib
+        CFLAGS='$CFLAGS -I$BUILD_ROOT/$ABI/include'
+        LDFLAGS='-L$BUILD_ROOT/$ABI/lib'
         "
         
         echo "[1/4] Build $ABI libmp3lame..."
