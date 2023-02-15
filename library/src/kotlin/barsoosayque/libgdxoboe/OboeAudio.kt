@@ -3,6 +3,7 @@ package barsoosayque.libgdxoboe
 import android.content.res.AssetManager
 import com.badlogic.gdx.Audio
 import com.badlogic.gdx.Files
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.AudioDevice
 import com.badlogic.gdx.audio.AudioRecorder
 import com.badlogic.gdx.audio.Music
@@ -46,7 +47,10 @@ class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
 
     override fun newMusic(file: FileHandle): Music? = when (file.type()) {
         Files.FileType.Internal -> createMusicFromAsset(assetManager, file.path())
-        else -> createMusicFromPath(file.file().path)
+        Files.FileType.Absolute -> createMusicFromPath(file.path())
+        Files.FileType.Local -> createMusicFromPath(Gdx.app.files.localStoragePath + file.path())
+        Files.FileType.External -> createMusicFromPath(Gdx.app.files.externalStoragePath + file.path())
+        else -> createMusicFromPath(file.file().path) // AndroidFileHandle doesn't implement file(), this will throw a null exception!
     }.takeIf { it != 0L }
         ?.let(::NativeMusic)
         ?.let(::OboeMusic)
@@ -54,6 +58,9 @@ class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
 
     override fun newSound(file: FileHandle): Sound? = when (file.type()) {
         Files.FileType.Internal -> createSoundpoolFromAsset(assetManager, file.path())
+        Files.FileType.Absolute -> createSoundpoolFromPath(file.path())
+        Files.FileType.Local -> createSoundpoolFromPath(Gdx.app.files.localStoragePath + file.path())
+        Files.FileType.External -> createSoundpoolFromPath(Gdx.app.files.externalStoragePath + file.path())
         else -> createSoundpoolFromPath(file.file().path)
     }.takeIf { it != 0L }
         ?.let(::NativeSoundpool)
