@@ -58,7 +58,11 @@ void music::raw_render(int16_t *stream, uint32_t frames) {
         return;
 
     auto iter = std::next(m_main_pcm.begin(), m_current_frame * m_channels);
+    auto iter_rem = std::distance(iter, m_main_pcm.end());
     int size = frames * m_channels;
+    if (size > iter_rem) {
+        size = iter_rem;
+    }
     for (int sample = 0; sample < size; ++sample, std::advance(iter, 1)) {
         stream[sample] += *iter * m_volume * m_pan.modulation(sample % m_channels);
     }
@@ -73,8 +77,9 @@ void music::render(int16_t *stream, uint32_t frames) {
         return;
     while (m_buffer_swap.test_and_set(std::memory_order_acquire));
 
-    uint32_t frames_in_pcm = m_main_pcm.size() / m_channels;
-    uint32_t frames_to_process = std::min(frames, frames_in_pcm - m_current_frame);
+    int32_t frames_in_pcm = m_main_pcm.size() / m_channels;
+    uint32_t frames_to_process = std::clamp(frames_in_pcm - m_current_frame, 0,
+                                            static_cast<int32_t>(frames));
 
     raw_render(stream, frames_to_process);
     m_buffer_swap.clear(std::memory_order_release);
