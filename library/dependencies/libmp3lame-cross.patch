@@ -1,0 +1,40 @@
+--- a/configure
++++ b/configure
+@@ -17526,16 +17526,10 @@
+ 					OPTIMIZATION="${OPTIMIZATION} -march=i486"
+ 					;;
+ 				*586)
+-					OPTIMIZATION="${OPTIMIZATION} -march=i586 \
+-						-mtune=native"
+-					;;
+-				*686)
+-					OPTIMIZATION="${OPTIMIZATION} -march=i686 \
+-						-mtune=native"
++					OPTIMIZATION="${OPTIMIZATION} -march=i586"
+ 					;;
+ 				*86)
+-					OPTIMIZATION="${OPTIMIZATION} -march=native \
+-						-mtune=native"
++					OPTIMIZATION="${OPTIMIZATION} -march=i686"
+ 					;;
+ 				arm*-gnueabi)
+ 					if  -z "$(echo ${GCC_version} | awk '/4\.0/')" ; then
+@@ -17579,16 +17573,10 @@
+ 			OPTIMIZATION="${OPTIMIZATION} -march=i486"
+ 			;;
+ 		*586)
+-			OPTIMIZATION="${OPTIMIZATION} -march=i586 \
+-				-mtune=native"
+-			;;
+-		*686)
+-			OPTIMIZATION="${OPTIMIZATION} -march=i686 \
+-				-mtune=native"
++			OPTIMIZATION="${OPTIMIZATION} -march=i586"
+ 			;;
+ 		*86)
+-			OPTIMIZATION="${OPTIMIZATION} -march=native \
+-				-mtune=native"
++			OPTIMIZATION="${OPTIMIZATION} -march=i686"
+ 			;;
+ 		esac
+ 
