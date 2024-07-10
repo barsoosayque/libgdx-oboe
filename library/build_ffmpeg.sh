@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 # =============== Build definitions ===============
 
@@ -112,7 +112,7 @@ while [[ $# -gt 0 ]]; do
             for ABI in $ABI_FILTERS; do
                 DIR="$(pwd)/libs/$ABI"
                 mkdir -p "$DIR"
-                cp -av -t "$DIR" $BUILD_ROOT/$ABI/lib/lib{avformat,avcodec,swresample,avutil}.so
+                cp -av $BUILD_ROOT/$ABI/lib/lib{avformat,avcodec,swresample,avutil}.so "$DIR"
             done
             exit 0
             ;;
@@ -154,7 +154,10 @@ if [ -z "$NDK_DIR" ]; then
 fi
 
 TOOLCHAIN="$NDK_DIR/toolchains/llvm/prebuilt/$HOST_TAG"
-
+if [ ! -e $TOOLCHAIN ]; then
+  # On MacOS arm64, the NDK still uses the darwin-x86_64 folder
+  TOOLCHAIN="$NDK_DIR/toolchains/llvm/prebuilt/$HOST_NAME-x86_64"
+fi
 
 # =============== Actual build ===============
 
@@ -167,6 +170,7 @@ if [ -z "$INIT_ONLY" ]; then
     echo "Downloading LIBMP3LAME:"
     curl -L "https://altushost-swe.dl.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz" | tar xz
     mv lame-3.100 "$LIBMP3LAME_ROOT"
+    patch $LIBMP3LAME_ROOT/configure < dependencies/libmp3lame-cross.patch
   fi
 
   if [ ! -e $LIBOGG_ROOT ]; then
