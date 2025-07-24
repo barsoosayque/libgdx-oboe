@@ -12,14 +12,13 @@ HOST_TAG="$HOST_NAME-$HOST_ARCH"
 # Directories
 LIBMP3LAME_ROOT="build/libmp3lame"
 LIBOGG_ROOT="build/libogg"
-LIBWAVPACK_ROOT="build/libwavpack"
 LIBVORBIS_ROOT="build/libvorbis"
 FFMPEG_ROOT="dependencies/ffmpeg"
 BUILD_ROOT="$(pwd)/build/libs"
 
 # Consult library/build.gradle for those options
 # android.defaultConfig.ndk.abiFilters
-#ABI_FILTERS="x86_64"
+# ABI_FILTERS="x86_64"
 ABI_FILTERS="x86 x86_64 armeabi-v7a arm64-v8a"
 # android.defaultConfig.minSdkVersion
 MIN_SDK_VERSION="21"
@@ -120,7 +119,6 @@ while [[ $# -gt 0 ]]; do
             rm -r "$BUILD_ROOT"
             rm -r "$LIBMP3LAME_ROOT"
             rm -r "$LIBOGG_ROOT"
-            rm -r "$LIBWAVPACK_ROOT"
             rm -r "$LIBVORBIS_ROOT"
             (cd "$FFMPEG_ROOT" && $MAKE clean)
             exit 0
