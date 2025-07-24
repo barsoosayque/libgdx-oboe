@@ -56,6 +56,14 @@ class OboeAudio(private val assetManager: AssetManager) : AndroidAudio {
         ?.let(::OboeMusic)
         ?.also(disposables::add)
 
+    override fun switchOutputDevice(deviceIdentifier: String?): Boolean {
+        return false;
+    }
+
+    override fun getAvailableOutputDevices(): Array<out String?>? {
+        return arrayOf();
+    }
+
     override fun newSound(file: FileHandle): Sound? = when (file.type()) {
         Files.FileType.Internal -> createSoundpoolFromAsset(assetManager, file.path())
         Files.FileType.Absolute -> createSoundpoolFromPath(file.path())

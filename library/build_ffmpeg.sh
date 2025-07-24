@@ -22,7 +22,7 @@ BUILD_ROOT="$(pwd)/build/libs"
 #ABI_FILTERS="x86_64"
 ABI_FILTERS="x86 x86_64 armeabi-v7a arm64-v8a"
 # android.defaultConfig.minSdkVersion
-MIN_SDK_VERSION="16"
+MIN_SDK_VERSION="21"
 
 TOOLCHAIN_VERSION="33"
 

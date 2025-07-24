@@ -1,11 +1,12 @@
 object DependenciesVersions {
     const val KOTLIN = "1.7.20"
-    const val KTX = "1.11.0-rc2"
-    const val GDX = "1.11.0"
+    const val KTX = "1.13.1-rc1"
+    const val GDX = "1.13.5"
 }
 
 object Dependencies {
     const val GDX_BACKEND_ANDROID = "com.badlogicgames.gdx:gdx-backend-android:${DependenciesVersions.GDX}"
+    const val GDX = "com.badlogicgames.gdx:gdx:${DependenciesVersions.GDX}"
     const val KOTLIN_STDLIB = "org.jetbrains.kotlin:kotlin-stdlib:${DependenciesVersions.KOTLIN}"
     const val KTX_SCENE2D = "io.github.libktx:ktx-scene2d:${DependenciesVersions.KTX}"
     const val KTX_ACTORS = "io.github.libktx:ktx-actors:${DependenciesVersions.KTX}"

@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+    implementation(Dependencies.GDX)
     implementation(Dependencies.GDX_BACKEND_ANDROID)
     implementation(Dependencies.KOTLIN_STDLIB)
 }

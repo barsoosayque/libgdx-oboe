@@ -9,6 +9,7 @@ val libDir = "../common/libs"
 dependencies {
     implementation(project(":library"))
     implementation(Dependencies.GDX_BACKEND_ANDROID)
+    implementation(Dependencies.GDX)
     implementation(Dependencies.KOTLIN_STDLIB)
     implementation(Dependencies.KTX_SCENE2D)
     implementation(Dependencies.KTX_ACTORS)
