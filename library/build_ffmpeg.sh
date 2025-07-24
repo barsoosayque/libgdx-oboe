@@ -102,7 +102,7 @@ while [[ $# -gt 0 ]]; do
             echo "    --ndk-dir <NDK_DIR>:           uses toolchain from provided ndk directory (or env var NDK_DIR otherwise)"
             echo "    --toolchain-version <VERSION>: uses this exact numeric NDK toolchain version"
             echo "    --abi <ABI>:                   build only selected ABI"
-            echo "    --update:                      copsy built libraries to ./libs (thi option assume that the library is built)."
+            echo "    --update:                      copy built libraries to ./libs (thi option assume that the library is built)."
             echo "    --clear:                       clear build and temporary directories and exit."
             echo "    --ffmpeg-only:                 only build ffmpeg (assuming that dependencies already built)"
             echo "    --init:                        configure ffmpeg and generate required files (this implies --ffmpeg-only)"
@@ -175,13 +175,13 @@ if [ -z "$INIT_ONLY" ]; then
 
   if [ ! -e $LIBOGG_ROOT ]; then
     echo "Downloading LIBOGG:"
-    curl -L "http://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.gz" | tar xz
+    curl -L "https://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.gz" | tar xz
     mv libogg-1.3.4 "$LIBOGG_ROOT"
   fi
 
   if [ ! -e $LIBVORBIS_ROOT ]; then
     echo "Downloading LIBVORBIS:"
-    curl -L "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.gz" | tar xz
+    curl -L "https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.gz" | tar xz
     mv libvorbis-1.3.5 "$LIBVORBIS_ROOT"
     patch $LIBVORBIS_ROOT/configure < dependencies/libvorbis-clang.patch
   fi
