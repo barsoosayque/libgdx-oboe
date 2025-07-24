@@ -13,6 +13,7 @@ android {
     buildToolsVersion = AndroidConfig.BUILD_TOOLS
     compileSdkVersion = "android-${AndroidConfig.SDK}"
     ndkVersion = AndroidConfig.NDK
+    namespace = AppConfig.PUBLISHED_GROUP_ID
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

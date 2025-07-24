@@ -6,7 +6,7 @@ object AndroidConfig {
 }
 
 object AppConfig {
-    const val PUBLISHED_GROUP_ID = "com.github.barsoosayque"
+    const val PUBLISHED_GROUP_ID = "barsoosayque.libgdxoboe"
     const val NAME = "libGDX Oboe"
     const val ARTIFACT_NAME = "libgdxoboe"
     const val DESCRIPTION = "libGDX audio replacement for Android (API 16+) built on top of Oboe."
