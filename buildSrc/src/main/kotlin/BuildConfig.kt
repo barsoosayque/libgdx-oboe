@@ -1,8 +1,8 @@
 object AndroidConfig {
-    const val BUILD_TOOLS = "31.0.0"
-    const val SDK = 33
-    const val NDK = "25.1.8937393"
+    const val BUILD_TOOLS = "35.0.0"
     const val MIN_SDK = 21
+    const val SDK = 35
+    const val NDK = "29.0.13599879"
 }
 
 object AppConfig {

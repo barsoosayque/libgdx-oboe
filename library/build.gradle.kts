@@ -17,8 +17,8 @@ android {
     namespace = AppConfig.PUBLISHED_GROUP_ID
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     sourceSets {
@@ -30,7 +30,6 @@ android {
 
     defaultConfig {
         minSdk = AndroidConfig.MIN_SDK
-        targetSdk = AndroidConfig.SDK
 
         ndk {
             abiFilters.addAll(listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a"))

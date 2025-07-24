@@ -1,5 +1,5 @@
 object DependenciesVersions {
-    const val KOTLIN = "1.7.20"
+    const val KOTLIN = "2.2.0"
     const val KTX = "1.13.1-rc1"
     const val GDX = "1.13.5"
 }

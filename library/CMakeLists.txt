@@ -57,12 +57,11 @@ target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${FFM
 target_compile_options(libgdx-oboe PRIVATE -Wall)
 
 # Strip
-get_filename_component(ANDROID_TOOLCHAIN_DIR ${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX} DIRECTORY)
 add_custom_command(TARGET libgdx-oboe POST_BUILD
-        COMMAND "${ANDROID_TOOLCHAIN_DIR}/llvm-strip" -g -S -d --strip-debug
+        COMMAND "${CMAKE_STRIP}" -g -S -d --strip-debug
         "$<TARGET_FILE:libgdx-oboe>")
 foreach(LIB ${FFMPEG_LIBS})
     add_custom_command(TARGET libgdx-oboe POST_BUILD
-            COMMAND "${ANDROID_TOOLCHAIN_DIR}/llvm-strip" -g -S -d --strip-debug
+            COMMAND "${CMAKE_STRIP}" -g -S -d --strip-debug
             "${CMAKE_CURRENT_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${LIB}.so")
 endforeach()

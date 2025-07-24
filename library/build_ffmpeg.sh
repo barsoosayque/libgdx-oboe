@@ -23,7 +23,7 @@ ABI_FILTERS="x86 x86_64 armeabi-v7a arm64-v8a"
 # android.defaultConfig.minSdkVersion
 MIN_SDK_VERSION="21"
 
-TOOLCHAIN_VERSION="33"
+TOOLCHAIN_VERSION="35"
 
 # Flags
 FFMPEG_FLAGS="
