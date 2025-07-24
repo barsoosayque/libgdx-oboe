@@ -22,7 +22,7 @@ include_directories (${FMT_DIR}/include)
 set(RESULT_DIR dependencies/result)
 include_directories (${RESULT_DIR})
 
-set(LIBSAMPLERATE_TESTS OFF)
+set(BUILD_TESTING OFF)
 set(LIBSAMPLERATE_EXAMPLES OFF)
 set(SAMPLERATE dependencies/libsamplerate)
 add_subdirectory (${SAMPLERATE} ./samplerate)

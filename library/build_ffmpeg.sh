@@ -191,9 +191,8 @@ echo "========== FFmpeg cross-compilation =========="
 echo "Compiling list: $ABI_FILTERS."
 for ABI in $ABI_FILTERS; do
     echo "~~~~~~~~~ Compiling $ABI ~~~~~~~~~"
-    # https://github.com/barsoosayque/libgdx-oboe/issues/17
-    CFLAGS="-O3 -Wl,--hash-style=both"
-    LDFLAGS="-lm"
+    CFLAGS=""
+    LDFLAGS=""
     ABI_FLAGS=""
     case $ABI in
         x86)
@@ -206,7 +205,7 @@ for ABI in $ABI_FILTERS; do
         x86_64)
             ARCH=x86_64
             TOOLCHAIN_PREFIX="x86_64-linux-android"
-            CPU="x86_64"
+            CPU="x86-64"
             ABI_FLAGS="--disable-x86asm"
             ;;
         armeabi-v7a)
@@ -248,7 +247,11 @@ for ABI in $ABI_FILTERS; do
     export TOOLCHAIN=$TOOLCHAIN
     export TARGET=$TOOLCHAIN_PREFIX
     export API=$MIN_SDK_VERSION
-    
+
+    # https://github.com/barsoosayque/libgdx-oboe/issues/17
+    export CFLAGS="$CFLAGS -I$BUILD_ROOT/$ABI/include -O3"
+    export LDFLAGS="$LDFLAGS -L$BUILD_ROOT/$ABI/lib -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 -Wl,--hash-style=both -lm"
+
     if [ -z "$FFMPEG_ONLY" ]; then
         echo "Cross-compile autoconf env:"
         echo "AR=$AR"
@@ -275,10 +278,8 @@ for ABI in $ABI_FILTERS; do
         --disable-examples
         --disable-encoder
         --prefix=$BUILD_ROOT/$ABI
-        CFLAGS='$CFLAGS -I$BUILD_ROOT/$ABI/include'
-        LDFLAGS='-L$BUILD_ROOT/$ABI/lib'
         "
-        
+
         echo "[1/4] Build $ABI libmp3lame..."
         (cd $LIBMP3LAME_ROOT && ./configure $AUTOCONF_CROSS_FLAGS && $MAKE clean && $MAKE install)
 
@@ -316,8 +317,6 @@ for ABI in $ABI_FILTERS; do
     echo "ABI flags:$ABI_FLAGS"
     echo "FFMPEG flags:$FFMPEG_FLAGS"
 
-    CFLAGS="$CFLAGS -I$BUILD_ROOT/$ABI/include"
-    LDFLAGS="$LDFLAGS -L$BUILD_ROOT/$ABI/lib"
     (cd "$FFMPEG_ROOT" && \
     ./configure \
         --extra-cflags="$CFLAGS" \
