@@ -1,3 +1,4 @@
+project(libgdx-oboe)
 cmake_minimum_required(VERSION 3.7.1)
 
 # Enable LTO optimization
@@ -55,6 +56,8 @@ add_library(libgdx-oboe SHARED
 
 target_link_libraries(libgdx-oboe samplerate android log oboe fmt OpenSLES ${FFMPEG_LIBS})
 target_compile_options(libgdx-oboe PRIVATE -Wall)
+target_link_options(libgdx-oboe PRIVATE "-Wl,-z,max-page-size=16384")
+target_link_options(libgdx-oboe PRIVATE "-Wl,-z,common-page-size=16384")
 
 # Strip
 add_custom_command(TARGET libgdx-oboe POST_BUILD
