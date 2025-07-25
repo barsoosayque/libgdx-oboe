@@ -25,10 +25,14 @@
         android-sdk = android-nixpkgs.sdk."${system}" (sdkPkgs: [
           sdkPkgs.cmdline-tools-latest
           sdkPkgs.platform-tools
+          sdkPkgs.emulator
           sdkPkgs."cmake-${toSdkVersion cmakeVersion}"
           sdkPkgs."build-tools-${toSdkVersion buildToolsVersion}"
           sdkPkgs."platforms-android-${toSdkVersion platformsAndroidVersion}"
           sdkPkgs."ndk-${toSdkVersion ndkVersion}"
+
+          sdkPkgs.system-images-android-36-google-apis-playstore-ps16k-arm64-v8a
+          sdkPkgs.system-images-android-36-google-apis-playstore-ps16k-x86-64
         ]);
         sdkDir = "${android-sdk}/share/android-sdk";
 
@@ -79,7 +83,7 @@
           ANDROID_SDK_ROOT = "${sdkDir}";
           ANDROID_NDK_ROOT = "${ANDROID_SDK_ROOT}/ndk/${ndkVersion}";
           NDK_VERSION = ndkVersion;
-          NDK_DIR = "${ANDROID_NDK_ROOT}";
+          NDK_DIR = ANDROID_NDK_ROOT;
 
           # GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${ANDROID_SDK_ROOT}/build-tools/${buildToolsVersion}/aapt2";
           JAVA_HOME = "${java.home}";
