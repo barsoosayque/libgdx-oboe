@@ -12,7 +12,7 @@ object AppConfig {
     const val DESCRIPTION = "libGDX audio replacement for Android built on top of Oboe."
     const val SITE_URL = "https://github.com/barsoosayque/libgdx-oboe"
     const val GIT_URL = "https://github.com/barsoosayque/libgdx-oboe.git"
-    const val VERSION = "0.3.0"
+    const val VERSION = "0.3.1"
     const val DEVELOPER_ID = "barsoosayque"
     const val DEVELOPER_EMAIL = "shtoshich@gmail.com"
     const val LICENSE_NAME = "The MIT License"
