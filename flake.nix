@@ -62,7 +62,7 @@
         # `nix build`
         packages."${projectName}" = pkgs.androidenv.buildApp {
           pname = projectName;
-          version = "0.3.1";
+          version = "0.3.2";
           src = self;
           release = true;
 
