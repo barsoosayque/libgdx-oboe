@@ -29,7 +29,7 @@ const std::vector<int16_t>& audio_player::generate_audio(uint32_t num_frames) {
     while (m_rendering_flag.test_and_set(std::memory_order_acquire));
 
     m_pcm.clear();
-    m_pcm.resize(num_frames, 0);
+    m_pcm.resize(num_frames * m_engine.channels(), 0);
     m_buffer.resize(m_pcm.size(), 0);
 
     int64_t prevaluated = 0;
@@ -39,7 +39,7 @@ const std::vector<int16_t>& audio_player::generate_audio(uint32_t num_frames) {
         is_dirty |= weak_track.expired();
         if (auto track = weak_track.lock()) {
             std::fill(m_buffer.begin(), m_buffer.end(), 0);
-            track->render(m_buffer.data(), num_frames / m_engine.channels());
+            track->render(m_buffer.data(), num_frames);
 
             for (int i = 0; i < m_pcm.size(); ++i) {
                 prevaluated = static_cast<int64_t>(m_pcm[i]) + static_cast<int64_t>(m_buffer[i]);
